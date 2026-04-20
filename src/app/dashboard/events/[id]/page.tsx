@@ -1,5 +1,6 @@
+import { EventDetailsClient } from "@/app/dashboard/events/[id]/_components/event-details-client";
 
-
-export default function Page() {
-  return <div>Events</div>;
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <EventDetailsClient id={id} />;
 }

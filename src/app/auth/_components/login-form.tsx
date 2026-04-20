@@ -15,6 +15,8 @@ const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
 });
 
+const sharpInputClassName = "rounded-md border-foreground/25";
+
 async function postSigninRequestLink(email: string): Promise<void> {
   const res = await fetch(bffRoutes.adminAuth.requestLink(), {
     method: "POST",
@@ -73,6 +75,7 @@ export function LoginForm() {
               <FieldLabel htmlFor="login-email">Email Address</FieldLabel>
               <Input
                 {...field}
+                className={sharpInputClassName}
                 id="login-email"
                 type="email"
                 placeholder="you@example.com"

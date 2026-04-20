@@ -5,6 +5,8 @@ import Logo from "@/components/logo";
 import { LoginForm } from "../_components/login-form";
 import { LoginMagicLinkError } from "../_components/login-magic-link-error";
 
+
+
 export default function LoginPage() {
   return (
     <div className="flex h-dvh">

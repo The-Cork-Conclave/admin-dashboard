@@ -1,15 +1,21 @@
 
-import { getEvent } from './_lib/get-event'
+import { getEventServer } from "./_lib/get-event.server";
 
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const post = await getEvent(params.id)
-  return {
-    title: post.slug,
-    description: post.slug,
+  const { id } = await params;
+  try {
+    const { event } = await getEventServer(id);
+    return {
+      title: `Cork Conclave - ${event?.slug ?? event?.name ?? "Event"}`,
+    };
+  } catch {
+    return {
+      title: "Cork Conclave - Event",
+    };
   }
 }
 

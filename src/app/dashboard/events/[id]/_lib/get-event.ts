@@ -1,6 +1,4 @@
-export async function getEvent(id: string) {
-  return {
-    id: '',
-    slug: '',
-  }
-}
+import "server-only";
+
+export { getEventServer as getEvent } from "./get-event.server";
+export type { EventDTO } from "./get-event.server";
