@@ -1,0 +1,16 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "next:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "next:build": {
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "next:start": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
