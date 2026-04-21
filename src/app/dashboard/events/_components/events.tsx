@@ -238,11 +238,11 @@ const Events = () => {
               <div className="overflow-hidden rounded-lg border bg-card">
                 <Table>
                   <TableHeader className="bg-muted/15">
-                    {table.getHeaderGroups().map((headerGroup) => (
+                    {table.getHeaderGroups().map((headerGroup, index) => (
                       <TableRow key={headerGroup.id}>
                         {headerGroup.headers.map((header) => (
                           <TableHead
-                            key={header.id}
+                            key={`${index}-${header.id}`}
                             colSpan={header.colSpan}
                             className="h-11 p-3 font-light text-sm text-muted-foreground"
                           >

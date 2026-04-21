@@ -29,7 +29,11 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" id="date" className="font-normal">
+        <Button
+          variant="outline"
+          id="date"
+          className={dateRange?.from ? "bg-background font-normal" : "bg-background font-normal text-muted-foreground"}
+        >
           {dateRange?.from
             ? dateRange.to
               ? `${format(dateRange.from, "d MMM yyyy")} - ${format(dateRange.to, "d MMM yyyy")}`

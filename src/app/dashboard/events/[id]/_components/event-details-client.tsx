@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime, formatNairaFromKobo } from "@/lib/utils";
 import { getEventClient, type EventDTO } from "@/app/dashboard/events/[id]/_lib/get-event.client";
 import { EventStatusBadge } from "@/components/ui/badge";
+import Link from "next/link";
 
 function toExternalUrl(maybeUrl?: string): string | null {
   const v = (maybeUrl ?? "").trim();
@@ -34,6 +35,7 @@ export function EventDetailsClient({ id }: { id: string }) {
 
   const event: EventDTO | undefined = query.data?.event;
   const amount = useMemo(() => formatNairaFromKobo(event?.amount_in_kobo), [event?.amount_in_kobo]);
+  const imageUrl = useMemo(() => toExternalUrl(event?.image_url), [event?.image_url]);
 
   return (
     <main className="mx-auto w-full max-w-7xl p-6 md:p-10 lg:p-12">
@@ -59,15 +61,11 @@ export function EventDetailsClient({ id }: { id: string }) {
         </div>
 
         <div className="flex w-full flex-wrap items-center gap-3 md:w-auto">
-          <Button className="flex-1 md:flex-none" variant="destructive" disabled>
-            Cancel Event
-          </Button>
-          <Button className="flex-1 md:flex-none" variant="outline" disabled>
-            Close Event
-          </Button>
-          <Button className="w-full md:w-auto" disabled>
-            Edit Event
-          </Button>
+          <Link href={`/dashboard/events/${id}/edit`}>
+            <Button className="w-full md:w-auto">
+              Edit Event
+            </Button>
+          </Link>
         </div>
       </header>
 
@@ -84,14 +82,25 @@ export function EventDetailsClient({ id }: { id: string }) {
       ) : null}
 
       <div className="group relative mb-6 h-48 w-full overflow-hidden rounded-2xl border bg-muted shadow-sm md:h-64">
-        <Image
-          src={event?.image_url ?? ""}
-          alt="Event Banner"
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-          fill
-          sizes="(max-width: 768px) 100vw, 1024px"
-          priority
-        />
+        {imageUrl ? (
+          <Link
+            href={imageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block h-full w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label="Open event banner image in a new tab"
+            title="Open image in a new tab"
+          >
+            <Image
+              src={imageUrl}
+              alt="Event Banner"
+              className="h-full w-full cursor-pointer object-cover transition-transform duration-700 group-hover:scale-105"
+              fill
+              sizes="(max-width: 768px) 100vw, 1024px"
+              priority
+            />
+          </Link>
+        ) : null}
         <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-foreground/10" />
       </div>
 

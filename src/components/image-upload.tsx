@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import Image from 'next/image'
-import { UploadCloud } from 'lucide-react'
+import { Trash2, UploadCloud } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -155,22 +155,24 @@ export function ImageUpload({
       <div className={cn(className)}>
         <div className={cn('relative overflow-hidden rounded-xl border border-border', disabled ? 'opacity-60' : '')}>
           <div className="relative h-56 w-full">
-            <Image src={value as string} alt="Uploaded" fill unoptimized className="object-cover" />
+            <Image src={value as string} alt="Uploaded" fill unoptimized className="object-cover brightness-75" />
+            <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
           </div>
           <div className="pointer-events-none absolute inset-0 grid place-items-center">
             <Button
               type="button"
               variant="destructive"
-              size="sm"
+              size="icon"
               className="pointer-events-auto"
               disabled={disabled || isUploading}
+              aria-label="Delete image"
               onClick={() => {
                 setError(null)
                 setIsDragging(false)
                 onChange('')
               }}
             >
-              Delete
+              <Trash2 className="size-4" />
             </Button>
           </div>
         </div>
@@ -228,7 +230,7 @@ export function ImageUpload({
           </div>
           <div className="mt-1 text-xs text-muted-foreground">
             {isUploading
-              ? 'Please wait while we upload to Cloudinary.'
+              ? 'Upload image.'
               : `Drag an image here, or click the icon to browse (max ${formatBytes(maxSizeBytes)}).`}
           </div>
         </div>

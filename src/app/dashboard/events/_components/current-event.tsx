@@ -15,6 +15,18 @@ import { formatNairaFromKobo } from "@/lib/utils";
 
 
 
+function toExternalUrl(maybeUrl?: string): string | null {
+  const v = (maybeUrl ?? "").trim();
+  if (!v) return null;
+  try {
+    const u = new URL(v);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
 function formatDate(raw: string): string {
   const d = new Date(raw);
   if (Number.isNaN(d.getTime())) return "—";
@@ -114,20 +126,34 @@ export default function CurrentEvent() {
 
   if (!event) return null;
 
-  const bannerUrl = event.image_url?.trim() ? event.image_url.trim() : "";
+  const bannerUrl = toExternalUrl(event.image_url);
 
   return (
     <section className="space-y-4">
       <div className="flex flex-col gap-1 overflow-hidden rounded-2xl border border-border bg-card p-1.5 text-card-foreground shadow-sm md:flex-row">
         <div className="relative h-48 w-full shrink-0 md:h-auto md:w-1/3 lg:w-1/4">
-          <Image
-            src={bannerUrl}
-            alt="Active event banner"
-            className="rounded-xl border border-border object-cover"
-            fill
-            sizes="(max-width: 768px) 100vw, 320px"
-            priority
-          />
+          {bannerUrl ? (
+            <Link
+              href={bannerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block h-full w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label="Open active event banner image in a new tab"
+              title="Open image in a new tab"
+            >
+              <Image
+                src={bannerUrl}
+                alt="Active event banner"
+                className="cursor-pointer rounded-xl border border-border object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, 320px"
+                priority
+              />
+            </Link>
+          ) : (
+            <div className="h-full w-full rounded-xl border border-border bg-muted" />
+          )}
+
           <div className="absolute top-3 left-3">
             <Badge
               variant="outline"

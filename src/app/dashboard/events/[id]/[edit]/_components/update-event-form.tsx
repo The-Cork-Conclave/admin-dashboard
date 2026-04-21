@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -11,13 +12,24 @@ import { DateTimePicker } from "@/components/date-time-picker";
 import { ImageUpload } from "@/components/image-upload";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRoutes } from "@/lib/routes";
+import { EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
 
 const sharpInputClassName = "rounded-md border-foreground/25";
 
+const statusSchema = z.enum(["draft", "active", "closed", "completed", "cancelled"]);
+
 const formSchema = z.object({
   name: z.string().min(1, { message: "Please enter an event name." }),
+  status: statusSchema,
   image_url: z
     .string()
     .min(1, { message: "Please upload an event image." })
@@ -36,10 +48,6 @@ const formSchema = z.object({
 
 type FormInput = z.infer<typeof formSchema>;
 
-type CreateEventResponse = {
-  id: string;
-};
-
 function toRFC3339FromDatetimeLocal(value: string): string {
   // `datetime-local` returns `YYYY-MM-DDTHH:mm` (no timezone).
   // We treat it as local time and convert to an RFC3339 string with timezone offset via Date.
@@ -48,11 +56,35 @@ function toRFC3339FromDatetimeLocal(value: string): string {
   return Number.isNaN(d.getTime()) ? value : d.toISOString();
 }
 
-async function postCreateEvent(input: FormInput): Promise<CreateEventResponse> {
-  const payload = {
+function toDatetimeLocalFromRFC3339(value: string | undefined): string {
+  const v = (value ?? "").trim();
+  if (!v) return "";
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return "";
+
+  const pad2 = (n: number) => String(n).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  const mm = pad2(d.getMonth() + 1);
+  const dd = pad2(d.getDate());
+  const hh = pad2(d.getHours());
+  const min = pad2(d.getMinutes());
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+}
+
+function nairaStringFromKoboString(kobo: string | undefined): string {
+  const raw = (kobo ?? "").trim();
+  if (!raw) return "";
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return "";
+  return String(Math.round(n / 100));
+}
+
+async function patchUpdateEvent(id: string, input: FormInput): Promise<void> {
+  const payload: Record<string, unknown> = {
     name: input.name,
+    status: input.status,
     image_url: input.image_url.trim(),
-    description: input.description?.trim() ? input.description.trim() : undefined,
+    description: input.description?.trim(),
     event_date: toRFC3339FromDatetimeLocal(input.event_date),
     venue_name: input.venue_name,
     venue_address: input.venue_address,
@@ -63,15 +95,15 @@ async function postCreateEvent(input: FormInput): Promise<CreateEventResponse> {
       : undefined,
   };
 
-  const res = await fetch(apiRoutes.events.create(), {
-    method: "POST",
+  const res = await fetch(apiRoutes.events.byId(id), {
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
     body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
-    let message = "Could not create event. Please try again.";
+    let message = "Could not update event. Please try again.";
     try {
       const body = (await res.json()) as { message?: string };
       if (typeof body.message === "string" && body.message.length > 0) {
@@ -82,27 +114,31 @@ async function postCreateEvent(input: FormInput): Promise<CreateEventResponse> {
     }
     throw new Error(message);
   }
-
-  const json = (await res.json()) as unknown;
-  const parsed = z.object({ id: z.string().min(1) }).safeParse(json);
-  if (!parsed.success) {
-    throw new Error("Event created, but received an unexpected response.");
-  }
-  return { id: parsed.data.id };
 }
 
-export function CreateEventForm({
+export function UpdateEventForm({
   footer,
+  id,
 }: {
   footer?: (args: { isPending: boolean }) => React.ReactNode;
+  id: string;
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ["event", id],
+    queryFn: () => getEventClient(id),
+    enabled: Boolean(id),
+  });
+
+  const event: EventDTO | undefined = query.data?.event;
 
   const form = useForm<FormInput>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      status: "draft",
       image_url: "",
       description: "",
       event_date: "",
@@ -114,15 +150,32 @@ export function CreateEventForm({
     },
   });
 
+  useEffect(() => {
+    if (!event) return;
+    form.reset({
+      name: event.name ?? "",
+      status: statusSchema.catch("draft").parse(event.status),
+      image_url: event.image_url ?? "",
+      description: event.description ?? "",
+      event_date: toDatetimeLocalFromRFC3339(event.event_date),
+      amount_in_kobo: nairaStringFromKoboString(event.amount_in_kobo),
+      venue_name: event.venue_name ?? "",
+      venue_address: event.venue_address ?? "",
+      registration_opens_at: toDatetimeLocalFromRFC3339(event.registration_opens_at),
+      registration_closes_at: toDatetimeLocalFromRFC3339(event.registration_closes_at),
+    });
+  }, [event, form]);
+
   const mutation = useMutation({
-    mutationFn: (input: FormInput) => postCreateEvent(input),
-    onSuccess: async (data) => {
+    mutationFn: (input: FormInput) => patchUpdateEvent(id, input),
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["events"] });
-      toast.success("Event created", { description: "Your event has been saved as a draft." });
-      router.push(`/dashboard/events/${encodeURIComponent(data.id)}`);
+      await queryClient.invalidateQueries({ queryKey: ["event", id] });
+      toast.success("Event updated", { description: "Your changes have been saved." });
+      router.push(`/dashboard/events/${encodeURIComponent(id)}`);
     },
     onError: (err: Error) => {
-      toast.error("Could not create event", { description: err.message });
+      toast.error("Could not update event", { description: err.message });
     },
   });
 
@@ -150,6 +203,31 @@ export function CreateEventForm({
                     disabled={mutation.isPending}
                     className={sharpInputClassName}
                   />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <Controller
+              control={form.control}
+              name="status"
+              render={({ field, fieldState }) => (
+                <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="event-status">Status</FieldLabel>
+                  <Select value={field.value} onValueChange={field.onChange} disabled={mutation.isPending}>
+                    <SelectTrigger id="event-status" className={`${sharpInputClassName} w-full`}>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
@@ -323,7 +401,7 @@ export function CreateEventForm({
         <FieldGroup className="px-6 pb-6 md:px-8 md:pb-8">
           <Input
             type="submit"
-            value={mutation.isPending ? "Creating…" : "Create Event"}
+            value={mutation.isPending ? "Saving…" : "Save Changes"}
             className={sharpInputClassName}
           />
         </FieldGroup>

@@ -64,7 +64,7 @@ export function DateTimePicker({
   const selectedDate = parsed;
   const selectedTime = parsed ? toTimeString(parsed) : "09:00";
 
-  const displayValue = selectedDate ? format(selectedDate, "d MMM yyyy, HH:mm") : "Select date & time";
+  const displayValue = selectedDate ? format(selectedDate, "d MMM yyyy, HH:mm") : placeholder;
 
   const handleSelectDate = (nextDate: Date | undefined) => {
     if (!nextDate) return;
@@ -117,8 +117,7 @@ export function DateTimePicker({
           disabled={disabled}
           className={cn(
             "cursor-pointer text-left",
-            !selectedDate &&
-              "text-[color-mix(in_oklch,var(--muted-foreground)_38%,var(--background))]",
+            !selectedDate && "text-muted-foreground",
             className,
           )}
           onClick={() => {
