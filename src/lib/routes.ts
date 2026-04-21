@@ -8,6 +8,7 @@ export const apiPaths = {
   adminsList: '/admins/',
   adminsAuthInvite: '/admins/auth/invite',
   events: '/events',
+  eventsMetrics: '/events/metrics',
 } as const
 
 export const bffPaths = {
@@ -36,6 +37,41 @@ export const apiRoutes = {
   },
   events: {
     create: () => getApiUrl(apiPaths.events),
+    metrics: () => getApiUrl(apiPaths.eventsMetrics),
+    list: (args?: {
+      page?: number
+      perPage?: number
+      q?: string
+      status?: string
+      dateFrom?: string
+      dateTo?: string
+      sortBy?: 'created_at' | 'name'
+      sortOrder?: 'asc' | 'desc'
+    }) => {
+      const base = getApiUrl(apiPaths.events)
+      const sp = new URLSearchParams()
+
+      const page = args?.page
+      const perPage = args?.perPage
+      const q = args?.q?.trim()
+      const status = args?.status?.trim()
+      const dateFrom = args?.dateFrom?.trim()
+      const dateTo = args?.dateTo?.trim()
+      const sortBy = args?.sortBy
+      const sortOrder = args?.sortOrder
+
+      if (typeof page === 'number' && Number.isFinite(page)) sp.set('page', String(page))
+      if (typeof perPage === 'number' && Number.isFinite(perPage)) sp.set('per_page', String(perPage))
+      if (q) sp.set('q', q)
+      if (status) sp.set('status', status)
+      if (dateFrom) sp.set('date_from', dateFrom)
+      if (dateTo) sp.set('date_to', dateTo)
+      if (sortBy) sp.set('sort_by', sortBy)
+      if (sortOrder) sp.set('sort_order', sortOrder)
+
+      const qs = sp.toString()
+      return qs ? `${base}?${qs}` : base
+    },
     byId: (id: string) => `${getApiUrl(apiPaths.events)}/${encodeURIComponent(id)}`,
   },
 } as const

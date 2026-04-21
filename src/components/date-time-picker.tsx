@@ -115,7 +115,12 @@ export function DateTimePicker({
           value={displayValue}
           placeholder={placeholder}
           disabled={disabled}
-          className={cn("cursor-pointer text-left", className)}
+          className={cn(
+            "cursor-pointer text-left",
+            !selectedDate &&
+              "text-[color-mix(in_oklch,var(--muted-foreground)_38%,var(--background))]",
+            className,
+          )}
           onClick={() => {
             if (!disabled) setOpen(true);
           }}

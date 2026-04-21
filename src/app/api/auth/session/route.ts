@@ -38,7 +38,39 @@ export async function GET(req: NextRequest) {
   const refresh = req.cookies.get(AUTH_COOKIES.refreshToken)?.value?.trim() ?? ''
 
   if (!access) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    // Missing access token is not necessarily "logged out" if refresh is still valid.
+    if (!refresh) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    const refreshRes = await refreshAccessToken(apiUrl, refresh)
+    if (refreshRes.status !== 201) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    const data = (await refreshRes.json()) as { access_token?: string }
+    const newAccess = data.access_token?.trim() ?? ''
+    if (!newAccess) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    const res = await fetchSession(apiUrl, newAccess)
+    if (res.status !== 200) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await res.text()
+    const out = new NextResponse(body, {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+    out.cookies.set(AUTH_COOKIES.accessToken, newAccess, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    })
+    return out
   }
 
   let res = await fetchSession(apiUrl, access)

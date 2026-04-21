@@ -16,6 +16,7 @@ const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
 });
 
+
 async function postAdminInvite(input: z.infer<typeof formSchema>): Promise<void> {
   const res = await fetch(apiRoutes.admins.invite(), {
     method: "POST",
@@ -84,6 +85,7 @@ export function InviteAdminForm({ onSuccess }: { onSuccess?: () => void }) {
                 autoComplete="name"
                 aria-invalid={fieldState.invalid}
                 disabled={mutation.isPending}
+                className="rounded-md border-foreground/25"
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -103,6 +105,7 @@ export function InviteAdminForm({ onSuccess }: { onSuccess?: () => void }) {
                 autoComplete="email"
                 aria-invalid={fieldState.invalid}
                 disabled={mutation.isPending}
+                className="rounded-md border-foreground/25"
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>

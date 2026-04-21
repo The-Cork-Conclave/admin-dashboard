@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { DateTimePicker } from "@/components/date-time-picker";
+import { ImageUpload } from "@/components/image-upload";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +18,10 @@ const sharpInputClassName = "rounded-md border-foreground/25";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Please enter an event name." }),
+  image_url: z
+    .string()
+    .min(1, { message: "Please upload an event image." })
+    .url({ message: "Please upload a valid image URL." }),
   description: z.string().optional(),
   event_date: z.string().min(1, { message: "Please select an event date." }),
   amount_in_kobo: z
@@ -46,6 +51,7 @@ function toRFC3339FromDatetimeLocal(value: string): string {
 async function postCreateEvent(input: FormInput): Promise<CreateEventResponse> {
   const payload = {
     name: input.name,
+    image_url: input.image_url.trim(),
     description: input.description?.trim() ? input.description.trim() : undefined,
     event_date: toRFC3339FromDatetimeLocal(input.event_date),
     venue_name: input.venue_name,
@@ -97,6 +103,7 @@ export function CreateEventForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      image_url: "",
       description: "",
       event_date: "",
       amount_in_kobo: "",
@@ -137,7 +144,7 @@ export function CreateEventForm({
                   <Input
                     {...field}
                     id="event-name"
-                    placeholder="e.g. Annual Retreat 2024"
+                    placeholder=""
                     autoComplete="off"
                     aria-invalid={fieldState.invalid}
                     disabled={mutation.isPending}
@@ -160,10 +167,29 @@ export function CreateEventForm({
                     {...field}
                     id="event-description"
                     rows={6}
-                    placeholder="Provide details about the event activities, speakers, and schedule..."
+                    placeholder="Provide details about the event description..."
                     aria-invalid={fieldState.invalid}
                     disabled={mutation.isPending}
                     className={`${sharpInputClassName} resize-none`}
+                  />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <Controller
+              control={form.control}
+              name="image_url"
+              render={({ field, fieldState }) => (
+                <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+                  <FieldLabel>Event Image</FieldLabel>
+                  <ImageUpload
+                    value={field.value}
+                    onChange={(url) => field.onChange(url)}
+                    folder="cork-conclave/events"
+                    disabled={mutation.isPending}
                   />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>

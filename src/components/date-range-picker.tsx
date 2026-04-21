@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,7 @@ interface DateRangePickerProps {
 
 export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const [internalDateRange, setInternalDateRange] = React.useState<DateRange | undefined>(() => {
-    const to = new Date();
-    const from = subDays(to, 29);
-    return { from, to };
-  });
+  const [internalDateRange, setInternalDateRange] = React.useState<DateRange | undefined>(undefined);
   const dateRange = value ?? internalDateRange;
 
   const handleDateChange = (nextValue: DateRange | undefined) => {

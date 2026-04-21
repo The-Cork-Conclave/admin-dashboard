@@ -176,15 +176,25 @@ export function NavMain({ items }: NavMainProps) {
   const path = usePathname()
   const { state, isMobile } = useSidebar()
 
+  const isPathMatch = (baseUrl: string, currentPath: string) => {
+    const normalized = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+    const normalizedCurrent = currentPath.endsWith('/') && currentPath !== '/' ? currentPath.slice(0, -1) : currentPath
+    
+    if (normalized === '/dashboard') return normalizedCurrent === '/dashboard'
+
+    if (normalizedCurrent === normalized) return true
+    return normalizedCurrent.startsWith(`${normalized}/`)
+  }
+
   const isItemActive = (url: string, subItems?: NavMainItem['subItems']) => {
     if (subItems?.length) {
-      return subItems.some((sub) => path.startsWith(sub.url))
+      return subItems.some((sub) => isPathMatch(sub.url, path))
     }
-    return path === url
+    return isPathMatch(url, path)
   }
 
   const isSubmenuOpen = (subItems?: NavMainItem['subItems']) => {
-    return subItems?.some((sub) => path.startsWith(sub.url)) ?? false
+    return subItems?.some((sub) => isPathMatch(sub.url, path)) ?? false
   }
 
   return (

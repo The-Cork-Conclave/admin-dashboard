@@ -256,3 +256,20 @@ html {
   color: var(--foreground) !important;
   opacity: 1 !important;
 }
+
+/* Softer placeholder copy on all text fields */
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in oklch, var(--muted-foreground) 38%, var(--background)) !important;
+}
+
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  color: color-mix(in oklch, var(--muted-foreground) 38%, var(--background)) !important;
+}
+
+input::-moz-placeholder,
+textarea::-moz-placeholder {
+  color: color-mix(in oklch, var(--muted-foreground) 38%, var(--background)) !important;
+  opacity: 1 !important;
+}

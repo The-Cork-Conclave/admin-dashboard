@@ -46,4 +46,40 @@ function Badge({
   )
 }
 
-export { Badge, badgeVariants }
+function EventStatusBadge({ status }: { status: string }) {
+  switch (status) {
+
+    case 'active':
+      return <span
+        className="inline-flex items-center gap-1.5 rounded-md bg-green-50 border border-green-200/60 px-2 py-0.5 text-xs font-medium text-green-700">
+        Active
+      </span>
+
+    case 'closed':
+      return <span
+        className="inline-flex items-center gap-1.5 rounded-md bg-red-50 border border-red-200/60 px-2 py-0.5 text-xs font-medium text-red-700">
+        Closed
+      </span>
+
+    case 'completed':
+      return <span
+        className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 border border-blue-200/60 px-2 py-0.5 text-xs font-medium text-blue-700">
+        Completed
+      </span>
+    case 'cancelled':
+      return <span
+        className="inline-flex items-center gap-1.5 rounded-md bg-red-50 border border-red-200/60 px-2 py-0.5 text-xs font-medium text-red-700">
+        Cancelled
+      </span>
+
+    case 'draft':
+    default:
+      return <span
+        className="inline-flex items-center gap-1.5 rounded-md bg-gray-50 border border-gray-200/60 px-2 py-0.5 text-xs font-medium text-gray-700">
+        Draft
+      </span>
+
+  }
+}
+
+export { Badge, badgeVariants, EventStatusBadge }

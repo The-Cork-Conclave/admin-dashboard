@@ -6,38 +6,12 @@ import { Calendar, Clock, FileText, MapPin, Server, Wallet } from "lucide-react"
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import { formatDateTime, formatNairaFromKobo } from "@/lib/utils";
 import { getEventClient, type EventDTO } from "@/app/dashboard/events/[id]/_lib/get-event.client";
-
-function formatDateTime(value?: string): string {
-  if (!value) return "—";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(d);
-}
-
-function formatNairaFromKobo(koboString?: string): { pretty: string; raw: string } {
-  const raw = (koboString ?? "").trim();
-  const kobo = Number(raw);
-  if (!raw || Number.isNaN(kobo)) return { pretty: "—", raw: raw || "—" };
-
-  const naira = kobo / 100;
-  const pretty = new Intl.NumberFormat(undefined, { style: "currency", currency: "NGN" }).format(naira);
-  return { pretty, raw };
-}
-
-function statusBadgeVariant(status?: string): "default" | "secondary" | "destructive" | "outline" {
-  const s = (status ?? "").toLowerCase();
-  if (s === "active" || s === "open") return "default";
-  if (s === "draft" || s === "pending") return "outline";
-  if (s === "cancelled" || s === "canceled") return "destructive";
-  if (s === "closed") return "secondary";
-  return "outline";
-}
+import { EventStatusBadge } from "@/components/ui/badge";
 
 function toExternalUrl(maybeUrl?: string): string | null {
   const v = (maybeUrl ?? "").trim();
@@ -79,7 +53,7 @@ export function EventDetailsClient({ id }: { id: string }) {
                 {formatDateTime(event?.event_date)}
               </span>
               <Separator orientation="vertical" className="h-4" />
-              <Badge variant={statusBadgeVariant(event?.status)}>{event?.status ?? "Unknown"}</Badge>
+              <EventStatusBadge status={event?.status ?? ""} />
             </div>
           )}
         </div>
@@ -111,7 +85,7 @@ export function EventDetailsClient({ id }: { id: string }) {
 
       <div className="group relative mb-6 h-48 w-full overflow-hidden rounded-2xl border bg-muted shadow-sm md:h-64">
         <Image
-          src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=2000&h=600"
+          src={event?.image_url ?? ""}
           alt="Event Banner"
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           fill
@@ -167,7 +141,7 @@ export function EventDetailsClient({ id }: { id: string }) {
                   <div>
                     <dt className="mb-1 text-sm text-muted-foreground">Status</dt>
                     <dd>
-                      <Badge variant={statusBadgeVariant(event?.status)}>{event?.status ?? "Unknown"}</Badge>
+                      <EventStatusBadge status={event?.status ?? ""} />
                     </dd>
                   </div>
                 </dl>
