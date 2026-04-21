@@ -53,4 +53,3 @@ export function EventsTableSkeleton({ rowCount = 10 }: EventsTableSkeletonProps)
     </div>
   );
 }
-

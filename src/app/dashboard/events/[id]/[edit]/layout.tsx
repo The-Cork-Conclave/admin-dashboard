@@ -1,10 +1,6 @@
 import { getEventServer } from "../_lib/get-event.server";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   try {
     const { event } = await getEventServer(id);
@@ -18,8 +14,6 @@ export async function generateMetadata({
   }
 }
 
-
-
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return <>{children}</>;
 }

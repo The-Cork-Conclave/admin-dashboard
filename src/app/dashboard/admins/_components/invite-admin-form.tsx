@@ -9,19 +9,17 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { apiRoutes } from "@/lib/routes";
+import { authFetch } from "@/lib/auth/auth-fetch";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Please enter a name." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
 });
 
-
 async function postAdminInvite(input: z.infer<typeof formSchema>): Promise<void> {
-  const res = await fetch(apiRoutes.admins.invite(), {
+  const res = await authFetch("/api/admins/invite", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify({ name: input.name, email: input.email }),
   });
 

@@ -1,8 +1,6 @@
 "use client";
 "use no memo";
 
-import * as React from "react";
-
 import {
   flexRender,
   getCoreRowModel,
@@ -14,10 +12,10 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-r
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
-import { totalFormatter } from "@/lib/total-formatter";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { totalFormatter } from "@/lib/total-formatter";
 
 import { adminColumns } from "./columns";
 import type { AdminRow } from "./schema";

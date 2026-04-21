@@ -1,18 +1,21 @@
 "use client";
 
 import { useMemo } from "react";
+
+import Image from "next/image";
+import Link from "next/link";
+
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Clock, FileText, MapPin, Server, Wallet } from "lucide-react";
-import Image from "next/image";
-import { Separator } from "@/components/ui/separator";
+
+import { type EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { EventStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime, formatNairaFromKobo } from "@/lib/utils";
-import { getEventClient, type EventDTO } from "@/app/dashboard/events/[id]/_lib/get-event.client";
-import { EventStatusBadge } from "@/components/ui/badge";
-import Link from "next/link";
 
 function toExternalUrl(maybeUrl?: string): string | null {
   const v = (maybeUrl ?? "").trim();
@@ -41,15 +44,15 @@ export function EventDetailsClient({ id }: { id: string }) {
     <main className="mx-auto w-full max-w-7xl p-6 md:p-10 lg:p-12">
       <header className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-start">
         <div className="min-w-0">
-          <h1 className="mb-2 truncate text-2xl font-semibold tracking-tight">{event?.name ?? "Event"}</h1>
+          <h1 className="mb-2 truncate font-semibold text-2xl tracking-tight">{event?.name ?? "Event"}</h1>
 
           {query.isLoading ? (
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-3 text-muted-foreground text-sm">
               <Skeleton className="h-4 w-44" />
               <Skeleton className="h-5 w-20 rounded-full" />
             </div>
           ) : (
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-3 text-muted-foreground text-sm">
               <span className="flex items-center gap-1.5">
                 <Calendar className="size-4" aria-hidden="true" />
                 {formatDateTime(event?.event_date)}
@@ -62,9 +65,7 @@ export function EventDetailsClient({ id }: { id: string }) {
 
         <div className="flex w-full flex-wrap items-center gap-3 md:w-auto">
           <Link href={`/dashboard/events/${id}/edit`}>
-            <Button className="w-full md:w-auto">
-              Edit Event
-            </Button>
+            <Button className="w-full md:w-auto">Edit Event</Button>
           </Link>
         </div>
       </header>
@@ -72,7 +73,9 @@ export function EventDetailsClient({ id }: { id: string }) {
       {query.isError ? (
         <Alert variant="destructive" className="mb-6">
           <AlertTitle>Could not load event</AlertTitle>
-          <AlertDescription>{query.error instanceof Error ? query.error.message : "Please try again."}</AlertDescription>
+          <AlertDescription>
+            {query.error instanceof Error ? query.error.message : "Please try again."}
+          </AlertDescription>
           <AlertAction>
             <Button size="sm" variant="outline" onClick={() => query.refetch()}>
               Retry
@@ -101,7 +104,7 @@ export function EventDetailsClient({ id }: { id: string }) {
             />
           </Link>
         ) : null}
-        <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-foreground/10" />
+        <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-foreground/10 ring-inset" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -116,11 +119,11 @@ export function EventDetailsClient({ id }: { id: string }) {
             <CardContent className="pt-2">
               {query.isLoading ? (
                 <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
-                  <div className="sm:col-span-2 space-y-2">
+                  <div className="space-y-2 sm:col-span-2">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-5 w-72" />
                   </div>
-                  <div className="sm:col-span-2 space-y-2">
+                  <div className="space-y-2 sm:col-span-2">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-20 w-full" />
                   </div>
@@ -136,19 +139,19 @@ export function EventDetailsClient({ id }: { id: string }) {
               ) : (
                 <dl className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <dt className="mb-1 text-sm text-muted-foreground">Event Name</dt>
-                    <dd className="text-sm font-medium">{event?.name ?? "—"}</dd>
+                    <dt className="mb-1 text-muted-foreground text-sm">Event Name</dt>
+                    <dd className="font-medium text-sm">{event?.name ?? "—"}</dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="mb-1 text-sm text-muted-foreground">Description</dt>
+                    <dt className="mb-1 text-muted-foreground text-sm">Description</dt>
                     <dd className="text-sm leading-relaxed">{event?.description || "—"}</dd>
                   </div>
                   <div>
-                    <dt className="mb-1 text-sm text-muted-foreground">Event Date</dt>
-                    <dd className="text-sm font-medium">{formatDateTime(event?.event_date)}</dd>
+                    <dt className="mb-1 text-muted-foreground text-sm">Event Date</dt>
+                    <dd className="font-medium text-sm">{formatDateTime(event?.event_date)}</dd>
                   </div>
                   <div>
-                    <dt className="mb-1 text-sm text-muted-foreground">Status</dt>
+                    <dt className="mb-1 text-muted-foreground text-sm">Status</dt>
                     <dd>
                       <EventStatusBadge status={event?.status ?? ""} />
                     </dd>
@@ -168,11 +171,11 @@ export function EventDetailsClient({ id }: { id: string }) {
             <CardContent className="pt-2">
               {query.isLoading ? (
                 <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
-                  <div className="sm:col-span-2 space-y-2">
+                  <div className="space-y-2 sm:col-span-2">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-5 w-60" />
                   </div>
-                  <div className="sm:col-span-2 space-y-2">
+                  <div className="space-y-2 sm:col-span-2">
                     <Skeleton className="h-4 w-28" />
                     <Skeleton className="h-12 w-full" />
                   </div>
@@ -180,11 +183,11 @@ export function EventDetailsClient({ id }: { id: string }) {
               ) : (
                 <dl className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <dt className="mb-1 text-sm text-muted-foreground">Venue Name</dt>
-                    <dd className="text-sm font-medium">{event?.venue_name ?? "—"}</dd>
+                    <dt className="mb-1 text-muted-foreground text-sm">Venue Name</dt>
+                    <dd className="font-medium text-sm">{event?.venue_name ?? "—"}</dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="mb-1 text-sm text-muted-foreground">Venue Address</dt>
+                    <dt className="mb-1 text-muted-foreground text-sm">Venue Address</dt>
                     <dd className="text-sm">
                       {(() => {
                         const text = event?.venue_address ?? "";
@@ -227,8 +230,8 @@ export function EventDetailsClient({ id }: { id: string }) {
                 </div>
               ) : (
                 <>
-                  <dt className="mb-1 text-sm text-muted-foreground">Registration Fee</dt>
-                  <dd className="mt-1 text-2xl font-semibold tracking-tight">{amount.pretty}</dd>
+                  <dt className="mb-1 text-muted-foreground text-sm">Registration Fee</dt>
+                  <dd className="mt-1 font-semibold text-2xl tracking-tight">{amount.pretty}</dd>
                 </>
               )}
             </CardContent>
@@ -256,12 +259,12 @@ export function EventDetailsClient({ id }: { id: string }) {
               ) : (
                 <dl className="space-y-5">
                   <div>
-                    <dt className="mb-1 text-sm text-muted-foreground">Opens At</dt>
-                    <dd className="text-sm font-medium">{formatDateTime(event?.registration_opens_at)}</dd>
+                    <dt className="mb-1 text-muted-foreground text-sm">Opens At</dt>
+                    <dd className="font-medium text-sm">{formatDateTime(event?.registration_opens_at)}</dd>
                   </div>
                   <div>
-                    <dt className="mb-1 text-sm text-muted-foreground">Closes At</dt>
-                    <dd className="text-sm font-medium">{formatDateTime(event?.registration_closes_at)}</dd>
+                    <dt className="mb-1 text-muted-foreground text-sm">Closes At</dt>
+                    <dd className="font-medium text-sm">{formatDateTime(event?.registration_closes_at)}</dd>
                   </div>
                 </dl>
               )}
@@ -290,19 +293,19 @@ export function EventDetailsClient({ id }: { id: string }) {
               ) : (
                 <dl className="space-y-4">
                   <div>
-                    <dt className="mb-1.5 text-xs text-muted-foreground">Slug</dt>
+                    <dt className="mb-1.5 text-muted-foreground text-xs">Slug</dt>
                     <dd>
-                      <code className="rounded-md border bg-background px-2 py-1 font-mono text-xs text-muted-foreground">
+                      <code className="rounded-md border bg-background px-2 py-1 font-mono text-muted-foreground text-xs">
                         {event?.slug ?? "—"}
                       </code>
                     </dd>
                   </div>
                   <div>
-                    <dt className="mb-1 text-xs text-muted-foreground">Created At</dt>
+                    <dt className="mb-1 text-muted-foreground text-xs">Created At</dt>
                     <dd className="text-xs">{formatDateTime(event?.created_at)}</dd>
                   </div>
                   <div>
-                    <dt className="mb-1 text-xs text-muted-foreground">Last Updated</dt>
+                    <dt className="mb-1 text-muted-foreground text-xs">Last Updated</dt>
                     <dd className="text-xs">—</dd>
                   </div>
                 </dl>
@@ -314,4 +317,3 @@ export function EventDetailsClient({ id }: { id: string }) {
     </main>
   );
 }
-

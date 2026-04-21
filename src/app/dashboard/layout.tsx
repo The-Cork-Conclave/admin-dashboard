@@ -1,49 +1,46 @@
-import type { ReactNode } from 'react'
-import { cookies } from 'next/headers'
-import { AppSidebar } from '@/app/dashboard/_components/sidebar/app-sidebar'
+import type { ReactNode } from "react";
+
+import { cookies } from "next/headers";
+
+import type { Metadata } from "next";
+
+import { AppSidebar } from "@/app/dashboard/_components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import {
-  SIDEBAR_COLLAPSIBLE_VALUES,
-  SIDEBAR_VARIANT_VALUES,
-} from '@/lib/preferences/layout'
-import { cn } from '@/lib/utils'
-import { getPreference } from '@/server/server-actions'
+import { SIDEBAR_COLLAPSIBLE_VALUES, SIDEBAR_VARIANT_VALUES } from "@/lib/preferences/layout";
+import { cn } from "@/lib/utils";
+import { getPreference } from "@/server/server-actions";
 
-import { AccountSwitcher } from './_components/sidebar/account-switcher'
-import { ThemeSwitcher } from './_components/sidebar/theme-switcher'
-
-import type { Metadata } from 'next'
+import { AccountSwitcher } from "./_components/sidebar/account-switcher";
+import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
 
 export const metadata: Metadata = {
-  title: 'Cork Conclave - Dashboar',
-}
+  title: "Cork Conclave - Dashboar",
+};
 
-export default async function Layout({
-  children,
-}: Readonly<{ children: ReactNode }>) {
-  const cookieStore = await cookies()
-  const defaultOpen = cookieStore.get('sidebar_state')?.value !== 'false'
+export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
   const [variant, collapsible] = await Promise.all([
-    getPreference('sidebar_variant', SIDEBAR_VARIANT_VALUES, 'inset'),
-    getPreference('sidebar_collapsible', SIDEBAR_COLLAPSIBLE_VALUES, 'icon'),
-  ])
+    getPreference("sidebar_variant", SIDEBAR_VARIANT_VALUES, "inset"),
+    getPreference("sidebar_collapsible", SIDEBAR_COLLAPSIBLE_VALUES, "icon"),
+  ]);
 
   return (
     <SidebarProvider
       defaultOpen={defaultOpen}
       style={
         {
-          '--sidebar-width': 'calc(var(--spacing) * 68)',
+          "--sidebar-width": "calc(var(--spacing) * 68)",
         } as React.CSSProperties
       }
     >
       <AppSidebar variant={variant} collapsible={collapsible} />
       <SidebarInset
         className={cn(
-          '[html[data-content-layout=centered]_&>*]:mx-auto',
-          '[html[data-content-layout=centered]_&>*]:w-full',
-          '[html[data-content-layout=centered]_&>*]:max-w-screen-2xl',
-          'peer-data-[variant=inset]:border',
+          "[html[data-content-layout=centered]_&>*]:mx-auto",
+          "[html[data-content-layout=centered]_&>*]:w-full",
+          "[html[data-content-layout=centered]_&>*]:max-w-screen-2xl",
+          "peer-data-[variant=inset]:border",
         )}
       >
         <header
@@ -56,10 +53,8 @@ export default async function Layout({
           <div className="flex w-full items-center justify-between px-4 lg:px-6">
             <div className="flex items-center gap-1 lg:gap-2">
               <SidebarTrigger className="-ml-1" />
-
             </div>
             <div className="flex items-center gap-2">
-
               <ThemeSwitcher />
 
               <AccountSwitcher />
@@ -69,5 +64,5 @@ export default async function Layout({
         <div className="h-full p-4 md:p-6">{children}</div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

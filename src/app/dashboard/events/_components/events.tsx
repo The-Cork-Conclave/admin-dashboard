@@ -1,18 +1,12 @@
-'use client'
+"use client";
 "use no memo";
 
 import * as React from "react";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import {
   flexRender,
   getCoreRowModel,
@@ -21,15 +15,20 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
+  Activity,
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  PlusIcon,
   Search,
-  Activity,
-  PlusIcon
 } from "lucide-react";
+import type { DateRange } from "react-day-picker";
+
+import { DateRangePicker } from "@/components/date-range-picker";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,12 +40,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { eventColumns } from "./columns";
-import type { EventRow } from "./schema";
-import { DateRangePicker } from "@/components/date-range-picker";
-import type { DateRange } from "react-day-picker";
+
 import { fetchEventsList } from "../_lib/fetch-events-list";
+import { eventColumns } from "./columns";
 import { EventsTableSkeleton } from "./events-table-skeleton";
+import type { EventRow } from "./schema";
 
 function useDebouncedValue<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = React.useState(value);
@@ -94,7 +92,7 @@ const Events = () => {
 
   React.useEffect(() => {
     setPagination((p) => ({ ...p, pageIndex: 0 }));
-  }, [debouncedSearch, status, sortValue]);
+  }, []);
 
   const page = pagination.pageIndex + 1;
   const perPage = pagination.pageSize;
@@ -164,7 +162,7 @@ const Events = () => {
   return (
     <div>
       <Card>
-        <CardHeader className='mb-2'>
+        <CardHeader className="mb-2">
           <CardTitle className="leading-none">Events</CardTitle>
           <CardAction>
             <Link href="/dashboard/events/new">
@@ -180,13 +178,13 @@ const Events = () => {
           {query.isLoading ? (
             <EventsTableSkeleton rowCount={pagination.pageSize} />
           ) : (
-            <div className="space-y-4 flex flex-col gap-4">
+            <div className="flex flex-col gap-4 space-y-4">
               <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="relative w-full lg:w-80">
                     <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      className="h-7 pl-8 rounded-md border-foreground/25"
+                      className="h-7 rounded-md border-foreground/25 pl-8"
                       placeholder="Search events..."
                       value={searchInput}
                       onChange={(event) => setSearchInput(event.target.value)}
@@ -213,7 +211,6 @@ const Events = () => {
                   </DropdownMenu>
                   <div className="flex flex-col gap-1">
                     <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
-
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -223,7 +220,10 @@ const Events = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuRadioGroup value={sortValue} onValueChange={(v) => setSortValue(v as typeof sortValue)}>
+                      <DropdownMenuRadioGroup
+                        value={sortValue}
+                        onValueChange={(v) => setSortValue(v as typeof sortValue)}
+                      >
                         {sortOptions.map((option) => (
                           <DropdownMenuRadioItem key={option.value} value={option.value}>
                             {option.label}
@@ -244,9 +244,11 @@ const Events = () => {
                           <TableHead
                             key={`${index}-${header.id}`}
                             colSpan={header.colSpan}
-                            className="h-11 p-3 font-light text-sm text-muted-foreground"
+                            className="h-11 p-3 font-light text-muted-foreground text-sm"
                           >
-                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(header.column.columnDef.header, header.getContext())}
                           </TableHead>
                         ))}
                       </TableRow>

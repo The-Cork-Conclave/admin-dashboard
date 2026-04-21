@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import { bffRoutes } from "@/lib/routes";
+import { bffRoutes } from "@/lib/bff-routes";
 
 export function VerifyPageClient() {
   const searchParams = useSearchParams();
@@ -68,4 +69,3 @@ export function VerifyPageClient() {
     </div>
   );
 }
-

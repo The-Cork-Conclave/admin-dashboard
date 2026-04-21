@@ -17,4 +17,4 @@ export const adminsListResponseSchema = z.object({
   meta: paginatedListMetaSchema,
 });
 
-export type AdminsListResponse = z.infer<typeof adminsListResponseSchema>
+export type AdminsListResponse = z.infer<typeof adminsListResponseSchema>;

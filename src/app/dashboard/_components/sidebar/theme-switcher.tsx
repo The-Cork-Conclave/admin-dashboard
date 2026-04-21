@@ -22,11 +22,7 @@ export function ThemeSwitcher() {
   const nextLabel = resolvedThemeMode === "light" ? "dark" : "light";
 
   return (
-    <Button
-      size="icon"
-      onClick={cycleTheme}
-      aria-label={`Theme is ${resolvedThemeMode}. Switch to ${nextLabel} mode.`}
-    >
+    <Button size="icon" onClick={cycleTheme} aria-label={`Theme is ${resolvedThemeMode}. Switch to ${nextLabel} mode.`}>
       <Sun className="hidden dark:block" />
       <Moon className="block dark:hidden" />
     </Button>

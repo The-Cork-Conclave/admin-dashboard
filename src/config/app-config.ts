@@ -1,12 +1,12 @@
-import packageJson from '../../package.json'
+import packageJson from "../../package.json";
 
-const currentYear = new Date().getFullYear()
+const currentYear = new Date().getFullYear();
 
 export const APP_CONFIG = {
-  name: 'Cork Conclave Admin',
+  name: "Cork Conclave Admin",
   version: packageJson.version,
   copyright: `© ${currentYear}, Studio Admin.`,
   meta: {
-    title: 'Cork Conclave',
+    title: "Cork Conclave",
   },
-}
+};

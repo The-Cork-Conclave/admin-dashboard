@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { z } from 'zod'
+import { z } from "zod";
 
-import { apiRoutes } from '@/lib/routes'
+import { authFetch } from "@/lib/auth/auth-fetch";
 
 export const eventDTOSchema = z.object({
   id: z.string().min(1),
@@ -18,33 +18,31 @@ export const eventDTOSchema = z.object({
   registration_closes_at: z.string(),
   created_at: z.string(),
   image_url: z.string(),
-})
+});
 
-export type EventDTO = z.infer<typeof eventDTOSchema>
+export type EventDTO = z.infer<typeof eventDTOSchema>;
 
-const getEventResponseSchema = z.object({ event: eventDTOSchema })
+const getEventResponseSchema = z.object({ event: eventDTOSchema });
 
-export type GetEventResponse = z.infer<typeof getEventResponseSchema>
+export type GetEventResponse = z.infer<typeof getEventResponseSchema>;
 
 export async function getEventClient(id: string): Promise<GetEventResponse> {
-  const res = await fetch(apiRoutes.events.byId(id), {
-    method: 'GET',
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
-  })
+  const res = await authFetch(`/api/events/${encodeURIComponent(id)}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
 
   if (!res.ok) {
-    let message = 'Could not load event. Please try again.'
+    let message = "Could not load event. Please try again.";
     try {
-      const body = (await res.json()) as { message?: string }
-      if (typeof body.message === 'string' && body.message.length > 0)
-        message = body.message
+      const body = (await res.json()) as { message?: string };
+      if (typeof body.message === "string" && body.message.length > 0) message = body.message;
     } catch {
       /* ignore */
     }
-    throw new Error(message)
+    throw new Error(message);
   }
 
-  const json = (await res.json()) as unknown
-  return getEventResponseSchema.parse(json)
+  const json = (await res.json()) as unknown;
+  return getEventResponseSchema.parse(json);
 }

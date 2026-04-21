@@ -1,19 +1,20 @@
-'use client'
+"use client";
+
+import * as React from "react";
 
 import Image from "next/image";
 import Link from "next/link";
-import * as React from "react";
+
 import { useQuery } from "@tanstack/react-query";
-import { Eye, CheckCircle, SquarePen } from "lucide-react";
 import { format } from "date-fns";
+import { CheckCircle, Eye, SquarePen } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchEventsList } from "../_lib/fetch-events-list";
 import { formatNairaFromKobo } from "@/lib/utils";
 
-
+import { fetchEventsList } from "../_lib/fetch-events-list";
 
 function toExternalUrl(maybeUrl?: string): string | null {
   const v = (maybeUrl ?? "").trim();
@@ -68,7 +69,6 @@ export default function CurrentEvent() {
         setIsExpanded(false);
         return;
       }
-
 
       if (!isExpanded) {
         const nextCanExpand = el.scrollHeight > el.clientHeight + 1;
@@ -209,7 +209,6 @@ export default function CurrentEvent() {
               <p className="truncate text-foreground text-sm" title={event.venue_name}>
                 {event.venue_name}
               </p>
-
             </div>
             <div>
               <p className="mb-1 font-medium text-muted-foreground text-xs">Registration Opens</p>
@@ -225,10 +224,7 @@ export default function CurrentEvent() {
 
           <div className="flex flex-wrap items-center gap-3">
             <Link href={`/dashboard/events/${encodeURIComponent(event.id)}`}>
-              <Button
-                type="button"
-                className="gap-2"
-              >
+              <Button type="button" className="gap-2">
                 <Eye className="size-4" aria-hidden />
                 View Event
               </Button>

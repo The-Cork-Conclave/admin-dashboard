@@ -1,4 +1,4 @@
-import { Banknote, ChartBar, Gauge, LayoutDashboard, type LucideIcon, Users2Icon, CalendarIcon } from "lucide-react";
+import { Banknote, CalendarIcon, ChartBar, Gauge, LayoutDashboard, type LucideIcon, Users2Icon } from "lucide-react";
 
 export interface NavSubItem {
   title: string;

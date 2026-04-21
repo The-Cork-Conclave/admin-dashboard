@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { apiRoutes } from "@/lib/routes";
+import { authFetch } from "@/lib/auth/auth-fetch";
 
 const listMetaSchema = z.object({
   total: z.number().int().nonnegative(),
@@ -43,23 +43,20 @@ export async function fetchEventsList(args: {
   sortBy?: "created_at" | "name";
   sortOrder?: "asc" | "desc";
 }): Promise<EventsListResponse> {
-  const res = await fetch(
-    apiRoutes.events.list({
-      page: args.page,
-      perPage: args.perPage,
-      q: args.q,
-      status: args.status,
-      dateFrom: args.dateFrom,
-      dateTo: args.dateTo,
-      sortBy: args.sortBy,
-      sortOrder: args.sortOrder,
-    }),
-    {
-      method: "GET",
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    },
-  );
+  const sp = new URLSearchParams();
+  sp.set("page", String(args.page));
+  sp.set("per_page", String(args.perPage));
+  if (args.q?.trim()) sp.set("q", args.q.trim());
+  if (args.status?.trim()) sp.set("status", args.status.trim());
+  if (args.dateFrom?.trim()) sp.set("date_from", args.dateFrom.trim());
+  if (args.dateTo?.trim()) sp.set("date_to", args.dateTo.trim());
+  if (args.sortBy) sp.set("sort_by", args.sortBy);
+  if (args.sortOrder) sp.set("sort_order", args.sortOrder);
+
+  const res = await authFetch(`/api/events?${sp.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
 
   if (!res.ok) {
     let message = "Failed to load events";
@@ -77,4 +74,3 @@ export async function fetchEventsList(args: {
   const json: unknown = await res.json();
   return eventsListResponseSchema.parse(json);
 }
-

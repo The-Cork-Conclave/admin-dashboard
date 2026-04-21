@@ -1,9 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -12,7 +13,7 @@ import { ImageUpload } from "@/components/image-upload";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { apiRoutes } from "@/lib/routes";
+import { authFetch } from "@/lib/auth/auth-fetch";
 
 const sharpInputClassName = "rounded-md border-foreground/25";
 
@@ -63,10 +64,9 @@ async function postCreateEvent(input: FormInput): Promise<CreateEventResponse> {
       : undefined,
   };
 
-  const res = await fetch(apiRoutes.events.create(), {
+  const res = await authFetch("/api/events", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify(payload),
   });
 
@@ -91,11 +91,7 @@ async function postCreateEvent(input: FormInput): Promise<CreateEventResponse> {
   return { id: parsed.data.id };
 }
 
-export function CreateEventForm({
-  footer,
-}: {
-  footer?: (args: { isPending: boolean }) => React.ReactNode;
-}) {
+export function CreateEventForm({ footer }: { footer?: (args: { isPending: boolean }) => React.ReactNode }) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -132,8 +128,8 @@ export function CreateEventForm({
 
   return (
     <form noValidate onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="p-6 md:p-8 space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
+      <div className="space-y-8 p-6 md:p-8">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
           <div className="md:col-span-2">
             <Controller
               control={form.control}
@@ -331,4 +327,3 @@ export function CreateEventForm({
     </form>
   );
 }
-

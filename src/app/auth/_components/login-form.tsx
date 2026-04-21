@@ -9,7 +9,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { bffRoutes } from "@/lib/routes";
+import { bffRoutes } from "@/lib/bff-routes";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { apiRoutes } from "@/lib/routes";
+import { authFetch } from "@/lib/auth/auth-fetch";
 
 const eventsMetricsDataSchema = z.object({
   draft: z.number().int().nonnegative(),
@@ -18,9 +18,8 @@ export type EventsMetricsResponse = z.infer<typeof eventsMetricsResponseSchema>;
 export type EventsMetricsData = z.infer<typeof eventsMetricsDataSchema>;
 
 export async function fetchEventsMetrics(): Promise<EventsMetricsResponse> {
-  const res = await fetch(apiRoutes.events.metrics(), {
+  const res = await authFetch("/api/events/metrics", {
     method: "GET",
-    credentials: "include",
     headers: { Accept: "application/json" },
   });
 
@@ -40,4 +39,3 @@ export async function fetchEventsMetrics(): Promise<EventsMetricsResponse> {
   const json: unknown = await res.json();
   return eventsMetricsResponseSchema.parse(json);
 }
-

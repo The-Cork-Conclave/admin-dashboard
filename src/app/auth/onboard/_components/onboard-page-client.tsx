@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -69,4 +70,3 @@ export function OnboardPageClient() {
     </div>
   );
 }
-

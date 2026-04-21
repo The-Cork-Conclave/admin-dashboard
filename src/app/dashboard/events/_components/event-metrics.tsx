@@ -1,8 +1,10 @@
-'use client'
+"use client";
 
-import { CalendarDays, CheckCircle2, FilePenLine, XCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { CalendarDays, CheckCircle2, FilePenLine, XCircle } from "lucide-react";
+
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+
 import { fetchEventsMetrics } from "../_lib/fetch-events-metrics";
 
 function MetricCards() {
@@ -15,9 +17,7 @@ function MetricCards() {
   const draft = data?.draft ?? 0;
   const completed = data?.completed ?? 0;
   const cancelled = data?.cancelled ?? 0;
-  const totalEvents = data
-    ? data.draft + data.active + data.closed + data.completed + data.cancelled
-    : 0;
+  const totalEvents = data ? data.draft + data.active + data.closed + data.completed + data.cancelled : 0;
 
   const display = (v: number) => (query.isLoading ? "—" : String(v));
 
@@ -34,9 +34,7 @@ function MetricCards() {
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">
-              {display(totalEvents)}
-            </div>
+            <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">{display(totalEvents)}</div>
           </div>
         </CardContent>
       </Card>
@@ -52,9 +50,7 @@ function MetricCards() {
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">
-              {display(draft)}
-            </div>
+            <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">{display(draft)}</div>
           </div>
         </CardContent>
       </Card>
@@ -70,9 +66,7 @@ function MetricCards() {
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">
-              {display(completed)}
-            </div>
+            <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">{display(completed)}</div>
           </div>
         </CardContent>
       </Card>
@@ -88,9 +82,7 @@ function MetricCards() {
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">
-              {display(cancelled)}
-            </div>
+            <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">{display(cancelled)}</div>
           </div>
         </CardContent>
       </Card>

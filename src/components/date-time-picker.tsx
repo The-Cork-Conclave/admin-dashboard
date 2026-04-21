@@ -88,15 +88,7 @@ export function DateTimePicker({
     if (Number.isNaN(hh) || Number.isNaN(mm)) return;
 
     const base = selectedDate ?? new Date();
-    const merged = new Date(
-      base.getFullYear(),
-      base.getMonth(),
-      base.getDate(),
-      hh,
-      mm,
-      0,
-      0,
-    );
+    const merged = new Date(base.getFullYear(), base.getMonth(), base.getDate(), hh, mm, 0, 0);
     onChange?.(toDatetimeLocalString(merged));
   };
 
@@ -115,11 +107,7 @@ export function DateTimePicker({
           value={displayValue}
           placeholder={placeholder}
           disabled={disabled}
-          className={cn(
-            "cursor-pointer text-left",
-            !selectedDate && "text-muted-foreground",
-            className,
-          )}
+          className={cn("cursor-pointer text-left", !selectedDate && "text-muted-foreground", className)}
           onClick={() => {
             if (!disabled) setOpen(true);
           }}
@@ -150,4 +138,3 @@ export function DateTimePicker({
     </Popover>
   );
 }
-

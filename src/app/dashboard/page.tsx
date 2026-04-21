@@ -1,6 +1,6 @@
-import { MetricCards } from './_components/metric-cards'
-import { PerformanceOverview } from './_components/performance-overview'
-import { SubscriberOverview } from './_components/subscriber-overview'
+import { MetricCards } from "./_components/metric-cards";
+import { PerformanceOverview } from "./_components/performance-overview";
+import { SubscriberOverview } from "./_components/subscriber-overview";
 
 export default function Page() {
   return (
@@ -9,5 +9,5 @@ export default function Page() {
       <PerformanceOverview />
       <SubscriberOverview />
     </div>
-  )
+  );
 }

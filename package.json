@@ -16,12 +16,12 @@
   },
   "lint-staged": {
     "*.{js,ts,jsx,tsx,mjs,cjs}": [
-      "prettier --write",
+      "prettier --config .prettier.json --write",
       "eslint --fix",
       "biome check --write --no-errors-on-unmatched"
     ],
     "*.{json,md,yml,yaml}": [
-      "prettier --write"
+      "prettier --config .prettier.json --write"
     ]
   },
   "dependencies": {

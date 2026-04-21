@@ -1,27 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
+
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { type EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
 import { DateTimePicker } from "@/components/date-time-picker";
 import { ImageUpload } from "@/components/image-upload";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { apiRoutes } from "@/lib/routes";
-import { EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
+import { authFetch } from "@/lib/auth/auth-fetch";
 
 const sharpInputClassName = "rounded-md border-foreground/25";
 
@@ -95,10 +91,9 @@ async function patchUpdateEvent(id: string, input: FormInput): Promise<void> {
       : undefined,
   };
 
-  const res = await fetch(apiRoutes.events.byId(id), {
+  const res = await authFetch(`/api/events/${encodeURIComponent(id)}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify(payload),
   });
 
@@ -152,9 +147,12 @@ export function UpdateEventForm({
 
   useEffect(() => {
     if (!event) return;
+    const parsedStatus = statusSchema.catch("draft").parse(event.status);
+    form.setValue("status", parsedStatus, { shouldDirty: false, shouldTouch: false, shouldValidate: true });
+
     form.reset({
       name: event.name ?? "",
-      status: statusSchema.catch("draft").parse(event.status),
+      status: parsedStatus,
       image_url: event.image_url ?? "",
       description: event.description ?? "",
       event_date: toDatetimeLocalFromRFC3339(event.event_date),
@@ -185,8 +183,8 @@ export function UpdateEventForm({
 
   return (
     <form noValidate onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="p-6 md:p-8 space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
+      <div className="space-y-8 p-6 md:p-8">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
           <div className="md:col-span-2">
             <Controller
               control={form.control}
@@ -216,7 +214,11 @@ export function UpdateEventForm({
               render={({ field, fieldState }) => (
                 <Field className="gap-1.5" data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="event-status">Status</FieldLabel>
-                  <Select value={field.value} onValueChange={field.onChange} disabled={mutation.isPending}>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={mutation.isPending}
+                  >
                     <SelectTrigger id="event-status" className={`${sharpInputClassName} w-full`}>
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
@@ -409,4 +411,3 @@ export function UpdateEventForm({
     </form>
   );
 }
-

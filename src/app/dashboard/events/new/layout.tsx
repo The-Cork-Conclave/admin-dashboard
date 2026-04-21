@@ -1,9 +1,9 @@
-import type { Metadata } from 'next'
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Cork Conclave - Create Event',
-}
+  title: "Cork Conclave - Create Event",
+};
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return <>{children}</>;
 }

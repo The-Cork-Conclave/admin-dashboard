@@ -1,4 +1,4 @@
-import z from 'zod'
+import z from "zod";
 
 export const eventSchema = z.object({
   id: z.string(),
@@ -16,6 +16,6 @@ export const eventSchema = z.object({
   created_by: z.string().optional(),
   updated_at: z.string().optional(),
   image_url: z.string().optional(),
-})
+});
 
-export type EventRow = z.infer<typeof eventSchema>
+export type EventRow = z.infer<typeof eventSchema>;

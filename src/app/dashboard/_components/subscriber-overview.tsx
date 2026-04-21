@@ -1,31 +1,22 @@
-'use client'
+"use client";
 
-import { Download } from 'lucide-react'
+import { Download } from "lucide-react";
 
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import customersData from './data.json'
-import type { RecentCustomerRow } from './recent-customers-table/schema'
-import { RecentCustomersTable } from './recent-customers-table/table'
+import customersData from "./data.json";
+import type { RecentCustomerRow } from "./recent-customers-table/schema";
+import { RecentCustomersTable } from "./recent-customers-table/table";
 
-const customers = customersData as RecentCustomerRow[]
+const customers = customersData as RecentCustomerRow[];
 
 export function SubscriberOverview() {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="leading-none">18,426 Users</CardTitle>
-        <CardDescription>
-          Recent user records with event activity.
-        </CardDescription>
+        <CardDescription>Recent user records with event activity.</CardDescription>
         <CardAction>
           <Button variant="outline" size="sm">
             <Download />
@@ -38,5 +29,5 @@ export function SubscriberOverview() {
         <RecentCustomersTable data={customers} />
       </CardContent>
     </Card>
-  )
+  );
 }

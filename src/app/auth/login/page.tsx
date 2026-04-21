@@ -5,8 +5,6 @@ import Logo from "@/components/logo";
 import { LoginForm } from "../_components/login-form";
 import { LoginMagicLinkError } from "../_components/login-magic-link-error";
 
-
-
 export default function LoginPage() {
   return (
     <div className="flex h-dvh">
@@ -17,7 +15,7 @@ export default function LoginPage() {
               <Logo />
             </div>
 
-            <div className="space-y-2 ">
+            <div className="space-y-2">
               <h1 className="font-light text-5xl text-primary-foreground">Hello again</h1>
               <p className="text-primary-foreground/80 text-xl">Login to continue</p>
             </div>
@@ -29,9 +27,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-10 py-24 lg:py-32">
           <div className="space-y-4 text-center">
             <div className="font-medium tracking-tight">Login</div>
-            <div className="mx-auto max-w-xl text-muted-foreground">
-              Welcome back. Enter your email address.
-            </div>
+            <div className="mx-auto max-w-xl text-muted-foreground">Welcome back. Enter your email address.</div>
           </div>
           <div className="space-y-4">
             <Suspense fallback={null}>

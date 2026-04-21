@@ -1,17 +1,19 @@
 "use client";
 
+import * as React from "react";
+
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { PaginationState, Updater } from "@tanstack/react-table";
-import * as React from "react";
-import { PlusIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
+import { PlusIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 import { fetchAdminsList } from "../_lib/fetch-admins-list";
 import { AdminsTableSkeleton } from "./admins-table-skeleton";
-import { AdminsTable } from "./table";
 import { InviteAdminForm } from "./invite-admin-form";
-
+import { AdminsTable } from "./table";
 
 export function AdminsView() {
   const [inviteOpen, setInviteOpen] = React.useState(false);
@@ -46,7 +48,7 @@ export function AdminsView() {
   return (
     <div className="flex flex-col gap-4 md:gap-6">
       <Card>
-        <CardHeader className="w-full justify-between mb-4 align-middle">
+        <CardHeader className="mb-4 w-full justify-between align-middle">
           <CardTitle className="leading-none">Admins</CardTitle>
           <CardAction>
             <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
