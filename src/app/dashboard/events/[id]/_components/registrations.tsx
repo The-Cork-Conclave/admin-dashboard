@@ -2,9 +2,6 @@
 "use no memo";
 
 import * as React from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -13,19 +10,15 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
-  Activity,
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  PlusIcon,
+  Activity,
   Search,
+  Download,
 } from "lucide-react";
-import type { DateRange } from "react-day-picker";
-import { DateRangePicker } from "@/components/date-range-picker";
-import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,19 +30,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { fetchEventsList } from "../_lib/fetch-events-list";
-import { eventColumns } from "./columns";
-import { EventsTableSkeleton } from "./events-table-skeleton";
-import type { EventRow } from "./schema";
+import { registrationColumns } from "./columns";
+import type { RegistrationRow } from "./schema";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import type { DateRange } from "react-day-picker";
+import { DateRangePicker } from "@/components/date-range-picker";
+import { fetchEventRegistrationsList } from "../../_lib/fetch-events-registrations-list";
 import useDebouncedValue from "@/hooks/use-debounced-value";
+import { EventsRegistrationTableSkeleton } from "./events-registrations-skeleton";
 
 const statusOptions = [
   { value: "all", label: "All" },
-  { value: "draft", label: "Draft" },
-  { value: "active", label: "Active" },
-  { value: "closed", label: "Closed" },
-  { value: "completed", label: "Completed" },
+  { value: "confirmed", label: "Paid" },
+  { value: "pending_payment", label: "Pending" },
   { value: "cancelled", label: "Cancelled" },
+  { value: "expired", label: "Expired" },
 ] as const;
 
 const sortOptions = [
@@ -59,8 +56,7 @@ const sortOptions = [
   { value: "name-desc", label: "Name Z-A" },
 ] as const;
 
-const Events = () => {
-  const router = useRouter();
+const Registrations = ({ id }: { id: string }) => {
   const [rowSelection, setRowSelection] = React.useState({});
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
@@ -94,7 +90,7 @@ const Events = () => {
 
   const query = useQuery({
     queryKey: [
-      "events",
+      `events-${id}-registrations`,
       page,
       perPage,
       debouncedSearch,
@@ -105,7 +101,7 @@ const Events = () => {
       sort.sortOrder,
     ],
     queryFn: () =>
-      fetchEventsList({
+      fetchEventRegistrationsList(id, {
         page,
         perPage,
         q: debouncedSearch.trim() ? debouncedSearch.trim() : undefined,
@@ -118,13 +114,13 @@ const Events = () => {
     placeholderData: keepPreviousData,
   });
 
-  const data = (query.data?.data ?? []) as EventRow[];
+  const data = (query.data?.data ?? []) as RegistrationRow[];
   const total = query.data?.meta.total ?? 0;
   const pageCount = Math.max(1, query.data?.meta.total_pages ?? 1);
 
   const table = useReactTable({
     data,
-    columns: eventColumns,
+    columns: registrationColumns,
     state: {
       rowSelection,
       pagination,
@@ -148,32 +144,33 @@ const Events = () => {
   });
 
   return (
-    <div>
+    <div className="mt-8 pt-8">
       <Card>
-        <CardHeader className="mb-2">
-          <CardTitle className="leading-none">Events</CardTitle>
+        <CardHeader>
+          <CardTitle className="leading-none">
+            {total} Registered Member{total !== 1 ? "s" : ""}
+          </CardTitle>
+
           <CardAction>
-            <Link href="/dashboard/events/new">
-              <Button variant="outline" size="sm">
-                <PlusIcon />
-                Create Event
-              </Button>
-            </Link>
+            <Button variant="outline" size="sm">
+              <Download />
+              Export
+            </Button>
           </CardAction>
         </CardHeader>
 
-        <CardContent className="pt-2">
+        <CardContent className="pt-2 mt-2">
           {query.isLoading ? (
-            <EventsTableSkeleton rowCount={pagination.pageSize} />
+            <EventsRegistrationTableSkeleton rowCount={pagination.pageSize} />
           ) : (
-            <div className="flex flex-col gap-4 space-y-4">
+            <div className="space-y-4 flex flex-col gap-2">
               <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="relative w-full lg:w-80">
                     <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      className="h-7 rounded-md border-foreground/25 pl-8"
-                      placeholder="Search events..."
+                      className="h-7 rounded-[min(var(--radius-md),12px)] pl-8"
+                      placeholder="Search members..."
                       value={searchInput}
                       onChange={(event) => setSearchInput(event.target.value)}
                     />
@@ -229,14 +226,10 @@ const Events = () => {
               <div className="overflow-hidden rounded-lg border bg-card">
                 <Table>
                   <TableHeader className="bg-muted/15">
-                    {table.getHeaderGroups().map((headerGroup, index) => (
+                    {table.getHeaderGroups().map((headerGroup) => (
                       <TableRow key={headerGroup.id}>
                         {headerGroup.headers.map((header) => (
-                          <TableHead
-                            key={`${index}-${header.id}`}
-                            colSpan={header.colSpan}
-                            className="h-11 p-3 font-light text-muted-foreground text-sm"
-                          >
+                          <TableHead key={header.id} colSpan={header.colSpan} className="h-11 p-3 font-medium">
                             {header.isPlaceholder
                               ? null
                               : flexRender(header.column.columnDef.header, header.getContext())}
@@ -249,19 +242,7 @@ const Events = () => {
                   <TableBody>
                     {table.getRowModel().rows.length ? (
                       table.getRowModel().rows.map((row) => (
-                        <TableRow
-                          key={`${row.id}-${row.index}`}
-                          role="link"
-                          tabIndex={0}
-                          className="cursor-pointer hover:bg-muted/50"
-                          onClick={() => router.push(`/dashboard/events/${encodeURIComponent(row.id)}`)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              router.push(`/dashboard/events/${encodeURIComponent(row.id)}`);
-                            }
-                          }}
-                        >
+                        <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                           {row.getVisibleCells().map((cell) => (
                             <TableCell key={cell.id} className="p-3 align-middle">
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -281,10 +262,7 @@ const Events = () => {
               </div>
 
               <div className="flex items-center justify-between px-1">
-                <div className="hidden flex-1 text-muted-foreground text-sm lg:flex">
-                  {total} Event{total === 1 ? "" : "s"}
-                </div>
-
+                <div className="hidden flex-1 text-muted-foreground text-sm lg:flex"></div>
                 <div className="flex w-full items-center gap-8 lg:w-fit">
                   <div className="hidden items-center gap-2 lg:flex">
                     <Label htmlFor="events-rows-per-page" className="font-medium text-sm">
@@ -365,4 +343,4 @@ const Events = () => {
   );
 };
 
-export default Events;
+export default Registrations;

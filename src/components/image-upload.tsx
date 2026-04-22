@@ -76,6 +76,7 @@ export function ImageUpload({
   className,
   maxSizeBytes = 10 * 1024 * 1024,
 }: ImageUploadProps) {
+  const inputId = React.useId();
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
@@ -154,9 +155,14 @@ export function ImageUpload({
 
   if (hasValue) {
     return (
-      <div className={cn(className)}>
-        <div className={cn("relative overflow-hidden rounded-xl border border-border", disabled ? "opacity-60" : "")}>
-          <div className="relative h-56 w-full">
+      <div className={cn("w-full min-w-0", className)}>
+        <div
+          className={cn(
+            "relative w-full min-w-0 overflow-hidden rounded-xl border border-border bg-muted/20",
+            disabled ? "opacity-60" : "",
+          )}
+        >
+          <div className="relative h-56 w-full min-w-0">
             <Image src={value as string} alt="Uploaded" fill unoptimized className="object-cover brightness-75" />
             <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
           </div>
@@ -183,38 +189,39 @@ export function ImageUpload({
   }
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("w-full min-w-0 space-y-2 font-sans", className)}>
       <label
         className={cn(
-          "relative rounded-xl border border-dashed p-6 transition-colors",
-          "bg-background",
-          isDragging ? "border-primary bg-primary/5" : "border-border",
-          disabled ? "pointer-events-none opacity-60" : "cursor-pointer",
+          "relative box-border flex min-h-52 w-full min-w-0 cursor-pointer flex-col items-stretch justify-center rounded-xl border-2 border-dashed p-6 transition-[border-color,box-shadow,background-color] sm:min-h-56 sm:p-8",
+          "bg-muted/25 ring-1 ring-border/60 ring-inset dark:bg-muted/15",
+          isDragging ? "border-primary bg-primary/[0.07] ring-primary/30" : "border-border/80",
+          disabled ? "pointer-events-none opacity-60" : "hover:border-foreground/25 hover:bg-muted/35 dark:hover:bg-muted/25",
         )}
         aria-disabled={disabled || isUploading}
         onDrop={onDrop}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
-        htmlFor="image-upload-input"
+        htmlFor={inputId}
       >
         <input
           ref={inputRef}
-          id="image-upload-input"
+          id={inputId}
           type="file"
           accept="image/*"
-          className="hidden"
+          className="sr-only"
           disabled={disabled || isUploading}
           onChange={onInputChange}
         />
 
-        <div className="flex flex-col items-center justify-center text-center">
+        <div className="flex w-full max-w-full min-w-0 flex-col items-center justify-center px-2 text-center">
           <Button
             type="button"
             variant="outline"
             size="icon"
-            className="mb-3 size-11 rounded-full"
+            className="mb-3 size-11 shrink-0 rounded-full shadow-sm"
             disabled={disabled || isUploading}
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               pickFile();
             }}
@@ -223,18 +230,22 @@ export function ImageUpload({
             <UploadCloud className="size-5" />
           </Button>
 
-          <div className="font-medium text-sm">
+          <div className="max-w-md font-medium text-sm leading-snug">
             {isUploading ? "Uploading…" : isDragging ? "Drop image to upload" : "Drop or select image"}
           </div>
-          <div className="mt-1 text-muted-foreground text-xs">
+          <div className="mt-2 max-w-md text-balance text-muted-foreground text-xs leading-relaxed">
             {isUploading
-              ? "Upload image."
+              ? "Please wait while your image uploads."
               : `Drag an image here, or click the icon to browse (max ${formatBytes(maxSizeBytes)}).`}
           </div>
         </div>
       </label>
 
-      {error ? <div className="text-destructive text-sm">{error}</div> : null}
+      {error ? (
+        <div className="wrap-break-word text-destructive text-sm leading-snug" role="alert">
+          {error}
+        </div>
+      ) : null}
     </div>
   );
 }

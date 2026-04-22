@@ -1,13 +1,13 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-const COLS = 7;
+const COLS = 4;
 
 type EventsTableSkeletonProps = {
   rowCount?: number;
 };
 
-export function EventsTableSkeleton({ rowCount = 10 }: EventsTableSkeletonProps) {
+export function EventsRegistrationTableSkeleton({ rowCount = 10 }: EventsTableSkeletonProps) {
   return (
     <div className="space-y-4">
       <div className="overflow-hidden rounded-lg border bg-card">

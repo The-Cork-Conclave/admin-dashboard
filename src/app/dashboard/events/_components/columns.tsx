@@ -43,6 +43,7 @@ export const eventColumns: ColumnDef<EventRow>[] = [
       if (!isValid(d)) {
         return <span className="text-muted-foreground text-xs">—</span>;
       }
+
       return <span className="font-medium text-sm">{format(d, "do MMMM yyyy h:mm a")}</span>;
     },
   },

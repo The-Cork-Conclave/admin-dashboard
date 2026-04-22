@@ -82,7 +82,7 @@ export default function CurrentEvent() {
   if (query.isLoading) {
     return (
       <section className="space-y-4">
-        <div className="flex flex-col gap-1 overflow-hidden rounded-2xl border border-border bg-card p-1.5 text-card-foreground shadow-sm md:flex-row">
+        <div className="flex flex-col gap-1 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm md:flex-row">
           <div className="relative h-48 w-full shrink-0 md:h-auto md:w-1/3 lg:w-1/4">
             <Skeleton className="h-full w-full rounded-xl" />
           </div>
@@ -130,7 +130,7 @@ export default function CurrentEvent() {
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-col gap-1 overflow-hidden rounded-2xl border border-border bg-card p-1.5 text-card-foreground shadow-sm md:flex-row">
+      <div className="flex flex-col gap-1 overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm md:flex-row">
         <div className="relative h-48 w-full shrink-0 md:h-auto md:w-1/3 lg:w-1/4">
           {bannerUrl ? (
             <Link
@@ -144,7 +144,7 @@ export default function CurrentEvent() {
               <Image
                 src={bannerUrl}
                 alt="Active event banner"
-                className="cursor-pointer rounded-xl border border-border object-cover"
+                className="cursor-pointer border border-border object-cover"
                 fill
                 sizes="(max-width: 768px) 100vw, 320px"
                 priority
@@ -165,7 +165,7 @@ export default function CurrentEvent() {
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col justify-between gap-6 p-5 md:p-6">
+        <div className="flex flex-1 flex-col justify-between gap-6 p-5 md:p-8">
           <div>
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
               <div className="min-w-0">
@@ -230,10 +230,12 @@ export default function CurrentEvent() {
               </Button>
             </Link>
 
-            <Button type="button" variant="outline" className="gap-2">
-              <SquarePen className="size-4" aria-hidden />
-              Edit Event
-            </Button>
+            <Link href={`/dashboard/events/${event.id}/edit`}>
+              <Button type="button" variant="outline" className="gap-2">
+                <SquarePen className="size-4" aria-hidden />
+                Edit Event
+              </Button>
+            </Link>
 
             <div className="mx-1 hidden h-6 w-px bg-border sm:block" aria-hidden />
             <Button type="button" variant="success" className="gap-2">

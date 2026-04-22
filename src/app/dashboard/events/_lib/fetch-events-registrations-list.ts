@@ -1,6 +1,6 @@
 import { z } from "zod";
-
 import { authFetch } from "@/lib/auth/auth-fetch";
+
 const listMetaSchema = z.object({
   total: z.number().int().nonnegative(),
   page: z.number().int().min(1),
@@ -8,40 +8,37 @@ const listMetaSchema = z.object({
   total_pages: z.number().int().nonnegative(),
 });
 
-const eventListItemSchema = z.object({
+const eventRegistrationListItemSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  slug: z.string(),
-  description: z.string(),
-  event_date: z.string(),
-  venue_name: z.string(),
-  venue_address: z.string(),
-  amount_in_kobo: z.string(),
+  email: z.string(),
+  user_id: z.string(),
   status: z.string(),
-  registration_opens_at: z.string(),
-  registration_closes_at: z.string(),
+  confirmed_at: z.string().optional(),
   created_at: z.string(),
-  image_url: z.string().optional(),
 });
 
-export const eventsListResponseSchema = z.object({
-  data: z.array(eventListItemSchema),
+export const eventRegistrationListResponseSchema = z.object({
+  data: z.array(eventRegistrationListItemSchema),
   meta: listMetaSchema,
 });
 
-export type EventsListResponse = z.infer<typeof eventsListResponseSchema>;
-export type EventListItem = z.infer<typeof eventListItemSchema>;
+export type EventRegistrationListResponse = z.infer<typeof eventRegistrationListResponseSchema>;
+export type EventRegistrationListItem = z.infer<typeof eventRegistrationListItemSchema>;
 
-export async function fetchEventsList(args: {
-  page: number;
-  perPage: number;
-  q?: string;
-  status?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  sortBy?: "created_at" | "name";
-  sortOrder?: "asc" | "desc";
-}): Promise<EventsListResponse> {
+export async function fetchEventRegistrationsList(
+  id: string,
+  args: {
+    page: number;
+    perPage: number;
+    q?: string;
+    status?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    sortBy?: "created_at" | "name";
+    sortOrder?: "asc" | "desc";
+  },
+): Promise<EventRegistrationListResponse> {
   const sp = new URLSearchParams();
   sp.set("page", String(args.page));
   sp.set("per_page", String(args.perPage));
@@ -52,13 +49,13 @@ export async function fetchEventsList(args: {
   if (args.sortBy) sp.set("sort_by", args.sortBy);
   if (args.sortOrder) sp.set("sort_order", args.sortOrder);
 
-  const res = await authFetch(`/api/events?${sp.toString()}`, {
+  const res = await authFetch(`/api/events/${id}/registrations?${sp.toString()}`, {
     method: "GET",
     headers: { Accept: "application/json" },
   });
 
   if (!res.ok) {
-    let message = "Failed to load events";
+    let message = "Failed to load event registrations";
     try {
       const body = (await res.json()) as { message?: string };
       if (typeof body.message === "string" && body.message.length > 0) {
@@ -71,5 +68,5 @@ export async function fetchEventsList(args: {
   }
 
   const json: unknown = await res.json();
-  return eventsListResponseSchema.parse(json);
+  return eventRegistrationListResponseSchema.parse(json);
 }
