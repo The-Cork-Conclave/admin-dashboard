@@ -42,7 +42,7 @@ export const adminColumns: ColumnDef<AdminRow>[] = [
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => {
-      return <span className="truncate text-muted-foreground text-xs leading-none">{row.original.email}</span>;
+      return <span className="truncate text-muted-foreground text-sm leading-none">{row.original.email}</span>;
     },
   },
 

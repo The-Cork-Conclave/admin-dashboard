@@ -222,18 +222,11 @@ export default function CurrentEvent() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 justify-end">
             <Link href={`/dashboard/events/${encodeURIComponent(event.id)}`}>
               <Button type="button" className="gap-2">
                 <Eye className="size-4" aria-hidden />
                 View Event
-              </Button>
-            </Link>
-
-            <Link href={`/dashboard/events/${event.id}/edit`}>
-              <Button type="button" variant="outline" className="gap-2">
-                <SquarePen className="size-4" aria-hidden />
-                Edit Event
               </Button>
             </Link>
 

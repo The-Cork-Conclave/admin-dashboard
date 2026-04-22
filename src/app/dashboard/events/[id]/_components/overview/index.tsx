@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, FileText, MapPin, Server, Wallet, Gauge, SquarePen } from "lucide-react";
+import { Calendar, Clock, FileText, MapPin, Server, Wallet } from "lucide-react";
 import { type EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EventStatusBadge } from "@/components/ui/badge";
@@ -14,7 +14,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDateTime, formatNairaFromKobo } from "@/lib/utils";
-import Registrations from "./registrations";
 
 function toExternalUrl(maybeUrl?: string): string | null {
   const v = (maybeUrl ?? "").trim();
@@ -60,21 +59,6 @@ export function EventDetailsClient({ id }: { id: string }) {
               <EventStatusBadge status={event?.status ?? ""} />
             </div>
           )}
-        </div>
-
-        <div className="flex w-full flex-wrap items-center gap-3 md:w-auto">
-          <Link href={`/dashboard/events/${id}/edit`}>
-            <Button className="w-full md:w-auto">
-              <SquarePen className="size-4" aria-hidden /> Edit Event
-            </Button>
-          </Link>
-
-          <Link href={`/dashboard/events/${id}/analytics`}>
-            <Button type="button" variant="outline" className="bg-accent">
-              <Gauge />
-              Analytics
-            </Button>
-          </Link>
         </div>
       </header>
 
@@ -310,8 +294,6 @@ export function EventDetailsClient({ id }: { id: string }) {
           </Card>
         </div>
       </div>
-
-      <Registrations id={id} />
     </main>
   );
 }
