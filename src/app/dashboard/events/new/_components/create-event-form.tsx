@@ -24,6 +24,9 @@ const formSchema = z.object({
     .min(1, { message: "Please upload an event image." })
     .url({ message: "Please upload a valid image URL." }),
   description: z.string().optional(),
+  welcome_text: z.string().optional(),
+  dress_code: z.string().optional(),
+  entry_fee: z.string().optional(),
   event_date: z.string().min(1, { message: "Please select an event date." }),
   amount_in_kobo: z
     .string()
@@ -54,6 +57,9 @@ async function postCreateEvent(input: FormInput): Promise<CreateEventResponse> {
     name: input.name,
     image_url: input.image_url.trim(),
     description: input.description?.trim() ? input.description.trim() : undefined,
+    welcome_text: input.welcome_text?.trim() ? input.welcome_text.trim() : undefined,
+    dress_code: input.dress_code?.trim() ? input.dress_code.trim() : undefined,
+    entry_fee: input.entry_fee?.trim() ? input.entry_fee.trim() : undefined,
     event_date: toRFC3339FromDatetimeLocal(input.event_date),
     venue_name: input.venue_name,
     venue_address: input.venue_address,
@@ -101,6 +107,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
       name: "",
       image_url: "",
       description: "",
+      welcome_text: "",
+      dress_code: "",
+      entry_fee: "",
       event_date: "",
       amount_in_kobo: "",
       venue_name: "",
@@ -167,6 +176,71 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                     aria-invalid={fieldState.invalid}
                     disabled={mutation.isPending}
                     className={`${sharpInputClassName} resize-none`}
+                  />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <Controller
+              control={form.control}
+              name="welcome_text"
+              render={({ field, fieldState }) => (
+                <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="event-welcome-text">Welcome Text</FieldLabel>
+                  <Textarea
+                    {...field}
+                    id="event-welcome-text"
+                    rows={4}
+                    placeholder="Optional (e.g. It's 1804 once again, and The Cork Conclave is here again!)"
+                    aria-invalid={fieldState.invalid}
+                    disabled={mutation.isPending}
+                    className={`${sharpInputClassName} resize-none`}
+                  />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <Controller
+              control={form.control}
+              name="dress_code"
+              render={({ field, fieldState }) => (
+                <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="event-dress-code">Dress Code</FieldLabel>
+                  <Textarea
+                    {...field}
+                    id="event-dress-code"
+                    rows={3}
+                    placeholder="Optional (e.g. Dress like a Nigerian in 1804)."
+                    aria-invalid={fieldState.invalid}
+                    disabled={mutation.isPending}
+                    className={`${sharpInputClassName} resize-none`}
+                  />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <Controller
+              control={form.control}
+              name="entry_fee"
+              render={({ field, fieldState }) => (
+                <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="event-entry-fee">Entry Fee</FieldLabel>
+                  <Input
+                    {...field}
+                    id="event-entry-fee"
+                    placeholder="Optional (e.g. A bottle of your favourite wine.)"
+                    aria-invalid={fieldState.invalid}
+                    disabled={mutation.isPending}
+                    className={sharpInputClassName}
                   />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>

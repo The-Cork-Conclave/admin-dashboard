@@ -10,6 +10,7 @@ import { fontVars } from "@/lib/fonts/registry";
 import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
 import { ThemeBootScript } from "@/scripts/theme-boot";
 import { PreferencesStoreProvider } from "@/stores/preferences/preferences-provider";
+import { ScrollToTopOnNavigate } from "@/components/scroll-to-top";
 
 import "./globals.css";
 
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       <head />
       <body className={`${fontVars} min-h-screen antialiased`}>
         <ThemeBootScript />
+        <ScrollToTopOnNavigate />
         <TooltipProvider>
           <QueryClientProviderWrapper>
             <PreferencesStoreProvider

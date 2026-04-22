@@ -220,9 +220,9 @@ export function PerformanceOverview() {
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle className="leading-none">Users Activity</CardTitle>
+        <CardTitle className="leading-none">Members Activity</CardTitle>
         <CardDescription>
-          <span className="@[540px]/card:block hidden">Users activity for the last 12 months</span>
+          <span className="@[540px]/card:block hidden">Members activity for the last 12 months</span>
           <span className="@[540px]/card:hidden">Last 12 months</span>
         </CardDescription>
         <CardAction className="flex items-center gap-2">

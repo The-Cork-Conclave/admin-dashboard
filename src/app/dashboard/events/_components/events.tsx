@@ -253,7 +253,7 @@ const Events = () => {
                           key={`${row.id}-${row.index}`}
                           role="link"
                           tabIndex={0}
-                          className="cursor-pointer hover:bg-muted/50"
+                          className="cursor-pointer hover:bg-muted-foreground/25"
                           onClick={() => router.push(`/dashboard/events/${encodeURIComponent(row.id)}`)}
                           onKeyDown={(e) => {
                             if (e.key === "Enter" || e.key === " ") {
