@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { format } from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -56,4 +57,10 @@ export function formatNairaFromKobo(koboString?: string): { pretty: string; raw:
   const naira = kobo / 100;
   const pretty = new Intl.NumberFormat(undefined, { style: "currency", currency: "NGN" }).format(naira);
   return { pretty, raw };
+}
+
+export function formatTime(raw: string): string {
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return "—";
+  return format(d, "h:mm a");
 }

@@ -15,6 +15,7 @@ const eventRegistrationListItemSchema = z.object({
   user_id: z.string(),
   status: z.string(),
   confirmed_at: z.string().optional(),
+  checked_in_at: z.string().nullable().optional(),
   created_at: z.string(),
 });
 

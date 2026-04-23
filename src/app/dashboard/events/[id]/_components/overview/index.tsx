@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, FileText, MapPin, Server, Wallet } from "lucide-react";
+import { Calendar, Clock, FileText, MapPin, Server, Wallet, MoveRight } from "lucide-react";
 import { type EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EventStatusBadge } from "@/components/ui/badge";
@@ -59,6 +59,17 @@ export function EventDetailsClient({ id }: { id: string }) {
             </div>
           )}
         </div>
+
+        {!!event?.id && (
+          <div className="flex gap-2">
+            <Link href={`/dashboard/events/${event?.id ?? ""}/registration`}>
+              <Button variant="default" size="sm">
+                <span className="mr-2">Registration</span>
+                <MoveRight />
+              </Button>
+            </Link>
+          </div>
+        )}
       </header>
 
       {query.isError ? (

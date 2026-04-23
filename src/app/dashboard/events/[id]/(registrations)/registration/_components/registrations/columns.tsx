@@ -13,6 +13,8 @@ function statusIcon(status: string) {
   switch (status.toLowerCase()) {
     case "confirmed":
       return <CircleCheckIcon className="fill-green-500 stroke-primary-foreground dark:fill-green-600" />;
+    case "checked_in":
+      return <CircleCheckIcon className="fill-primary stroke-primary-foreground" />;
     case "pending_payment":
       return <LoaderIcon />;
     case "cancelled":
@@ -53,8 +55,12 @@ export const registrationColumns: ColumnDef<RegistrationRow>[] = [
     filterFn: "equalsString",
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        {statusIcon(row.original.status)}
-        {row.original.status === "pending_payment" ? "Pending" : row.original.status}
+        {statusIcon(row.original.checked_in_at ? "checked_in" : row.original.status)}
+        {(row.original.checked_in_at ? "checked_in" : row.original.status) === "pending_payment"
+          ? "Pending"
+          : (row.original.checked_in_at ? "checked_in" : row.original.status) === "checked_in"
+            ? "Checked in"
+            : row.original.status}
       </Badge>
     ),
   },
@@ -62,7 +68,6 @@ export const registrationColumns: ColumnDef<RegistrationRow>[] = [
     accessorKey: "confirmed_at",
     header: "Paid On",
     cell: ({ row }) => {
-      console.log(row.original.confirmed_at);
       if (!row.original.confirmed_at) {
         return <span className="text-muted-foreground text-xs">—</span>;
       }

@@ -158,7 +158,7 @@ export function ImageUpload({
       <div className={cn("w-full min-w-0", className)}>
         <div
           className={cn(
-            "relative w-full min-w-0 overflow-hidden rounded-xl border border-border bg-muted/20",
+            "relative w-full min-w-0 overflow-hidden rounded-md border border-foreground/25 bg-background",
             disabled ? "opacity-60" : "",
           )}
         >
@@ -192,10 +192,13 @@ export function ImageUpload({
     <div className={cn("w-full min-w-0 space-y-2 font-sans", className)}>
       <label
         className={cn(
-          "relative box-border flex min-h-52 w-full min-w-0 cursor-pointer flex-col items-stretch justify-center rounded-xl border-2 border-dashed p-6 transition-[border-color,box-shadow,background-color] sm:min-h-56 sm:p-8",
-          "bg-muted/25 ring-1 ring-border/60 ring-inset dark:bg-muted/15",
+          "border-foreground/25! ring-1 ring-border/60 ring-inset dark:border-foreground/25",
+          "relative box-border flex min-h-52 w-full min-w-0 cursor-pointer flex-col items-stretch justify-center rounded-md border-2 border-dashed bg-background p-6 transition-[border-color,box-shadow,background-color] sm:min-h-56 sm:p-8",
+
           isDragging ? "border-primary bg-primary/[0.07] ring-primary/30" : "border-border/80",
-          disabled ? "pointer-events-none opacity-60" : "hover:border-foreground/25 hover:bg-muted/35 dark:hover:bg-muted/25",
+          disabled
+            ? "pointer-events-none opacity-60"
+            : "hover:border-foreground/25 hover:bg-muted/35 dark:hover:bg-muted/25",
         )}
         aria-disabled={disabled || isUploading}
         onDrop={onDrop}

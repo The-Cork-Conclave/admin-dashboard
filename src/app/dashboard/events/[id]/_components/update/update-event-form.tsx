@@ -12,6 +12,7 @@ import { z } from "zod";
 
 import { type EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
 import { DateTimePicker } from "@/components/date-time-picker";
+import { AmountInput } from "@/components/amount-input";
 import { ImageUpload } from "@/components/image-upload";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -48,9 +49,6 @@ const formSchema = z.object({
 type FormInput = z.infer<typeof formSchema>;
 
 function toRFC3339FromDatetimeLocal(value: string): string {
-  // `datetime-local` returns `YYYY-MM-DDTHH:mm` (no timezone).
-  // We treat it as local time and convert to an RFC3339 string with timezone offset via Date.
-  // If parsing fails, return the raw string and let the backend validate.
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? value : d.toISOString();
 }
@@ -299,47 +297,50 @@ export function UpdateEventForm({
             />
           </div>
 
-          <div className="md:col-span-2">
-            <Controller
-              control={form.control}
-              name="dress_code"
-              render={({ field, fieldState }) => (
-                <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="event-dress-code">Dress Code</FieldLabel>
-                  <Textarea
-                    {...field}
-                    id="event-dress-code"
-                    rows={3}
-                    placeholder="Optional (e.g. Dress like a Nigerian in 1804)."
-                    aria-invalid={fieldState.invalid}
-                    disabled={mutation.isPending}
-                    className={`${sharpInputClassName} resize-none`}
-                  />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-          </div>
+          <div className="md:col-span-2 flex flex-col md:flex-row gap-8">
+            <div className="w-full">
+              <Controller
+                control={form.control}
+                name="dress_code"
+                render={({ field, fieldState }) => (
+                  <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="event-dress-code">Dress Code</FieldLabel>
+                    <Textarea
+                      {...field}
+                      id="event-dress-code"
+                      rows={3}
+                      placeholder="Optional (e.g. Dress like a Nigerian in 1804)."
+                      aria-invalid={fieldState.invalid}
+                      disabled={mutation.isPending}
+                      className={`${sharpInputClassName} resize-none`}
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+            </div>
 
-          <div className="md:col-span-2">
-            <Controller
-              control={form.control}
-              name="entry_fee"
-              render={({ field, fieldState }) => (
-                <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="event-entry-fee">Entry Fee</FieldLabel>
-                  <Input
-                    {...field}
-                    id="event-entry-fee"
-                    placeholder="Optional (e.g. A bottle of your favourite wine.)"
-                    aria-invalid={fieldState.invalid}
-                    disabled={mutation.isPending}
-                    className={sharpInputClassName}
-                  />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
+            <div className="w-full">
+              <Controller
+                control={form.control}
+                name="entry_fee"
+                render={({ field, fieldState }) => (
+                  <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="event-entry-fee">Entry Fee</FieldLabel>
+                    <Textarea
+                      {...field}
+                      id="event-entry-fee"
+                      placeholder="e.g. A bottle of your favourite wine."
+                      rows={2}
+                      aria-invalid={fieldState.invalid}
+                      disabled={mutation.isPending}
+                      className={`${sharpInputClassName} resize-none`}
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+            </div>
           </div>
 
           <div className="md:col-span-2">
@@ -386,15 +387,15 @@ export function UpdateEventForm({
             render={({ field, fieldState }) => (
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="amount-in-kobo">Amount (₦)</FieldLabel>
-                <Input
-                  {...field}
+                <AmountInput
                   id="amount-in-kobo"
-                  inputMode="numeric"
-                  pattern="\\d*"
                   placeholder="e.g. 5000"
                   aria-invalid={fieldState.invalid}
                   disabled={mutation.isPending}
                   className={sharpInputClassName}
+                  value={String(field.value ?? "")}
+                  onChange={(digitsOnly) => field.onChange(digitsOnly)}
+                  ref={field.ref}
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>

@@ -23,6 +23,7 @@ export default function MembersActivity() {
 
   const graphData: SignupGraphDTO | undefined = query.data;
   const chartData = (graphData?.data ?? []).map((item) => ({ label: item.label, signups: item.value }));
+  const axisLabelFormatter = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" });
 
   return (
     <div className="w-full h-full">
@@ -67,7 +68,16 @@ export default function MembersActivity() {
                   </pattern>
                 </defs>
                 <CartesianGrid vertical={false} strokeDasharray="0" />
-                <XAxis dataKey="label" tickLine={false} tickMargin={10} axisLine={false} />
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  tickMargin={10}
+                  axisLine={false}
+                  tickFormatter={(value) => {
+                    const d = new Date(String(value));
+                    return Number.isNaN(d.getTime()) ? String(value) : axisLabelFormatter.format(d);
+                  }}
+                />
                 <YAxis hide />
                 <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
                 <Bar

@@ -44,7 +44,7 @@ export async function fetchUsersList(args: {
   if (args.sortBy) sp.set("sort_by", args.sortBy);
   if (args.sortOrder) sp.set("sort_order", args.sortOrder);
 
-  const res = await authFetch("/api/users", {
+  const res = await authFetch(`/api/users?${sp.toString()}`, {
     method: "GET",
     headers: { Accept: "application/json" },
   });

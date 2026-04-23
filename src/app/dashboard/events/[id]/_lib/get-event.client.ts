@@ -21,6 +21,7 @@ export const eventDTOSchema = z.object({
   registration_closes_at: z.string(),
   created_at: z.string(),
   image_url: z.string(),
+  checked_in_count: z.number().optional(),
 });
 
 export type EventDTO = z.infer<typeof eventDTOSchema>;

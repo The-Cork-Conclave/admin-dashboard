@@ -9,9 +9,16 @@ import {
   type PaginationState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import {
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Activity,
+  Search,
+  Download,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,16 +30,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { registrationColumns } from "./columns";
+import type { RegistrationRow } from "./schema";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/date-range-picker";
-import { fetchUsersList } from "./fetch-members-list";
+import { fetchEventRegistrationsList } from "@/app/dashboard/events/_lib/fetch-events-registrations-list";
 import useDebouncedValue from "@/hooks/use-debounced-value";
-import { UsersTableSkeleton } from "./members-skeleton";
-import { membersColumn } from "./columns";
-import type { MembersRow } from "./schema";
-import { Download } from "lucide-react";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EventsRegistrationTableSkeleton } from "./events-registrations-skeleton";
+
+const statusOptions = [
+  { value: "all", label: "All" },
+  { value: "confirmed", label: "Paid" },
+  { value: "checked_in", label: "Checked in" },
+  { value: "pending_payment", label: "Pending" },
+  { value: "cancelled", label: "Cancelled" },
+  { value: "expired", label: "Expired" },
+] as const;
 
 const sortOptions = [
   { value: "newest", label: "Newest first" },
@@ -41,8 +57,7 @@ const sortOptions = [
   { value: "name-desc", label: "Name Z-A" },
 ] as const;
 
-export default function Members() {
-  const router = useRouter();
+const Registrations = ({ id }: { id: string }) => {
   const [rowSelection, setRowSelection] = React.useState({});
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
@@ -51,6 +66,7 @@ export default function Members() {
 
   const [searchInput, setSearchInput] = React.useState("");
   const debouncedSearch = useDebouncedValue(searchInput, 350);
+  const [status, setStatus] = React.useState<(typeof statusOptions)[number]["value"]>("all");
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>(undefined);
   const [sortValue, setSortValue] = React.useState<(typeof sortOptions)[number]["value"]>("newest");
 
@@ -75,20 +91,22 @@ export default function Members() {
 
   const query = useQuery({
     queryKey: [
-      `members`,
+      `events-${id}-registrations`,
       page,
       perPage,
       debouncedSearch,
+      status,
       dateRange?.from?.toISOString() ?? "",
       dateRange?.to?.toISOString() ?? "",
       sort.sortBy,
       sort.sortOrder,
     ],
     queryFn: () =>
-      fetchUsersList({
+      fetchEventRegistrationsList(id, {
         page,
         perPage,
         q: debouncedSearch.trim() ? debouncedSearch.trim() : undefined,
+        status: status === "all" ? undefined : status,
         dateFrom: dateRange?.from ? dateRange.from.toISOString() : undefined,
         dateTo: dateRange?.to ? dateRange.to.toISOString() : undefined,
         sortBy: sort.sortBy,
@@ -97,13 +115,13 @@ export default function Members() {
     placeholderData: keepPreviousData,
   });
 
-  const data = (query.data?.data ?? []) as MembersRow[];
+  const data = (query.data?.data ?? []) as RegistrationRow[];
   const total = query.data?.meta.total ?? 0;
   const pageCount = Math.max(1, query.data?.meta.total_pages ?? 1);
 
   const table = useReactTable({
     data,
-    columns: membersColumn,
+    columns: registrationColumns,
     state: {
       rowSelection,
       pagination,
@@ -129,8 +147,10 @@ export default function Members() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="leading-none">{total} Members</CardTitle>
-        <CardDescription>Recent member records.</CardDescription>
+        <CardTitle className="leading-none">
+          {total} Registered Member{total !== 1 ? "s" : ""}
+        </CardTitle>
+
         <CardAction>
           <Button variant="outline" size="sm">
             <Download />
@@ -139,11 +159,11 @@ export default function Members() {
         </CardAction>
       </CardHeader>
 
-      <CardContent className="pt-0">
+      <CardContent className="pt-2 mt-2">
         {query.isLoading ? (
-          <UsersTableSkeleton rowCount={pagination.pageSize} />
+          <EventsRegistrationTableSkeleton rowCount={pagination.pageSize} />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 flex flex-col gap-2">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative w-full lg:w-80">
@@ -158,6 +178,24 @@ export default function Members() {
               </div>
 
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center xl:w-auto">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Activity />
+                      Status
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-35" align="start">
+                    <DropdownMenuRadioGroup value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                      {statusOptions.map((s) => (
+                        <DropdownMenuRadioItem key={s.value} value={s.value}>
+                          {s.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <div className="flex flex-col gap-1">
                   <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
                 </div>
@@ -204,20 +242,7 @@ export default function Members() {
                 <TableBody>
                   {table.getRowModel().rows.length ? (
                     table.getRowModel().rows.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        role="link"
-                        tabIndex={0}
-                        className="cursor-pointer hover:bg-muted-foreground/25"
-                        data-state={row.getIsSelected() && "selected"}
-                        onClick={() => router.push(`/dashboard/members/${encodeURIComponent(row.id)}`)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            router.push(`/dashboard/members/${encodeURIComponent(row.id)}`);
-                          }
-                        }}
-                      >
+                      <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id} className="p-3 align-middle">
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -240,7 +265,7 @@ export default function Members() {
               <div className="hidden flex-1 text-muted-foreground text-sm lg:flex"></div>
               <div className="flex w-full items-center gap-8 lg:w-fit">
                 <div className="hidden items-center gap-2 lg:flex">
-                  <Label htmlFor="recent-customers-rows-per-page" className="font-medium text-sm">
+                  <Label htmlFor="events-rows-per-page" className="font-medium text-sm">
                     Rows per page
                   </Label>
                   <Select
@@ -249,7 +274,7 @@ export default function Members() {
                       table.setPageSize(Number(value));
                     }}
                   >
-                    <SelectTrigger size="sm" className="w-20" id="recent-customers-rows-per-page">
+                    <SelectTrigger size="sm" className="w-20" id="events-rows-per-page">
                       <SelectValue placeholder={table.getState().pagination.pageSize} />
                     </SelectTrigger>
                     <SelectContent side="top">
@@ -315,4 +340,6 @@ export default function Members() {
       </CardContent>
     </Card>
   );
-}
+};
+
+export default Registrations;

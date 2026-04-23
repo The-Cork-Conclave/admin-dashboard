@@ -1,10 +1,10 @@
-import { ActionsManagerQueue } from "./analytics-actions-manager-queue";
+import { Activities } from "./activities";
 import { ActionsRiskLedger } from "./analytics-actions-risk-ledger";
 import { DriversCoverageTriage } from "./analytics-drivers-coverage-triage";
 import { DriversForecastTarget } from "./analytics-drivers-forecast-target";
 import { AnalyticsOverview } from "./analytics-overview";
 
-export default function Insights({}: { id: string }) {
+export default function Insights({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-4 md:gap-6">
       <AnalyticsOverview />
@@ -14,7 +14,7 @@ export default function Insights({}: { id: string }) {
           <DriversForecastTarget />
           <DriversCoverageTriage />
         </div>
-        <ActionsManagerQueue />
+        <Activities id={id} />
       </div>
 
       <ActionsRiskLedger />
