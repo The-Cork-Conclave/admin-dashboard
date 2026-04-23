@@ -1,4 +1,10 @@
-import { CalendarIcon, LayoutDashboard, type LucideIcon, Users2Icon, Logs, CirclePile } from "lucide-react";
+import {
+  CalendarIcon,
+  LayoutDashboard,
+  type LucideIcon,
+  Users2Icon,
+  // , Logs, CirclePile
+} from "lucide-react";
 
 export interface NavSubItem {
   title: string;
@@ -43,16 +49,16 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard/admins",
         icon: Users2Icon,
       },
-      {
-        title: "Jobs",
-        url: "/dashboard/jobs",
-        icon: CirclePile,
-      },
-      {
-        title: "Logs",
-        url: "/dashboard/logs",
-        icon: Logs,
-      },
+      // {
+      //   title: "Jobs",
+      //   url: "/dashboard/jobs",
+      //   icon: CirclePile,
+      // },
+      // {
+      //   title: "Logs",
+      //   url: "/dashboard/logs",
+      //   icon: Logs,
+      // },
     ],
   },
 ];

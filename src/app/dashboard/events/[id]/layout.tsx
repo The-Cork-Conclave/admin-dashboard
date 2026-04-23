@@ -28,12 +28,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <TabsTrigger value="registrations" className="lg:px-3 lg:py-1 lg:text-base">
           Registrations
         </TabsTrigger>
-        <TabsTrigger value="insights" className="lg:px-3 lg:py-1 lg:text-base">
+        {/* <TabsTrigger value="insights" className="lg:px-3 lg:py-1 lg:text-base">
           Insights
         </TabsTrigger>
         <TabsTrigger value="activity" className="lg:px-3 lg:py-1 lg:text-base">
           Activity
-        </TabsTrigger>
+        </TabsTrigger> */}
       </TabsList>
 
       {children}

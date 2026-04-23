@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
