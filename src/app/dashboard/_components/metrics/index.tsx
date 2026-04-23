@@ -12,7 +12,7 @@ import {
   MembersMetricsDTO,
   getTicketsMetrics,
   TicketsMetricsDTO,
-} from "./get-metrics";
+} from "./api";
 import { formatNairaFromKobo } from "@/lib/utils";
 
 type MetricCardSkeletonProps = {
