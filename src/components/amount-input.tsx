@@ -87,4 +87,3 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
     />
   );
 });
-

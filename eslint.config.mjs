@@ -16,4 +16,9 @@ export default defineConfig([
     "node_modules/**",
     "src/components/ui/**",
   ]),
+  {
+    rules: {
+      "react-compiler/react-compiler": "off",
+    },
+  },
 ]);

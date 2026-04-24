@@ -2,14 +2,8 @@ import { NextResponse } from "next/server";
 
 import { fetchUpstream } from "@/app/api/_utils/upstream";
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const searchParams = url.searchParams;
-
-  const upstream = await fetchUpstream("/metrics/events/activity", {
-    method: "GET",
-    searchParams,
-  });
+export async function GET() {
+  const upstream = await fetchUpstream("/metrics/attendance", { method: "GET" });
   const body = await upstream.text();
   return new NextResponse(body, {
     status: upstream.status,

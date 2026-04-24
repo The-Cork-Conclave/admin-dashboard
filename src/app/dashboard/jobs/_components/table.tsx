@@ -1,7 +1,7 @@
 "use client";
-"use no memo";
 
 import * as React from "react";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -9,8 +9,12 @@ import {
   type PaginationState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search } from "lucide-react";
+import { Activity, ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import type { DateRange } from "react-day-picker";
+import { toast } from "sonner";
+import { DateRangePicker } from "@/components/date-range-picker";
 import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,20 +22,22 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import JobDetails from "./details";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type { DateRange } from "react-day-picker";
-import { DateRangePicker } from "@/components/date-range-picker";
-import { fetchUsersList } from "./fetch-members-list";
-import useDebouncedValue from "@/hooks/use-debounced-value";
-import { UsersTableSkeleton } from "./members-skeleton";
-import { membersColumn } from "./columns";
-import type { MembersRow } from "./schema";
-import { Download } from "lucide-react";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { fetchJobsList, retryJob } from "./api";
+import { jobsColumns } from "./columns";
+import { JobsTableSkeleton } from "./skeleton";
+import type { JobRow } from "./schema";
+
+const statusOptions = [
+  { value: "all", label: "All" },
+  { value: "pending", label: "Pending" },
+  { value: "processing", label: "Processing" },
+  { value: "completed", label: "Completed" },
+  { value: "failed", label: "Failed" },
+] as const;
 
 const sortOptions = [
   { value: "newest", label: "Newest first" },
@@ -40,15 +46,17 @@ const sortOptions = [
   { value: "name-desc", label: "Name Z-A" },
 ] as const;
 
-export default function Members() {
+export default function JobsTable() {
+  const queryClient = useQueryClient();
   const [rowSelection, setRowSelection] = React.useState({});
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   });
+  const [detailsOpen, setDetailsOpen] = React.useState(false);
+  const [selectedJob, setSelectedJob] = React.useState<JobRow | null>(null);
 
-  const [searchInput, setSearchInput] = React.useState("");
-  const debouncedSearch = useDebouncedValue(searchInput, 350);
+  const [status, setStatus] = React.useState<(typeof statusOptions)[number]["value"]>("all");
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>(undefined);
   const [sortValue, setSortValue] = React.useState<(typeof sortOptions)[number]["value"]>("newest");
 
@@ -73,20 +81,20 @@ export default function Members() {
 
   const query = useQuery({
     queryKey: [
-      `members`,
+      "jobs",
       page,
       perPage,
-      debouncedSearch,
+      status,
       dateRange?.from?.toISOString() ?? "",
       dateRange?.to?.toISOString() ?? "",
       sort.sortBy,
       sort.sortOrder,
     ],
     queryFn: () =>
-      fetchUsersList({
+      fetchJobsList({
         page,
         perPage,
-        q: debouncedSearch.trim() ? debouncedSearch.trim() : undefined,
+        status: status === "all" ? undefined : status,
         dateFrom: dateRange?.from ? dateRange.from.toISOString() : undefined,
         dateTo: dateRange?.to ? dateRange.to.toISOString() : undefined,
         sortBy: sort.sortBy,
@@ -95,13 +103,31 @@ export default function Members() {
     placeholderData: keepPreviousData,
   });
 
-  const data = (query.data?.data ?? []) as MembersRow[];
+  const retryMutation = useMutation({
+    mutationFn: (jobId: string) => retryJob(jobId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      toast.success("Job queued", { description: "We scheduled this job to run again shortly." });
+    },
+    onError: (err: Error) => {
+      toast.error("Retry failed", { description: err.message });
+    },
+  });
+
+  const data = React.useMemo(() => (query.data?.data ?? []) as JobRow[], [query.data]);
   const total = query.data?.meta.total ?? 0;
   const pageCount = Math.max(1, query.data?.meta.total_pages ?? 1);
 
+  React.useEffect(() => {
+    const id = selectedJob?.id;
+    if (!id) return;
+    const updated = data.find((j) => j.id === id);
+    if (updated) setSelectedJob(updated);
+  }, [data, selectedJob?.id]);
+
   const table = useReactTable({
     data,
-    columns: membersColumn,
+    columns: jobsColumns,
     state: {
       rowSelection,
       pagination,
@@ -125,67 +151,91 @@ export default function Members() {
   });
 
   return (
-    <Card>
+    <Card className="min-w-0 shadow-xs">
       <CardHeader>
-        <CardTitle className="leading-none">
-          {total} Member{total > 1 ? "s" : ""}
-        </CardTitle>
-        <CardDescription>Recent member records.</CardDescription>
-      </CardHeader>
+        <CardTitle>Jobs</CardTitle>
+        <CardAction>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center xl:w-auto">
+            <JobDetails
+              open={detailsOpen}
+              onOpenChange={setDetailsOpen}
+              job={selectedJob}
+              retryPending={retryMutation.isPending}
+              onRetry={async (job) => {
+                // Optimistic UI so the drawer updates immediately.
+                setSelectedJob((prev) => {
+                  if (!prev || prev.id !== job.id) return prev;
+                  return {
+                    ...prev,
+                    status: "pending",
+                    run_at: new Date(Date.now() + 30_000).toISOString(),
+                    processed_at: undefined,
+                    last_error: undefined,
+                    attempts: prev.attempts,
+                  };
+                });
+                await retryMutation.mutateAsync(job.id);
+              }}
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Activity />
+                  Status
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-35" align="start">
+                <DropdownMenuRadioGroup value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                  {statusOptions.map((s) => (
+                    <DropdownMenuRadioItem key={s.value} value={s.value}>
+                      {s.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-      <CardContent className="pt-0">
-        {query.isLoading ? (
-          <UsersTableSkeleton rowCount={pagination.pageSize} />
-        ) : (
-          <div className="space-y-4">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="relative w-full lg:w-80">
-                  <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    className="h-7 rounded-[min(var(--radius-md),12px)] pl-8"
-                    placeholder="Search members..."
-                    value={searchInput}
-                    onChange={(event) => setSearchInput(event.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center xl:w-auto">
-                <div className="flex flex-col gap-1">
-                  <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
-                </div>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <ArrowUpDown />
-                      Sort
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuRadioGroup
-                      value={sortValue}
-                      onValueChange={(v) => setSortValue(v as typeof sortValue)}
-                    >
-                      {sortOptions.map((option) => (
-                        <DropdownMenuRadioItem key={option.value} value={option.value}>
-                          {option.label}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+            <div className="flex flex-col gap-1">
+              <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
             </div>
 
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <ArrowUpDown />
+                  Sort
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuRadioGroup value={sortValue} onValueChange={(v) => setSortValue(v as typeof sortValue)}>
+                  {sortOptions.map((option) => (
+                    <DropdownMenuRadioItem key={option.value} value={option.value}>
+                      {option.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardAction>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        {query.isLoading ? (
+          <JobsTableSkeleton rowCount={pagination.pageSize} />
+        ) : (
+          <div className="flex flex-col gap-4 space-y-4">
             <div className="overflow-hidden rounded-lg border bg-card">
               <Table>
                 <TableHeader className="bg-muted/15">
-                  {table.getHeaderGroups().map((headerGroup) => (
+                  {table.getHeaderGroups().map((headerGroup, index) => (
                     <TableRow key={headerGroup.id}>
                       {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id} colSpan={header.colSpan} className="h-11 p-3 font-medium">
+                        <TableHead
+                          key={`${index}-${header.id}`}
+                          colSpan={header.colSpan}
+                          className="h-11 p-3 font-light text-muted-foreground text-sm"
+                        >
                           {header.isPlaceholder
                             ? null
                             : flexRender(header.column.columnDef.header, header.getContext())}
@@ -199,11 +249,21 @@ export default function Members() {
                   {table.getRowModel().rows.length ? (
                     table.getRowModel().rows.map((row) => (
                       <TableRow
-                        key={row.id}
+                        key={`${row.id}-${row.index}`}
                         role="link"
                         tabIndex={0}
                         className="cursor-pointer hover:bg-muted-foreground/25"
-                        data-state={row.getIsSelected() && "selected"}
+                        onClick={() => {
+                          setSelectedJob(row.original as JobRow);
+                          setDetailsOpen(true);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedJob(row.original as JobRow);
+                            setDetailsOpen(true);
+                          }
+                        }}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id} className="p-3 align-middle">
@@ -224,10 +284,13 @@ export default function Members() {
             </div>
 
             <div className="flex items-center justify-between px-1">
-              <div className="hidden flex-1 text-muted-foreground text-sm lg:flex"></div>
+              <div className="hidden flex-1 text-muted-foreground text-sm lg:flex">
+                {total} Job{total === 1 ? "" : "s"}
+              </div>
+
               <div className="flex w-full items-center gap-8 lg:w-fit">
                 <div className="hidden items-center gap-2 lg:flex">
-                  <Label htmlFor="recent-customers-rows-per-page" className="font-medium text-sm">
+                  <Label htmlFor="jobs-rows-per-page" className="font-medium text-sm">
                     Rows per page
                   </Label>
                   <Select
@@ -236,7 +299,7 @@ export default function Members() {
                       table.setPageSize(Number(value));
                     }}
                   >
-                    <SelectTrigger size="sm" className="w-20" id="recent-customers-rows-per-page">
+                    <SelectTrigger size="sm" className="w-20" id="jobs-rows-per-page">
                       <SelectValue placeholder={table.getState().pagination.pageSize} />
                     </SelectTrigger>
                     <SelectContent side="top">

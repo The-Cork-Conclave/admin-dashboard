@@ -1,9 +1,8 @@
 "use client";
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { Card, CardAction, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { getSignupGraph, SignupGraphDTO } from "./api";
@@ -33,12 +32,6 @@ export default function MembersActivity() {
           <CardDescription>
             <span>Track members signup over time</span>
           </CardDescription>
-
-          <CardAction className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              View report
-            </Button>
-          </CardAction>
         </CardHeader>
 
         <CardContent className="flex-1">

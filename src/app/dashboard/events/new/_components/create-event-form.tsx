@@ -28,10 +28,9 @@ const formSchema = z.object({
   dress_code: z.string().optional(),
   entry_fee: z.string().optional(),
   event_date: z.string().min(1, { message: "Please select an event date." }),
-  amount_in_kobo: z
-    .string()
-    .min(1, { message: "Please enter an amount in naira." })
-    .refine((v) => /^\d+$/.test(v), { message: "Amount must be a whole number (kobo)." }),
+  amount_in_kobo: z.string().refine((v) => v.trim() === "" || /^\d+$/.test(v.trim()), {
+    message: "Amount must be a whole number (naira, stored as kobo on the server).",
+  }),
   venue_name: z.string().min(1, { message: "Please enter a venue name." }),
   venue_address: z.string().min(1, { message: "Please enter a venue address." }),
   registration_opens_at: z.string().min(1, { message: "Please select when registration opens." }),
@@ -63,7 +62,7 @@ async function postCreateEvent(input: FormInput): Promise<CreateEventResponse> {
     event_date: toRFC3339FromDatetimeLocal(input.event_date),
     venue_name: input.venue_name,
     venue_address: input.venue_address,
-    amount_in_kobo: input.amount_in_kobo,
+    amount_in_kobo: (input.amount_in_kobo ?? "").trim() || "0",
     registration_opens_at: toRFC3339FromDatetimeLocal(input.registration_opens_at),
     registration_closes_at: input.registration_closes_at?.trim()
       ? toRFC3339FromDatetimeLocal(input.registration_closes_at)
@@ -189,7 +188,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
               name="welcome_text"
               render={({ field, fieldState }) => (
                 <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="event-welcome-text">Welcome Text  <span className="text-xs text-muted-foreground">(Optional)</span></FieldLabel>
+                  <FieldLabel htmlFor="event-welcome-text">
+                    Welcome Text <span className="text-xs text-muted-foreground">(Optional)</span>
+                  </FieldLabel>
                   <Textarea
                     {...field}
                     id="event-welcome-text"
@@ -212,7 +213,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                 name="dress_code"
                 render={({ field, fieldState }) => (
                   <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="event-dress-code">Dress Code  <span className="text-xs text-muted-foreground">(Optional)</span></FieldLabel>
+                    <FieldLabel htmlFor="event-dress-code">
+                      Dress Code <span className="text-xs text-muted-foreground">(Optional)</span>
+                    </FieldLabel>
                     <Textarea
                       {...field}
                       id="event-dress-code"
@@ -297,7 +300,10 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
             name="amount_in_kobo"
             render={({ field, fieldState }) => (
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="amount-in-kobo">Amount (₦)</FieldLabel>
+                <FieldLabel htmlFor="amount-in-kobo">
+                  Amount (₦){" "}
+                  <span className="text-xs text-muted-foreground">(optional; leave empty for a free event)</span>
+                </FieldLabel>
                 <AmountInput
                   id="amount-in-kobo"
                   placeholder="e.g. 5000"

@@ -88,6 +88,7 @@ export default function RegistrationPage({ id }: { id: string }) {
           </Button>
         </Link>
       </div>
+
       <header className="flex flex-col justify-between gap-4 border-b pb-2 sm:flex-row sm:items-end">
         <div>
           <div className="mb-1.5 flex items-center gap-3">
@@ -104,7 +105,7 @@ export default function RegistrationPage({ id }: { id: string }) {
           <Card size="sm" className="w-fit gap-2 px-4 py-3">
             <CardContent className="p-0">
               <div className="flex items-center gap-4 text-sm">
-                <div className="flex flex-col text-right">
+                <div className="flex md:flex-col lg:flex-row text-right items-center gap-4">
                   <span className="text-xs font-medium text-muted-foreground">Attendees Checked In</span>
                   <span className="font-semibold tracking-tight">{event?.checked_in_count ?? 0}</span>
                 </div>

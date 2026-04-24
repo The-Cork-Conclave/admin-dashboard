@@ -53,4 +53,3 @@ export async function fetchEventActivitiesPage(
   const json: unknown = await res.json();
   return eventActivitiesResponseSchema.parse(json);
 }
-

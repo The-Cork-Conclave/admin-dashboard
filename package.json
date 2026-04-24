@@ -20,9 +20,7 @@
       "eslint --fix",
       "biome check --write --no-errors-on-unmatched"
     ],
-    "*.{json,md,yml,yaml}": [
-      "prettier --config .prettier.json --write"
-    ]
+    "*.{json,md,yml,yaml}": ["prettier --config .prettier.json --write"]
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",

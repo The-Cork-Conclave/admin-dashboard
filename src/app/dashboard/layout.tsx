@@ -14,7 +14,7 @@ import { AccountSwitcher } from "./_components/sidebar/account-switcher";
 import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
 
 export const metadata: Metadata = {
-  title: "Cork Conclave - Dashboar",
+  title: "Cork Conclave - Dashboard",
 };
 
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {

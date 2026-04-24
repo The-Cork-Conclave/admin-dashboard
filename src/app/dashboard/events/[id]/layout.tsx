@@ -2,6 +2,7 @@ import { getEventServer } from "./_lib/get-event.server";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
   try {
     const { event } = await getEventServer(id);
     return {

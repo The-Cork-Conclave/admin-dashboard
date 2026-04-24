@@ -2,7 +2,7 @@ import { FormInput, CheckinResponse } from "./schema";
 import { authFetch } from "@/lib/auth/auth-fetch";
 import { z } from "zod";
 
-export async function checkinAttendee(id:string,input: FormInput): Promise<CheckinResponse> {
+export async function checkinAttendee(id: string, input: FormInput): Promise<CheckinResponse> {
   const payload = {
     access_code: input.access_code,
   };

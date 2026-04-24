@@ -5,7 +5,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format, parseISO, isValid } from "date-fns";
 import { CircleAlertIcon, CircleCheckIcon, Clock3Icon, LoaderIcon, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 
 import type { RegistrationRow } from "./schema";
 
@@ -31,21 +30,19 @@ export const registrationColumns: ColumnDef<RegistrationRow>[] = [
     accessorKey: "name",
     header: "Customer",
     cell: ({ row }) => (
-      <Link href={`/dashboard/members/${row.original.id}`}>
-        <div className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-md border bg-muted">
-            <UserRound className="size-4 text-muted-foreground" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-end justify-between gap-3">
-              <div className="grid min-w-0 gap-0.5">
-                <span className="truncate font-medium text-sm leading-none">{row.original.name}</span>
-                <span className="truncate text-muted-foreground text-xs leading-none">{row.original.email}</span>
-              </div>
+      <div className="flex items-center gap-2">
+        <span className="flex size-8 items-center justify-center rounded-md border bg-muted">
+          <UserRound className="size-4 text-muted-foreground" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-end justify-between gap-3">
+            <div className="grid min-w-0 gap-0.5">
+              <span className="truncate font-medium text-sm leading-none">{row.original.name}</span>
+              <span className="truncate text-muted-foreground text-xs leading-none">{row.original.email}</span>
             </div>
           </div>
         </div>
-      </Link>
+      </div>
     ),
     enableHiding: false,
   },

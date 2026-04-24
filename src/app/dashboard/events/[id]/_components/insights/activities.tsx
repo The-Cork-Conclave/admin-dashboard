@@ -3,8 +3,8 @@ import { ActivitiesListClient } from "./activities-list.client";
 
 export function Activities({ id }: { id: string }) {
   return (
-    <Card className="h-full shadow-xs max-h-210 overflow-hidden">
-      <CardHeader className="mb-2 pb-2">
+    <Card className="h-full min-h-0 max-h-125 shadow-xs">
+      <CardHeader>
         <CardTitle>Activities</CardTitle>
         <CardDescription>
           Track real-time registrations, payments, ticket issuance, and check-ins. Monitor operational flow as the event
@@ -12,7 +12,7 @@ export function Activities({ id }: { id: string }) {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="h-full">
+      <CardContent className="flex min-h-0 flex-1 flex-col">
         <ActivitiesListClient id={id} />
       </CardContent>
     </Card>

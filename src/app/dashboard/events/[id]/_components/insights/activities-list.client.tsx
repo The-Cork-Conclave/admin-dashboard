@@ -164,7 +164,7 @@ export function ActivitiesListClient({ id, limit = 20 }: { id: string; limit?: n
   }
 
   return (
-    <div ref={scrollRootRef} className="flex h-full max-h-180 overflow-y-auto flex-col gap-4">
+    <div ref={scrollRootRef} className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
       <div className="flex-1 space-y-2">
         {activities.map((activity) => (
           <ActivityItem key={activity.id} activity={activity} />
@@ -173,7 +173,9 @@ export function ActivitiesListClient({ id, limit = 20 }: { id: string; limit?: n
         <div ref={sentinelRef} className="h-8" />
 
         {query.isFetchingNextPage && <div className="text-xs text-slate-500">Loading more…</div>}
-        {!query.hasNextPage && <div className="text-xs text-slate-400">You’re all caught up.</div>}
+        {!query.hasNextPage && (
+          <div className="text-xs text-slate-400 text-center pb-4 mb-4">You’re all caught up.</div>
+        )}
       </div>
     </div>
   );

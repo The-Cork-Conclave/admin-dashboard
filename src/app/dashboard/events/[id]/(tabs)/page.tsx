@@ -7,16 +7,16 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const { id } = await params;
 
   return (
-    <Tabs className="gap-4" defaultValue="insights">
+    <Tabs className="gap-4" defaultValue="overview">
       <TabsList className="lg:h-10 lg:p-2">
-        <TabsTrigger value="overview" className="lg:px-3 lg:py-1 lg:text-base">
+        <TabsTrigger value="overview" className="md:px-3 md:py-1 lg:text-base">
           Overview
         </TabsTrigger>
-        <TabsTrigger value="update" className="lg:px-3 lg:py-1 lg:text-base">
+        <TabsTrigger value="update" className="md:px-3 md:py-1 lg:text-base">
           Edit
         </TabsTrigger>
 
-        <TabsTrigger value="insights" className="lg:px-3 lg:py-1 lg:text-base">
+        <TabsTrigger value="insights" className="md:px-3 md:py-1 lg:text-base">
           Insights
         </TabsTrigger>
       </TabsList>

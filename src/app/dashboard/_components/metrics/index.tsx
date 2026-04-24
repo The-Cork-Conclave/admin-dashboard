@@ -12,6 +12,8 @@ import {
   MembersMetricsDTO,
   getTicketsMetrics,
   TicketsMetricsDTO,
+  getAttendanceMetrics,
+  AttendanceMetricsDTO,
 } from "./api";
 import { formatNairaFromKobo } from "@/lib/utils";
 
@@ -151,6 +153,19 @@ function TicketsCard() {
 }
 
 function AttendanceCard() {
+  const query = useQuery({
+    queryKey: ["attendance-metrics"],
+    queryFn: getAttendanceMetrics,
+  });
+
+  const metric: AttendanceMetricsDTO | undefined = query.data;
+
+  if (query.isLoading) {
+    return <MetricCardSkeleton description="Attendance Rate" />;
+  }
+
+  const fmtPercent = (n: number | undefined) => `${Math.round(n ?? 0)}%`;
+
   return (
     <Card>
       <CardHeader>
@@ -163,9 +178,13 @@ function AttendanceCard() {
       </CardHeader>
       <CardContent className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
-          <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">0%</div>
+          <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">
+            {fmtPercent(metric?.attendance_vs_all_registrations)}
+          </div>
         </div>
-        <p className="text-muted-foreground text-sm">% of ticket holders who checked in this month</p>
+        <p className="text-muted-foreground text-sm">
+          {fmtPercent(metric?.attendance_vs_confirmed_registrations)} of confirmed registrations checked in this month
+        </p>
       </CardContent>
     </Card>
   );

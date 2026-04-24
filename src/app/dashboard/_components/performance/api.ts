@@ -50,10 +50,13 @@ export type GetEventsActivityInput = {
 };
 
 export async function getEventsActivity(input: GetEventsActivityInput): Promise<EventsActivityDTO> {
-  const res = await authFetch(`/api/metrics/events/activity?type=${input.type}&value=${encodeURIComponent(input.value)}`, {
-    method: "GET",
-    headers: { Accept: "application/json" },
-  });
+  const res = await authFetch(
+    `/api/metrics/events/activity?type=${input.type}&value=${encodeURIComponent(input.value)}`,
+    {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    },
+  );
 
   if (!res.ok) {
     let message = "Could not load metrics. Please try again.";

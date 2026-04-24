@@ -3,7 +3,8 @@ import {
   LayoutDashboard,
   type LucideIcon,
   Users2Icon,
-  // , Logs, CirclePile
+  CirclePile,
+  // , Logs,
 } from "lucide-react";
 
 export interface NavSubItem {
@@ -49,11 +50,11 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard/admins",
         icon: Users2Icon,
       },
-      // {
-      //   title: "Jobs",
-      //   url: "/dashboard/jobs",
-      //   icon: CirclePile,
-      // },
+      {
+        title: "Jobs",
+        url: "/dashboard/jobs",
+        icon: CirclePile,
+      },
       // {
       //   title: "Logs",
       //   url: "/dashboard/logs",

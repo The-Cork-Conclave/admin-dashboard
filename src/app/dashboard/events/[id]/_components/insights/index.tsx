@@ -1,23 +1,33 @@
+"use client";
+
 import { Activities } from "./activities";
-import { ActionsRiskLedger } from "./analytics-actions-risk-ledger";
-import { DriversCoverageTriage } from "./analytics-drivers-coverage-triage";
-import { DriversForecastTarget } from "./analytics-drivers-forecast-target";
+import { EventPerformance } from "./event-performance";
 import { AnalyticsOverview } from "./analytics-overview";
+import { useQuery } from "@tanstack/react-query";
+import { getEventMetrics, MetricsDTO } from "./api";
 
 export default function Insights({ id }: { id: string }) {
+  const query = useQuery({
+    queryKey: [`event-${id}-metrics`],
+    queryFn: () => getEventMetrics(id),
+    enabled: Boolean(id),
+  });
+
+  const metrics: MetricsDTO | undefined = query.data;
+
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <AnalyticsOverview />
+      <AnalyticsOverview metrics={metrics} />
 
-      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
-        <div className="flex flex-col gap-4 lg:col-span-2">
-          <DriversForecastTarget />
-          <DriversCoverageTriage />
+      <div className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-2">
+        <div className="flex h-full min-h-0 flex-col gap-4">
+          <EventPerformance metrics={metrics} />
         </div>
-        <Activities id={id} />
-      </div>
 
-      <ActionsRiskLedger />
+        <div className="flex h-full min-h-0 flex-col gap-4">
+          <Activities id={id} />
+        </div>
+      </div>
     </div>
   );
 }

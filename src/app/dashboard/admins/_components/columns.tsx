@@ -3,11 +3,8 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { format, isValid, parseISO } from "date-fns";
-import { CircleAlertIcon, CircleCheckIcon, Trash, UserRound } from "lucide-react";
-
+import { CircleAlertIcon, CircleCheckIcon, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-
 import type { AdminRow } from "./schema";
 
 function statusIcon(valid: boolean) {
@@ -28,11 +25,7 @@ export const adminColumns: ColumnDef<AdminRow>[] = [
           <UserRound className="size-4 text-muted-foreground" />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="flex items-end justify-between gap-3">
-            <div className="grid min-w-0 gap-0.5">
-              <span className="truncate font-medium text-sm leading-none">{row.original.name}</span>
-            </div>
-          </div>
+          <p className="font-medium text-sm">{row.original.name}</p>
         </div>
       </div>
     ),
@@ -42,7 +35,7 @@ export const adminColumns: ColumnDef<AdminRow>[] = [
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => {
-      return <span className="truncate text-muted-foreground text-sm leading-none">{row.original.email}</span>;
+      return <p className="font-medium text-sm">{row.original.email}</p>;
     },
   },
 
@@ -74,23 +67,6 @@ export const adminColumns: ColumnDef<AdminRow>[] = [
         <div className="flex items-center gap-1.5">
           <span className="text-sm">{format(d, "do MMMM yyyy")}</span>
           <span className="text-muted-foreground text-xs">at {format(d, "h:mm a")}</span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "id",
-    header: "",
-    cell: ({ row }) => {
-      const d = parseISO(row.original.created_at);
-      if (!isValid(d)) {
-        return <span className="text-muted-foreground text-xs">—</span>;
-      }
-      return (
-        <div className="flex items-center gap-1.5">
-          <Button variant="ghost" size="icon" className="flex size-8 text-muted-foreground">
-            <Trash className="size-4 text-destructive" />
-          </Button>
         </div>
       );
     },

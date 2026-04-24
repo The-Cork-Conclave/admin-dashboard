@@ -49,7 +49,6 @@ export default function EventActivity() {
   });
 
   const queryValue = React.useMemo(() => {
-    
     if (mode === "year") return new Date(Date.UTC(selectedYear, 0, 1, 0, 0, 0, 0)).toISOString();
     return new Date(Date.UTC(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1, 0, 0, 0, 0)).toISOString();
   }, [mode, selectedMonth, selectedYear]);
@@ -71,10 +70,7 @@ export default function EventActivity() {
       const ticket = data.tickets[i] ?? { label: "", value: 0 };
 
       const rawLabel = (reg.label && String(reg.label).trim().length > 0 ? reg.label : ticket.label) ?? "";
-      const x =
-        mode === "month"
-          ? String(rawLabel).trim()
-          : String(rawLabel).trim();
+      const x = mode === "month" ? String(rawLabel).trim() : String(rawLabel).trim();
 
       out.push({
         date: x,
@@ -129,8 +125,6 @@ export default function EventActivity() {
                 toYear={currentYear}
               />
             )}
-
-           
           </CardAction>
         </CardHeader>
 
@@ -193,13 +187,7 @@ export default function EventActivity() {
                   dot={false}
                   fillOpacity={1}
                 />
-                <Line
-                  dataKey="tickets"
-                  type="natural"
-                  stroke="var(--color-tickets)"
-                  strokeWidth={1.2}
-                  dot={false}
-                />
+                <Line dataKey="tickets" type="natural" stroke="var(--color-tickets)" strokeWidth={1.2} dot={false} />
               </ComposedChart>
             </ChartContainer>
           )}

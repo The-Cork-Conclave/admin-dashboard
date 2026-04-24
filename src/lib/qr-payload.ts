@@ -24,4 +24,3 @@ export function decodeQrPayload(text: string): QrPayload {
   const parsedJson = JSON.parse(json) as unknown;
   return qrPayloadSchema.parse(parsedJson);
 }
-
