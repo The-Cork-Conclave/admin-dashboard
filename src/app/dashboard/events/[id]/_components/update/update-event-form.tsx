@@ -275,27 +275,7 @@ export function UpdateEventForm({
             />
           </div>
 
-          <div className="md:col-span-2">
-            <Controller
-              control={form.control}
-              name="welcome_text"
-              render={({ field, fieldState }) => (
-                <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="event-welcome-text">Welcome Text</FieldLabel>
-                  <Textarea
-                    {...field}
-                    id="event-welcome-text"
-                    rows={4}
-                    placeholder="Optional (e.g. It's 1804 once again, and The Cork Conclave is here again!)"
-                    aria-invalid={fieldState.invalid}
-                    disabled={mutation.isPending}
-                    className={`${sharpInputClassName} resize-none`}
-                  />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-          </div>
+        
 
           <div className="md:col-span-2 flex flex-col md:flex-row gap-8">
             <div className="w-full">

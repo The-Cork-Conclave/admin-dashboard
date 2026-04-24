@@ -149,10 +149,6 @@ export function EventDetailsClient({ id }: { id: string }) {
                     <dd className="text-sm leading-relaxed">{event?.description || "—"}</dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="mb-1 text-muted-foreground text-sm">Welcome Text</dt>
-                    <dd className="text-sm leading-relaxed">{event?.welcome_text || "—"}</dd>
-                  </div>
-                  <div className="sm:col-span-2">
                     <dt className="mb-1 text-muted-foreground text-sm">Dress Code</dt>
                     <dd className="text-sm leading-relaxed">{event?.dress_code || "—"}</dd>
                   </div>
