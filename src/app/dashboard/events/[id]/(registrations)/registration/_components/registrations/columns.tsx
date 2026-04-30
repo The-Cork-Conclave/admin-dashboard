@@ -28,7 +28,7 @@ function statusIcon(status: string) {
 export const registrationColumns: ColumnDef<RegistrationRow>[] = [
   {
     accessorKey: "name",
-    header: "Customer",
+    header: "Member",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <span className="flex size-8 items-center justify-center rounded-md border bg-muted">
