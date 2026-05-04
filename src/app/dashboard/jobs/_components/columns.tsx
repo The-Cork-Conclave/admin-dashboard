@@ -15,6 +15,13 @@ export function JobStatusBadge({ status }: { status: JobStatus }) {
         </span>
       );
 
+    case "cancelled":
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 border border-slate-200/60 px-2 py-0.5 text-xs font-medium text-slate-700">
+          Cancelled
+        </span>
+      );
+
     case "failed":
       return (
         <span className="inline-flex items-center gap-1.5 rounded-md bg-red-50 border border-red-200/60 px-2 py-0.5 text-xs font-medium text-red-700">
@@ -47,6 +54,10 @@ export function JobName(name: JobType) {
       return "Send Admin Login Link";
     case "send_event_registration_email":
       return "Send Event Registration Email";
+    case "send_event_reminder_3_days":
+      return "Send Event Reminder (3 days)";
+    case "send_event_reminder_day_of":
+      return "Send Event Reminder (day of)";
     case "verify_ercas_payment":
       return "Verify Ercas Payment";
     default:
