@@ -25,3 +25,18 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     headers: { "Content-Type": upstream.headers.get("Content-Type") ?? "application/json" },
   });
 }
+
+export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  const upstream = await fetchUpstream(`/events/${encodeURIComponent(id)}`, { method: "DELETE" });
+
+  if (upstream.status === 204) {
+    return new NextResponse(null, { status: 204 });
+  }
+
+  const body = await upstream.text();
+  return new NextResponse(body, {
+    status: upstream.status,
+    headers: { "Content-Type": upstream.headers.get("Content-Type") ?? "application/json" },
+  });
+}

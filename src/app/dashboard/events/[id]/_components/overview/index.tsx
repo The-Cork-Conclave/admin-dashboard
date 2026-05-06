@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Clock, FileText, MapPin, Server, Wallet, MoveRight } from "lucide-react";
 import { type EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
+import { DeleteEventButton } from "./delete-event-button";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EventStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,8 @@ export function EventDetailsClient({ id }: { id: string }) {
                 <MoveRight />
               </Button>
             </Link>
+
+            <DeleteEventButton id={event.id} name={event.name} status={event.status} />
           </div>
         )}
       </header>

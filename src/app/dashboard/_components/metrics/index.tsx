@@ -107,7 +107,7 @@ function MembersCard() {
           <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">{metric?.total ?? 0}</div>
           <Badge variant={`${(metric?.delta ?? 0) >= 0 ? "success" : "destructive"}`}>
             {(metric?.delta ?? 0) >= 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-            {metric?.delta ?? 0}%
+            {metric?.delta?.toFixed(2) ?? 0}%
           </Badge>
         </div>
         <p className="text-muted-foreground text-sm">New members registered this month</p>
@@ -143,7 +143,7 @@ function TicketsCard() {
           <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">{metric?.total ?? 0}</div>
           <Badge variant={`${(metric?.delta ?? 0) >= 0 ? "success" : "destructive"}`}>
             {(metric?.delta ?? 0) >= 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-            {metric?.delta ?? 0}%
+            {metric?.delta?.toFixed(2) ?? "0.00"}%
           </Badge>
         </div>
         <p className="text-muted-foreground text-sm">Number of paid tickets for events this month</p>
