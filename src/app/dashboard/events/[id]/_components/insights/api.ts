@@ -15,6 +15,7 @@ export const metricsDTOSchema = z.object({
   total_no_shows: z.number(),
   registrations: z.array(graphItemSchema),
   payments: z.array(graphItemSchema),
+  expenses: z.array(graphItemSchema),
   reg_to_payment_conversion: z.number(),
   payment_to_attendance_conversion: z.number(),
   average_time_to_payment: z.number(),

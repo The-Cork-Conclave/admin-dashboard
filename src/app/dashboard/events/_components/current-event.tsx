@@ -1,15 +1,29 @@
 "use client";
 
 import * as React from "react";
+
 import Image from "next/image";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CheckCircle, Eye } from "lucide-react";
+import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { authFetch } from "@/lib/auth/auth-fetch";
 import { formatNairaFromKobo } from "@/lib/utils";
 
 import { fetchEventsList } from "../_lib/fetch-events-list";
@@ -42,6 +56,9 @@ export default function CurrentEvent() {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const descriptionRef = React.useRef<HTMLParagraphElement | null>(null);
   const [canExpand, setCanExpand] = React.useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = React.useState(false);
+
+  const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey: ["events", "active", 1, 1],
@@ -56,6 +73,52 @@ export default function CurrentEvent() {
   });
 
   const event = query.data?.data?.[0] ?? null;
+
+  const id = event?.id ?? "";
+
+  async function completeEvent() {
+    const payload: Record<string, unknown> = {
+      status: "completed",
+    };
+
+    const res = await authFetch(`/api/events/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      let message = "Could not update event. Please try again.";
+      try {
+        const body = (await res.json()) as { message?: string };
+        if (typeof body.message === "string" && body.message.length > 0) {
+          message = body.message;
+        }
+      } catch {
+        /* ignore */
+      }
+      throw new Error(message);
+    }
+  }
+
+  const mutation = useMutation({
+    mutationFn: () => completeEvent(),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["events"] });
+      await queryClient.invalidateQueries({ queryKey: ["event", id] });
+      setIsConfirmOpen(false);
+      toast.success("Event completed", { description: "Your changes have been saved." });
+    },
+    onError: (err: Error) => {
+      setIsConfirmOpen(false);
+      toast.error("Could not complete event", { description: err.message });
+    },
+  });
+
+  const onConfirmComplete = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    mutation.mutate();
+  };
 
   React.useEffect(() => {
     const el = descriptionRef.current;
@@ -229,10 +292,40 @@ export default function CurrentEvent() {
             </Link>
 
             <div className="mx-1 hidden h-6 w-px bg-border sm:block" aria-hidden />
-            <Button type="button" variant="success" className="gap-2">
-              <CheckCircle className="size-4" aria-hidden />
-              Complete Event
-            </Button>
+            <AlertDialog
+              open={isConfirmOpen}
+              onOpenChange={(nextOpen) => {
+                if (mutation.isPending) return;
+                setIsConfirmOpen(nextOpen);
+              }}
+            >
+              <AlertDialogTrigger asChild>
+                <Button type="button" variant="success" className="gap-2">
+                  <CheckCircle className="size-4" aria-hidden />
+                  {mutation.isPending ? "Completing" : "Complete Event"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Complete this event?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    <span className="font-medium text-foreground">{event.name}</span> will be marked as completed and
+                    will no longer appear as the current active event. This action can be reversed later by updating the
+                    event status if needed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={mutation.isPending}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    variant="success"
+                    disabled={mutation.isPending}
+                    onClick={onConfirmComplete}
+                  >
+                    {mutation.isPending ? "Completing…" : "Yes, complete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>

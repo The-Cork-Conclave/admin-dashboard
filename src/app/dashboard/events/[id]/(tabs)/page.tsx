@@ -2,6 +2,8 @@ import { EventDetailsClient } from "@/app/dashboard/events/[id]/_components/over
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UpdateEvent from "@/app/dashboard/events/[id]/_components/update";
 import Insights from "@/app/dashboard/events/[id]/_components/insights";
+import Gallery from "@/app/dashboard/events/[id]/_components/gallery";
+import Finance from "@/app/dashboard/events/[id]/_components/finance";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -19,6 +21,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         <TabsTrigger value="insights" className="md:px-3 md:py-1 lg:text-base">
           Insights
         </TabsTrigger>
+
+        <TabsTrigger value="gallery" className="md:px-3 md:py-1 lg:text-base">
+          Gallery
+        </TabsTrigger>
+
+        <TabsTrigger value="finance" className="md:px-3 md:py-1 lg:text-base">
+          Finance
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="overview">
@@ -31,6 +41,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
       <TabsContent value="insights">
         <Insights id={id} />
+      </TabsContent>
+
+      <TabsContent value="gallery">
+        <Gallery id={id} />
+      </TabsContent>
+
+      <TabsContent value="finance">
+        <Finance id={id} />
       </TabsContent>
     </Tabs>
   );

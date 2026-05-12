@@ -6,7 +6,7 @@ import { UpdateEventForm } from "./update-event-form";
 
 export default function UpdateEvent({ id }: { id: string }) {
   return (
-    <main className="mx-auto w-full max-w-5xl p-6 md:p-10 lg:p-12">
+    <main className="mx-auto w-full p-6 md:p-10 lg:p-12">
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <UpdateEventForm
           id={id}

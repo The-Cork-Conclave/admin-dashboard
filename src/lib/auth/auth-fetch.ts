@@ -37,13 +37,12 @@ function toRequest(input: RequestInfo | URL, init?: RequestInit): Request {
  */
 export async function authFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const req1 = toRequest(input, init);
+  const retryReq = req1.clone();
   const res1 = await fetch(req1, { credentials: "include" });
   if (res1.status !== 401) return res1;
 
   const refreshed = await refreshAccessTokenOnce();
   if (!refreshed.ok) return res1;
 
-  // Important: requests/bodies are single-use; clone for retry.
-  const req2 = req1.clone();
-  return fetch(req2, { credentials: "include" });
+  return fetch(retryReq, { credentials: "include" });
 }

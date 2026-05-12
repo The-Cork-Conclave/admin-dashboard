@@ -1,0 +1,37 @@
+import { type NextRequest, NextResponse } from "next/server";
+
+import { fetchUpstream } from "@/app/api/_utils/upstream";
+
+export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string; expense_id: string }> }) {
+  const { id, expense_id } = await ctx.params;
+
+  const upstream = await fetchUpstream(`/events/${encodeURIComponent(id)}/expenses/${encodeURIComponent(expense_id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": req.headers.get("Content-Type") ?? "application/json" },
+    body: await req.text(),
+  });
+
+  const body = await upstream.text();
+  return new NextResponse(body, {
+    status: upstream.status,
+    headers: { "Content-Type": upstream.headers.get("Content-Type") ?? "application/json" },
+  });
+}
+
+export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ id: string; expense_id: string }> }) {
+  const { id, expense_id } = await ctx.params;
+
+  const upstream = await fetchUpstream(`/events/${encodeURIComponent(id)}/expenses/${encodeURIComponent(expense_id)}`, {
+    method: "DELETE",
+  });
+
+  if (upstream.status === 204) {
+    return new NextResponse(null, { status: 204 });
+  }
+
+  const body = await upstream.text();
+  return new NextResponse(body, {
+    status: upstream.status,
+    headers: { "Content-Type": upstream.headers.get("Content-Type") ?? "application/json" },
+  });
+}

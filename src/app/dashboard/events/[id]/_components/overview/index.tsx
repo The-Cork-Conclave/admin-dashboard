@@ -39,7 +39,7 @@ export function EventDetailsClient({ id }: { id: string }) {
   const imageUrl = useMemo(() => toExternalUrl(event?.image_url), [event?.image_url]);
 
   return (
-    <main className="mx-auto w-full max-w-7xl p-6 md:p-10 lg:p-12">
+    <main className="mx-auto w-full p-6 md:p-10 lg:p-12">
       <header className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-start">
         <div className="min-w-0">
           <h1 className="mb-2 truncate font-semibold text-2xl tracking-tight">{event?.name ?? "Event"}</h1>
