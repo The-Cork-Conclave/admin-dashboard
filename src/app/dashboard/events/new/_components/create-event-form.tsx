@@ -32,8 +32,8 @@ const formSchema = z.object({
     message: "Amount must be a whole number (naira, stored as kobo on the server).",
   }),
   venue_name: z.string().min(1, { message: "Please enter a venue name." }),
-  venue_address: z.string().min(1, { message: "Please enter a venue address." }),
-  registration_opens_at: z.string().min(1, { message: "Please select when registration opens." }),
+  venue_address: z.string().optional(),
+  registration_opens_at: z.string().optional(),
   registration_closes_at: z.string().optional(),
 });
 
@@ -51,7 +51,37 @@ function toRFC3339FromDatetimeLocal(value: string): string {
   return Number.isNaN(d.getTime()) ? value : d.toISOString();
 }
 
+function eventInstantFromForm(eventDateLocal: string): Date | null {
+  const d = new Date(eventDateLocal);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function defaultRegistrationOpensIso(eventInstant: Date): string {
+  const d = new Date(eventInstant);
+  d.setDate(d.getDate() - 21);
+  return d.toISOString();
+}
+
+function defaultRegistrationClosesIso(eventInstant: Date): string {
+  const d = new Date(eventInstant);
+  d.setDate(d.getDate() - 1);
+  return d.toISOString();
+}
+
 async function postCreateEvent(input: FormInput): Promise<CreateEventResponse> {
+  const eventInstant = eventInstantFromForm(input.event_date);
+  if (!eventInstant) {
+    throw new Error("Invalid event date.");
+  }
+
+  const registrationOpensAt = input.registration_opens_at?.trim()
+    ? toRFC3339FromDatetimeLocal(input.registration_opens_at)
+    : defaultRegistrationOpensIso(eventInstant);
+
+  const registrationClosesAt = input.registration_closes_at?.trim()
+    ? toRFC3339FromDatetimeLocal(input.registration_closes_at)
+    : defaultRegistrationClosesIso(eventInstant);
+
   const payload = {
     name: input.name,
     image_url: input.image_url.trim(),
@@ -61,12 +91,10 @@ async function postCreateEvent(input: FormInput): Promise<CreateEventResponse> {
     entry_fee: input.entry_fee?.trim() ? input.entry_fee.trim() : undefined,
     event_date: toRFC3339FromDatetimeLocal(input.event_date),
     venue_name: input.venue_name,
-    venue_address: input.venue_address,
+    venue_address: input.venue_address?.trim() ? input.venue_address.trim() : undefined,
     amount_in_kobo: (input.amount_in_kobo ?? "").trim() || "0",
-    registration_opens_at: toRFC3339FromDatetimeLocal(input.registration_opens_at),
-    registration_closes_at: input.registration_closes_at?.trim()
-      ? toRFC3339FromDatetimeLocal(input.registration_closes_at)
-      : undefined,
+    registration_opens_at: registrationOpensAt,
+    registration_closes_at: registrationClosesAt,
   };
 
   const res = await authFetch("/api/events", {
@@ -181,8 +209,6 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
               )}
             />
           </div>
-
-      
 
           <div className="md:col-span-2 flex flex-col md:flex-row gap-8">
             <div className="w-full">
@@ -324,7 +350,10 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
               name="venue_address"
               render={({ field, fieldState }) => (
                 <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="venue-address">Venue Address (preferably an address with a map link)</FieldLabel>
+                  <FieldLabel htmlFor="venue-address">
+                    Venue Address{" "}
+                    <span className="text-xs text-muted-foreground">(optional; preferably an address with a map link)</span>
+                  </FieldLabel>
                   <Input
                     {...field}
                     id="venue-address"
@@ -344,7 +373,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
             name="registration_opens_at"
             render={({ field, fieldState }) => (
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="registration-opens-at">Registration Opens</FieldLabel>
+                <FieldLabel htmlFor="registration-opens-at">
+                  Registration Opensxw
+                </FieldLabel>
                 <DateTimePicker
                   id="registration-opens-at"
                   value={field.value}
@@ -363,7 +394,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
             name="registration_closes_at"
             render={({ field, fieldState }) => (
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="registration-closes-at">Registration Closes</FieldLabel>
+                <FieldLabel htmlFor="registration-closes-at">
+                  Registration Closes
+                </FieldLabel>
                 <DateTimePicker
                   id="registration-closes-at"
                   value={field.value}

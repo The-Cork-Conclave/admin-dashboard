@@ -5,22 +5,32 @@ import * as React from "react";
 import Image from "next/image";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CirclePlus, FileArchive, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+
+import {
+  deleteGalleryItem,
+  fetchEventGallery,
+  type GalleryItem,
+  patchUpdateGalleryItem,
+  postCreateGalleryItem,
+} from "@/app/dashboard/events/[id]/_components/gallery/_lib/gallery-api.client";
+import {
+  collectZipImageFiles,
+  GALLERY_ZIP_MAX_BYTES,
+  GALLERY_ZIP_MAX_IMAGES,
+  runGalleryZipImport,
+  type ZipImportFailure,
+  type ZipImportProgress,
+} from "@/app/dashboard/events/[id]/_components/gallery/_lib/gallery-zip-import";
+import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { ImageUpload } from "@/components/image-upload";
-import { CirclePlus, Pencil, Trash2 } from "lucide-react";
-
-import {
-  type GalleryItem,
-  deleteGalleryItem,
-  fetchEventGallery,
-  patchUpdateGalleryItem,
-  postCreateGalleryItem,
-} from "@/app/dashboard/events/[id]/_components/gallery/_lib/gallery-api.client";
 
 type AddForm = {
   url: string;
@@ -44,6 +54,18 @@ export default function Gallery({ id }: { id: string }) {
 
   const [addForm, setAddForm] = React.useState<AddForm>({ url: "", caption: "", alt: "" });
   const [editForm, setEditForm] = React.useState<EditForm>({ url: "", caption: "", alt: "" });
+
+  const zipInputRef = React.useRef<HTMLInputElement>(null);
+  const [zipDialogOpen, setZipDialogOpen] = React.useState(false);
+  const [zipPhase, setZipPhase] = React.useState<"reading" | "uploading" | "done">("reading");
+  const [zipBusy, setZipBusy] = React.useState(false);
+  const [zipProgress, setZipProgress] = React.useState<ZipImportProgress>({
+    completed: 0,
+    total: 0,
+    currentPath: null,
+  });
+  const [zipFailures, setZipFailures] = React.useState<ZipImportFailure[]>([]);
+  const [zipSuccessCount, setZipSuccessCount] = React.useState(0);
 
   const galleryQuery = useQuery({
     queryKey: ["eventGallery", id],
@@ -153,6 +175,77 @@ export default function Gallery({ id }: { id: string }) {
     });
   };
 
+  const cloudinaryGalleryFolder = `cork-conclave/events/${id}/gallery`;
+
+  const resetZipImportState = React.useCallback(() => {
+    setZipPhase("reading");
+    setZipProgress({ completed: 0, total: 0, currentPath: null });
+    setZipFailures([]);
+    setZipSuccessCount(0);
+  }, []);
+
+  const onZipInputChange: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    const isZipName = file.name.toLowerCase().endsWith(".zip");
+    const isZipMime =
+      file.type === "application/zip" ||
+      file.type === "application/x-zip-compressed" ||
+      file.type === "application/x-zip";
+    if (!isZipName && !isZipMime) {
+      toast.error("Please choose a ZIP file.");
+      return;
+    }
+
+    setZipDialogOpen(true);
+    setZipBusy(true);
+    setZipPhase("reading");
+    setZipFailures([]);
+    setZipSuccessCount(0);
+    setZipProgress({ completed: 0, total: 0, currentPath: null });
+
+    try {
+      const collected = await collectZipImageFiles(file);
+      if ("error" in collected) {
+        toast.error(collected.error);
+        setZipBusy(false);
+        setZipDialogOpen(false);
+        resetZipImportState();
+        return;
+      }
+
+      const total = collected.files.length;
+      setZipPhase("uploading");
+      setZipProgress({ completed: 0, total, currentPath: null });
+
+      const result = await runGalleryZipImport(id, cloudinaryGalleryFolder, collected.files, setZipProgress);
+
+      await queryClient.invalidateQueries({ queryKey: ["eventGallery", id] });
+      setZipSuccessCount(result.successCount);
+      setZipFailures(result.failures);
+      setZipPhase("done");
+      setZipBusy(false);
+
+      if (result.failures.length === 0) {
+        toast.success(`Imported ${result.successCount} of ${result.total} image(s).`);
+      } else {
+        toast.success(`Imported ${result.successCount} of ${result.total} image(s).`, {
+          description: `${result.failures.length} failed — see the list in this dialog.`,
+        });
+      }
+    } catch (err) {
+      toast.error("ZIP import failed", { description: err instanceof Error ? err.message : "Unknown error" });
+      setZipBusy(false);
+      setZipDialogOpen(false);
+      resetZipImportState();
+    }
+  };
+
+  const zipProgressPercent =
+    zipProgress.total > 0 ? Math.round((zipProgress.completed / zipProgress.total) * 100) : 0;
+
   return (
     <main className="mx-auto w-full px-6 py-4 md:px-10 lg:px-12">
       <header className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
@@ -160,10 +253,31 @@ export default function Gallery({ id }: { id: string }) {
           <h1 className="text-2xl font-semibold tracking-tight">Event Gallery</h1>
         </div>
 
-        <Button type="button" variant="default" size="sm" onClick={openAdd}>
-          <span className="mr-2">Add Image</span>
-          <CirclePlus />
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" variant="default" size="sm" onClick={openAdd} disabled={zipBusy}>
+            <span className="mr-2">Add Image</span>
+            <CirclePlus />
+          </Button>
+          <input
+            ref={zipInputRef}
+            type="file"
+            accept=".zip,application/zip,application/x-zip-compressed"
+            className="sr-only"
+            aria-hidden
+            tabIndex={-1}
+            onChange={onZipInputChange}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={zipBusy || !id?.trim()}
+            onClick={() => zipInputRef.current?.click()}
+          >
+            <span className="mr-2">Upload ZIP</span>
+            <FileArchive className="size-4" />
+          </Button>
+        </div>
       </header>
 
       <div className="space-y-4">
@@ -258,7 +372,85 @@ export default function Gallery({ id }: { id: string }) {
         )}
       </div>
 
-      {/* Add modal */}
+      <Dialog
+        open={zipDialogOpen}
+        onOpenChange={(open) => {
+          if (!open && zipBusy) return;
+          setZipDialogOpen(open);
+          if (!open) resetZipImportState();
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upload images from ZIP</DialogTitle>
+            <DialogDescription>
+              Images are uploaded to storage and added to this gallery. Max{" "}
+              {Math.round(GALLERY_ZIP_MAX_BYTES / (1024 * 1024))} MB per ZIP, up to {GALLERY_ZIP_MAX_IMAGES} images
+              (jpg, png, webp, gif, avif, bmp, svg).
+            </DialogDescription>
+          </DialogHeader>
+
+          {zipPhase === "reading" ? (
+            <p className="text-muted-foreground text-sm">Reading ZIP…</p>
+          ) : null}
+
+          {zipPhase === "uploading" ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-2 text-sm">
+                <span className="text-muted-foreground">
+                  {zipProgress.completed} / {zipProgress.total} images
+                </span>
+                <span className="text-muted-foreground tabular-nums">{zipProgressPercent}%</span>
+              </div>
+              <Progress value={zipProgressPercent} />
+              {zipProgress.currentPath ? (
+                <p className="truncate text-muted-foreground text-xs" title={zipProgress.currentPath}>
+                  {zipProgress.currentPath}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
+          {zipPhase === "done" ? (
+            <div className="space-y-3">
+              <p className="text-sm">
+                Finished: <span className="font-medium">{zipSuccessCount}</span> of{" "}
+                <span className="font-medium">{zipProgress.total}</span> imported successfully.
+              </p>
+              {zipFailures.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="font-medium text-destructive text-sm">Failed ({zipFailures.length})</p>
+                  <ScrollArea className="max-h-40 rounded-md border border-border pr-3">
+                    <ul className="space-y-2 p-3 text-xs">
+                      {zipFailures.map((f) => (
+                        <li key={`${f.path}:${f.message}`} className="wrap-break-word">
+                          <span className="font-medium">{f.path}</span>
+                          <span className="text-muted-foreground"> — {f.message}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </ScrollArea>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="default"
+              disabled={zipBusy || zipPhase !== "done"}
+              onClick={() => {
+                setZipDialogOpen(false);
+                resetZipImportState();
+              }}
+            >
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog
         open={isAddOpen}
         onOpenChange={(open) => {
@@ -289,7 +481,7 @@ export default function Gallery({ id }: { id: string }) {
               <ImageUpload
                 value={addForm.url}
                 onChange={(url) => setAddForm((s) => ({ ...s, url }))}
-                folder={`cork-conclave/events/${id}/gallery`}
+                folder={cloudinaryGalleryFolder}
               />
             </div>
 
@@ -315,7 +507,7 @@ export default function Gallery({ id }: { id: string }) {
                 value={addForm.alt}
                 onChange={(e) => setAddForm((s) => ({ ...s, alt: e.target.value }))}
               />
-              <p className="text-xs text-muted-foreground">Recommended for accessibility</p>
+              
             </div>
 
             <DialogFooter>
@@ -366,7 +558,7 @@ export default function Gallery({ id }: { id: string }) {
               <ImageUpload
                 value={editForm.url}
                 onChange={(url) => setEditForm((s) => ({ ...s, url }))}
-                folder={`cork-conclave/events/${id}/gallery`}
+                folder={cloudinaryGalleryFolder}
               />
             </div>
 

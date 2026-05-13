@@ -7,15 +7,8 @@ import Image from "next/image";
 import { Trash2, UploadCloud } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { getCloudinarySignature, uploadFileToCloudinary } from "@/lib/cloudinary-client-upload";
 import { cn } from "@/lib/utils";
-
-type CloudinarySignatureResponse = {
-  cloudName: string;
-  apiKey: string;
-  timestamp: number;
-  signature: string;
-  folder: string;
-};
 
 export type ImageUploadProps = {
   value?: string;
@@ -33,39 +26,6 @@ function formatBytes(bytes: number): string {
   const v = bytes / 1024 ** i;
   const rounded = v >= 10 || i === 0 ? Math.round(v) : Math.round(v * 10) / 10;
   return `${rounded} ${units[i]}`;
-}
-
-async function getSignature(folder?: string): Promise<CloudinarySignatureResponse> {
-  const url = new URL("/api/uploads/cloudinary/signature", window.location.origin);
-  if (folder?.trim()) url.searchParams.set("folder", folder.trim());
-  const res = await fetch(url, { method: "GET" });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(text || `Signature request failed (${res.status})`);
-  }
-  return (await res.json()) as CloudinarySignatureResponse;
-}
-
-async function uploadToCloudinary(file: File, sig: CloudinarySignatureResponse): Promise<string> {
-  const endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(sig.cloudName)}/image/upload`;
-
-  const body = new FormData();
-  body.set("file", file);
-  body.set("api_key", sig.apiKey);
-  body.set("timestamp", String(sig.timestamp));
-  body.set("signature", sig.signature);
-  body.set("folder", sig.folder);
-
-  const res = await fetch(endpoint, { method: "POST", body });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(text || `Upload failed (${res.status})`);
-  }
-
-  const data = (await res.json()) as { secure_url?: string; url?: string };
-  const out = (data.secure_url ?? data.url ?? "").trim();
-  if (!out) throw new Error("Upload succeeded but no URL returned");
-  return out;
 }
 
 export function ImageUpload({
@@ -109,8 +69,8 @@ export function ImageUpload({
 
       setIsUploading(true);
       try {
-        const sig = await getSignature(folder);
-        const url = await uploadToCloudinary(file, sig);
+        const sig = await getCloudinarySignature(folder);
+        const url = await uploadFileToCloudinary(file, sig);
         onChange(url);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Upload failed");
