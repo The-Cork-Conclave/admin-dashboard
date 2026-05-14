@@ -2,16 +2,9 @@ import z from "zod";
 
 export const jobSchema = z.object({
   id: z.string(),
-  name: z.enum([
-    "send_event_registration_email",
-    "send_event_reminder_3_days",
-    "send_event_reminder_day_of",
-    "verify_ercas_payment",
-    "send_admin_magic_link_email",
-    "send_admin_invite_email",
-  ]),
+  name: z.string().min(1),
   payload: z.any(),
-  status: z.enum(["pending", "processing", "completed", "failed", "cancelled"]),
+  status: z.string().min(1),
   attempts: z.number(),
   max_attempts: z.number(),
   run_at: z.string(),
@@ -29,12 +22,5 @@ export const listMetaSchema = z.object({
 
 export type JobRow = z.infer<typeof jobSchema>;
 
-export type JobStatus = "pending" | "processing" | "completed" | "failed" | "cancelled";
-
-export type JobType =
-  | "send_event_registration_email"
-  | "send_event_reminder_3_days"
-  | "send_event_reminder_day_of"
-  | "verify_ercas_payment"
-  | "send_admin_magic_link_email"
-  | "send_admin_invite_email";
+export type JobStatus = JobRow["status"];
+export type JobType = JobRow["name"];

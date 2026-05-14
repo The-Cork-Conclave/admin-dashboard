@@ -6,6 +6,14 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format, isValid, parseISO } from "date-fns";
 import { type JobStatus, type JobType } from "./schema";
 
+function humanizeSnakeCase(value: string): string {
+  return value
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export function JobStatusBadge({ status }: { status: JobStatus }) {
   switch (status) {
     case "completed":
@@ -37,10 +45,16 @@ export function JobStatusBadge({ status }: { status: JobStatus }) {
       );
 
     case "pending":
-    default:
       return (
         <span className="inline-flex items-center gap-1.5 rounded-md bg-gray-50 border border-gray-200/60 px-2 py-0.5 text-xs font-medium text-gray-700">
           Pending
+        </span>
+      );
+
+    default:
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-md bg-zinc-50 border border-zinc-200/60 px-2 py-0.5 text-xs font-medium text-zinc-700">
+          {humanizeSnakeCase(status)}
         </span>
       );
   }
@@ -61,7 +75,7 @@ export function JobName(name: JobType) {
     case "verify_ercas_payment":
       return "Verify Ercas Payment";
     default:
-      return "";
+      return humanizeSnakeCase(name);
   }
 }
 

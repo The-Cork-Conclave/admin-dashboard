@@ -22,7 +22,17 @@ import { authFetch } from "@/lib/auth/auth-fetch";
 
 const sharpInputClassName = "rounded-md border-foreground/25";
 
-const statusSchema = z.enum(["draft", "active", "closed", "completed", "cancelled"]);
+const EVENT_STATUSES = ["draft", "active", "closed", "completed", "cancelled"] as const;
+
+const statusSchema = z.string().refine((v) => (EVENT_STATUSES as readonly string[]).includes(v), {
+  message: "Please select a valid status.",
+});
+
+function coerceEventStatus(raw: string | undefined): (typeof EVENT_STATUSES)[number] {
+  const v = (raw ?? "").trim();
+  if ((EVENT_STATUSES as readonly string[]).includes(v)) return v as (typeof EVENT_STATUSES)[number];
+  return "draft";
+}
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Please enter an event name." }),
@@ -159,11 +169,9 @@ export function UpdateEventForm({
 
   useEffect(() => {
     if (!event) return;
-    const parsedStatus = statusSchema.parse(event.status);
-
     form.reset({
       name: event.name ?? "",
-      status: parsedStatus,
+      status: coerceEventStatus(event.status),
       image_url: event.image_url ?? "",
       description: event.description ?? "",
       welcome_text: event.welcome_text ?? "",
