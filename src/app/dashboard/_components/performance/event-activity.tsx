@@ -1,8 +1,12 @@
 "use client";
 
 import * as React from "react";
+
+import { useQuery } from "@tanstack/react-query";
 import { format, isValid, parseISO } from "date-fns";
 import { Area, CartesianGrid, ComposedChart, Line, XAxis } from "recharts";
+
+import { MonthYearPicker } from "@/components/month-year-picker";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   type ChartConfig,
@@ -12,10 +16,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
-import { MonthYearPicker } from "@/components/month-year-picker";
+import { Skeleton } from "@/components/ui/skeleton";
+
 import { getEventsActivity } from "./api";
 
 function safeParseISO(value: unknown): Date | undefined {
@@ -82,8 +85,8 @@ export default function EventActivity() {
   }, [mode, query.data]);
 
   return (
-    <div className="w-full h-full">
-      <Card className="@container/card h-full flex flex-col">
+    <div className="h-full w-full">
+      <Card className="@container/card flex h-full flex-col">
         <CardHeader>
           <CardTitle className="leading-none">Event Activity</CardTitle>
           <CardDescription>

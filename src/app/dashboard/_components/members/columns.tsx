@@ -2,8 +2,9 @@
 "use no memo";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { isValid, format, parseISO } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { UserRound } from "lucide-react";
+
 import type { MembersRow } from "./schema";
 
 export const membersColumn: ColumnDef<MembersRow>[] = [

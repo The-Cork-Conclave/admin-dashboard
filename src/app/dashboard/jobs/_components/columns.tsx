@@ -1,10 +1,10 @@
 "use client";
 "use no memo";
 
-import { JobRow } from "./schema";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format, isValid, parseISO } from "date-fns";
-import { type JobStatus, type JobType } from "./schema";
+
+import type { JobRow, JobStatus, JobType } from "./schema";
 
 function humanizeSnakeCase(value: string): string {
   return value
@@ -18,42 +18,42 @@ export function JobStatusBadge({ status }: { status: JobStatus }) {
   switch (status) {
     case "completed":
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-green-50 border border-green-200/60 px-2 py-0.5 text-xs font-medium text-green-700">
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-green-200/60 bg-green-50 px-2 py-0.5 font-medium text-green-700 text-xs">
           Completed
         </span>
       );
 
     case "cancelled":
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 border border-slate-200/60 px-2 py-0.5 text-xs font-medium text-slate-700">
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200/60 bg-slate-50 px-2 py-0.5 font-medium text-slate-700 text-xs">
           Cancelled
         </span>
       );
 
     case "failed":
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-red-50 border border-red-200/60 px-2 py-0.5 text-xs font-medium text-red-700">
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-red-200/60 bg-red-50 px-2 py-0.5 font-medium text-red-700 text-xs">
           Failed
         </span>
       );
 
     case "processing":
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-yellow-50 border border-yellow-200/60 px-2 py-0.5 text-xs font-medium text-yellow-700">
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-yellow-200/60 bg-yellow-50 px-2 py-0.5 font-medium text-xs text-yellow-700">
           Processing
         </span>
       );
 
     case "pending":
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-gray-50 border border-gray-200/60 px-2 py-0.5 text-xs font-medium text-gray-700">
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-gray-200/60 bg-gray-50 px-2 py-0.5 font-medium text-gray-700 text-xs">
           Pending
         </span>
       );
 
     default:
       return (
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-zinc-50 border border-zinc-200/60 px-2 py-0.5 text-xs font-medium text-zinc-700">
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200/60 bg-zinc-50 px-2 py-0.5 font-medium text-xs text-zinc-700">
           {humanizeSnakeCase(status)}
         </span>
       );
@@ -116,7 +116,7 @@ export const jobsColumns: ColumnDef<JobRow>[] = [
         return <span className="text-muted-foreground text-xs">—</span>;
       }
 
-      return <span className="font-medium text-sm text-muted-foreground">{format(d, "do MMMM yyyy h:mm:ss a")}</span>;
+      return <span className="font-medium text-muted-foreground text-sm">{format(d, "do MMMM yyyy h:mm:ss a")}</span>;
     },
   },
   {
@@ -128,7 +128,7 @@ export const jobsColumns: ColumnDef<JobRow>[] = [
         return <span className="text-muted-foreground text-xs">—</span>;
       }
 
-      return <span className="font-medium text-sm text-muted-foreground">{format(d, "do MMMM yyyy h:mm:ss a")}</span>;
+      return <span className="font-medium text-muted-foreground text-sm">{format(d, "do MMMM yyyy h:mm:ss a")}</span>;
     },
   },
 ];

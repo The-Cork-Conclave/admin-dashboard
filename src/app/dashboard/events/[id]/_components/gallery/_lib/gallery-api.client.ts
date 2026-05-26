@@ -66,7 +66,10 @@ export async function fetchEventGallery(eventId: string): Promise<GalleryListRes
   return json as GalleryListResponse;
 }
 
-export async function postCreateGalleryItem(eventId: string, payload: CreateGalleryPayload): Promise<CreateGalleryResponse> {
+export async function postCreateGalleryItem(
+  eventId: string,
+  payload: CreateGalleryPayload,
+): Promise<CreateGalleryResponse> {
   const res = await authFetch(`/api/events/${encodeURIComponent(eventId)}/gallery`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -117,4 +120,3 @@ export async function deleteGalleryItem(eventId: string, galleryId: string): Pro
     throw new Error(await parseErrorMessage(res, "Could not delete gallery item. Please try again."));
   }
 }
-

@@ -2,12 +2,12 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { EventDetailsClient } from "@/app/dashboard/events/[id]/_components/overview";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import UpdateEvent from "@/app/dashboard/events/[id]/_components/update";
-import Insights from "@/app/dashboard/events/[id]/_components/insights";
-import Gallery from "@/app/dashboard/events/[id]/_components/gallery";
 import Finance from "@/app/dashboard/events/[id]/_components/finance";
+import Gallery from "@/app/dashboard/events/[id]/_components/gallery";
+import Insights from "@/app/dashboard/events/[id]/_components/insights";
+import { EventDetailsClient } from "@/app/dashboard/events/[id]/_components/overview";
+import UpdateEvent from "@/app/dashboard/events/[id]/_components/update";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TAB_VALUES = ["overview", "update", "insights", "gallery", "finance"] as const;
 type TabValue = (typeof TAB_VALUES)[number];

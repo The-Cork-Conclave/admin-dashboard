@@ -9,6 +9,9 @@ const graphItemSchema = z.object({
 
 export const metricsDTOSchema = z.object({
   total_received: z.number(),
+  payments_total: z.number(),
+  previous_balance_in_kobo: z.number(),
+  total_revenue_in_kobo: z.number(),
   total_registrations: z.number(),
   total_tickets: z.number(),
   total_attendees: z.number(),

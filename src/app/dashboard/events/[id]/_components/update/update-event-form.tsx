@@ -11,8 +11,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { type EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
-import { DateTimePicker } from "@/components/date-time-picker";
 import { AmountInput } from "@/components/amount-input";
+import { DateTimePicker } from "@/components/date-time-picker";
 import { ImageUpload } from "@/components/image-upload";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -207,7 +207,7 @@ export function UpdateEventForm({
     <form noValidate onSubmit={form.handleSubmit(onSubmit)}>
       <div className="space-y-8 p-6 md:p-8">
         <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
-          <div className="md:col-span-2 flex flex-col md:flex-row gap-8">
+          <div className="flex flex-col gap-8 md:col-span-2 md:flex-row">
             <div className="w-full md:w-2/3">
               <Controller
                 control={form.control}
@@ -283,9 +283,7 @@ export function UpdateEventForm({
             />
           </div>
 
-        
-
-          <div className="md:col-span-2 flex flex-col md:flex-row gap-8">
+          <div className="flex flex-col gap-8 md:col-span-2 md:flex-row">
             <div className="w-full">
               <Controller
                 control={form.control}

@@ -1,9 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { ActivitiesListClient } from "./activities-list.client";
 
 export function Activities({ id }: { id: string }) {
   return (
-    <Card className="h-full min-h-0 max-h-125 shadow-xs">
+    <Card className="h-full max-h-125 min-h-0 shadow-xs">
       <CardHeader>
         <CardTitle>Activities</CardTitle>
         <CardDescription>

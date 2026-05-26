@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   flexRender,
@@ -12,6 +13,7 @@ import {
 import { Activity, ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
+
 import { DateRangePicker } from "@/components/date-range-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,14 +24,15 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import JobDetails from "./details";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
 import { fetchJobsList, retryJob } from "./api";
 import { jobsColumns } from "./columns";
-import { JobsTableSkeleton } from "./skeleton";
+import JobDetails from "./details";
 import type { JobRow } from "./schema";
+import { JobsTableSkeleton } from "./skeleton";
 
 const statusOptions = [
   { value: "all", label: "All" },
@@ -229,11 +232,11 @@ export default function JobsTable() {
             <div className="overflow-hidden rounded-lg border bg-card">
               <Table>
                 <TableHeader className="bg-muted/15">
-                  {table.getHeaderGroups().map((headerGroup, index) => (
+                  {table.getHeaderGroups().map((headerGroup) => (
                     <TableRow key={headerGroup.id}>
                       {headerGroup.headers.map((header) => (
                         <TableHead
-                          key={`${index}-${header.id}`}
+                          key={`${headerGroup.id}-${header.id}`}
                           colSpan={header.colSpan}
                           className="h-11 p-3 font-light text-muted-foreground text-sm"
                         >

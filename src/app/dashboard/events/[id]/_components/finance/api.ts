@@ -235,7 +235,7 @@ export async function getEventFinanceSummary(id: string): Promise<EventFinanceSu
 
   const expensesInKobo =
     expensesTotal.data.find((item) => item.currency.toUpperCase() === "NGN")?.total_amount_in_kobo ?? 0;
-  const revenueInKobo = metrics.total_received;
+  const revenueInKobo = metrics.total_revenue_in_kobo;
 
   return {
     expensesInKobo,
@@ -243,4 +243,40 @@ export async function getEventFinanceSummary(id: string): Promise<EventFinanceSu
     netBalanceInKobo: revenueInKobo - expensesInKobo,
     revenueInKobo,
   };
+}
+
+const updateEventFinanceAdjustmentRequestSchema = z.object({
+  previous_balance_in_kobo: z.number().int().min(0),
+});
+
+const updateEventFinanceAdjustmentResponseSchema = z.object({
+  previous_balance_in_kobo: z.number().int().min(0),
+});
+
+export type UpdateEventFinanceAdjustmentInput = z.infer<typeof updateEventFinanceAdjustmentRequestSchema>;
+export type UpdateEventFinanceAdjustmentResponseDTO = z.infer<typeof updateEventFinanceAdjustmentResponseSchema>;
+
+export async function updateEventFinanceAdjustment(
+  id: string,
+  input: UpdateEventFinanceAdjustmentInput,
+): Promise<UpdateEventFinanceAdjustmentResponseDTO> {
+  const payload = updateEventFinanceAdjustmentRequestSchema.parse(input);
+  const res = await authFetch(`/api/events/${encodeURIComponent(id)}/finance-adjustment`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    let message = "Could not update opening balance.";
+    try {
+      message = getErrorMessageFallback(message, (await res.json()) as unknown);
+    } catch {
+      /* ignore */
+    }
+    throw new Error(message);
+  }
+
+  const json = (await res.json()) as unknown;
+  return updateEventFinanceAdjustmentResponseSchema.parse(json);
 }

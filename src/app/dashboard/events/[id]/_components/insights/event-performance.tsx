@@ -1,10 +1,13 @@
 "use client";
 
 import * as React from "react";
+
 import { Bar, CartesianGrid, ComposedChart, XAxis, YAxis } from "recharts";
-import { MetricsDTO } from "./api";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+
+import type { MetricsDTO } from "./api";
 import { formatMetricChartLabel } from "./format-metric-chart-label";
 
 const registrationChartConfig = {

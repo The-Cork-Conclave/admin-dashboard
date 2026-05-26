@@ -1,44 +1,46 @@
 "use client";
 
 import * as React from "react";
+
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { CircleX, DollarSign, Ticket, User, UserCheck } from "lucide-react";
 
-import type { Activity, ActivityType } from "./schema";
-import { fetchEventActivitiesPage, type EventActivitiesCursor } from "../../_lib/fetch-event-activities";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+
+import { type EventActivitiesCursor, fetchEventActivitiesPage } from "../../_lib/fetch-event-activities";
+import type { Activity, ActivityType } from "./schema";
 
 function ActivityIcon({ type }: { type: ActivityType }) {
   switch (type) {
     case "registration_created":
       return (
-        <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-slate-50 border border-slate-200 shadow-sm text-slate-600 z-10">
+        <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 shadow-sm">
           <User className="h-4 w-4" />
         </div>
       );
     case "payment_successful":
       return (
-        <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 border border-blue-100 shadow-sm text-blue-600 z-10">
+        <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-blue-600 shadow-sm">
           <DollarSign className="h-4 w-4" />
         </div>
       );
     case "payment_verification_failed":
       return (
-        <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-rose-50 border border-rose-100 shadow-sm text-rose-600 z-10">
+        <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-rose-100 bg-rose-50 text-rose-600 shadow-sm">
           <CircleX className="h-4 w-4" />
         </div>
       );
     case "ticket_issued":
       return (
-        <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-indigo-50 border-indigo-100 shadow-sm text-indigo-600 border z-10">
+        <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-indigo-100 bg-indigo-50 text-indigo-600 shadow-sm">
           <Ticket className="h-4 w-4" />
         </div>
       );
     case "check_in_completed":
       return (
-        <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 shadow-sm text-emerald-600 z-10">
+        <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-emerald-600 shadow-sm">
           <UserCheck className="h-4 w-4" />
         </div>
       );
@@ -51,22 +53,22 @@ function ActivityItem({ activity: { type, title, description, created_at } }: { 
   const time = formatDistanceToNow(new Date(created_at), { addSuffix: true });
 
   return (
-    <div className="flex gap-4 group">
+    <div className="group flex gap-4">
       <div className="relative flex flex-col items-center">
-        <div className="absolute top-8 bottom-0 w-px bg-slate-100 group-last:hidden"></div>
-        <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 border border-emerald-100 shadow-sm text-emerald-600 z-10">
+        <div className="absolute top-8 bottom-0 w-px bg-slate-100 group-last:hidden" />
+        <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-emerald-600 shadow-sm">
           <ActivityIcon type={type} />
         </div>
       </div>
 
-      <div className="pb-8 w-full">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+      <div className="w-full pb-8">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-800">{title}</p>
-            {description && <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">{description}</p>}
+            <p className="font-semibold text-slate-800 text-sm">{title}</p>
+            {description && <p className="mt-1 flex items-center gap-1.5 text-slate-500 text-xs">{description}</p>}
           </div>
 
-          <span className="text-xs text-slate-400 whitespace-nowrap mt-1 sm:mt-0 font-medium">{time}</span>
+          <span className="mt-1 whitespace-nowrap font-medium text-slate-400 text-xs sm:mt-0">{time}</span>
         </div>
       </div>
     </div>
@@ -78,6 +80,7 @@ function ActivitiesSkeleton({ rows = 6 }: { rows?: number }) {
     <div className="flex h-full max-h-180 flex-col gap-4 overflow-y-auto">
       <div className="flex-1 space-y-2">
         {Array.from({ length: rows }, (_, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: skeleton items are static and never reordered
           <div key={`activity-skeleton-${i}`} className="flex gap-4">
             <div className="relative flex flex-col items-center">
               <Skeleton className="h-8 w-8 rounded-full" />
@@ -149,7 +152,7 @@ export function ActivitiesListClient({ id, limit = 20 }: { id: string; limit?: n
     const message = query.error instanceof Error ? query.error.message : "Failed to load activities";
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-sm text-red-600">{message}</p>
+        <p className="text-red-600 text-sm">{message}</p>
         <div>
           <Button size="sm" variant="outline" onClick={() => query.refetch()}>
             Retry
@@ -160,7 +163,7 @@ export function ActivitiesListClient({ id, limit = 20 }: { id: string; limit?: n
   }
 
   if (activities.length === 0) {
-    return <div className="text-sm text-slate-500">No activities yet.</div>;
+    return <div className="text-slate-500 text-sm">No activities yet.</div>;
   }
 
   return (
@@ -172,9 +175,9 @@ export function ActivitiesListClient({ id, limit = 20 }: { id: string; limit?: n
 
         <div ref={sentinelRef} className="h-8" />
 
-        {query.isFetchingNextPage && <div className="text-xs text-slate-500">Loading more…</div>}
+        {query.isFetchingNextPage && <div className="text-slate-500 text-xs">Loading more…</div>}
         {!query.hasNextPage && (
-          <div className="text-xs text-slate-400 text-center pb-4 mb-4">You’re all caught up.</div>
+          <div className="mb-4 pb-4 text-center text-slate-400 text-xs">You’re all caught up.</div>
         )}
       </div>
     </div>

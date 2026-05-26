@@ -26,7 +26,14 @@ import {
 import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -243,14 +250,13 @@ export default function Gallery({ id }: { id: string }) {
     }
   };
 
-  const zipProgressPercent =
-    zipProgress.total > 0 ? Math.round((zipProgress.completed / zipProgress.total) * 100) : 0;
+  const zipProgressPercent = zipProgress.total > 0 ? Math.round((zipProgress.completed / zipProgress.total) * 100) : 0;
 
   return (
     <main className="mx-auto w-full px-6 py-4 md:px-10 lg:px-12">
       <header className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Event Gallery</h1>
+          <h1 className="font-semibold text-2xl tracking-tight">Event Gallery</h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -282,27 +288,27 @@ export default function Gallery({ id }: { id: string }) {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium">
+          <h2 className="font-medium text-sm">
             Gallery Images <span className="ml-1 font-normal text-muted-foreground">({galleryCount})</span>
           </h2>
         </div>
 
         {galleryQuery.isLoading ? (
-          <div className="text-sm text-muted-foreground">Loading gallery…</div>
+          <div className="text-muted-foreground text-sm">Loading gallery…</div>
         ) : galleryQuery.isError ? (
           <div className="space-y-3 rounded-xl border border-border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Could not load gallery.</p>
+            <p className="text-muted-foreground text-sm">Could not load gallery.</p>
             <Button type="button" variant="outline" size="sm" onClick={() => galleryQuery.refetch()}>
               Retry
             </Button>
           </div>
         ) : gallery.length === 0 ? (
-          <div className="mt-12 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-4 py-16 text-center shadow-sm">
+          <div className="mt-12 flex flex-col items-center justify-center rounded-2xl border border-border border-dashed bg-card px-4 py-16 text-center shadow-sm">
             <div className="mb-4 grid size-16 place-items-center rounded-full border border-border bg-muted/30">
               <CirclePlus className="size-7 text-muted-foreground" />
             </div>
-            <h3 className="text-base font-medium">No gallery images yet</h3>
-            <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
+            <h3 className="font-medium text-base">No gallery images yet</h3>
+            <p className="mt-1.5 max-w-sm text-muted-foreground text-sm">
               Add images by uploading a file or pasting an image URL.
             </p>
             <div className="mt-6">
@@ -313,11 +319,11 @@ export default function Gallery({ id }: { id: string }) {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
             {gallery.map((img) => (
               <Card
                 key={img.id}
-                className="group relative gap-0 overflow-hidden rounded-xl py-0 ring-1 ring-foreground/10 shadow-sm transition-all hover:shadow-md"
+                className="group relative gap-0 overflow-hidden rounded-xl py-0 shadow-sm ring-1 ring-foreground/10 transition-all hover:shadow-md"
               >
                 <div className="relative aspect-video overflow-hidden bg-muted/30">
                   <Image
@@ -354,15 +360,15 @@ export default function Gallery({ id }: { id: string }) {
 
                 <CardContent className="px-3 py-3">
                   {img.caption?.trim() ? (
-                    <h4 className="truncate text-sm font-medium">{img.caption}</h4>
+                    <h4 className="truncate font-medium text-sm">{img.caption}</h4>
                   ) : (
-                    <h4 className="truncate text-sm font-normal text-muted-foreground italic">No caption added</h4>
+                    <h4 className="truncate font-normal text-muted-foreground text-sm italic">No caption added</h4>
                   )}
 
                   {img.alt?.trim() ? (
-                    <p className="mt-0.5 truncate text-xs text-muted-foreground">Alt: {img.alt}</p>
+                    <p className="mt-0.5 truncate text-muted-foreground text-xs">Alt: {img.alt}</p>
                   ) : (
-                    <p className="mt-0.5 truncate text-xs text-muted-foreground italic">Alt text missing</p>
+                    <p className="mt-0.5 truncate text-muted-foreground text-xs italic">Alt text missing</p>
                   )}
                 </CardContent>
                 <CardFooter className="hidden" />
@@ -390,9 +396,7 @@ export default function Gallery({ id }: { id: string }) {
             </DialogDescription>
           </DialogHeader>
 
-          {zipPhase === "reading" ? (
-            <p className="text-muted-foreground text-sm">Reading ZIP…</p>
-          ) : null}
+          {zipPhase === "reading" ? <p className="text-muted-foreground text-sm">Reading ZIP…</p> : null}
 
           {zipPhase === "uploading" ? (
             <div className="space-y-3">
@@ -466,18 +470,21 @@ export default function Gallery({ id }: { id: string }) {
 
           <form onSubmit={onSubmitAdd} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Image URL</label>
+              <label htmlFor="gallery-add-url" className="font-medium text-sm">
+                Image URL
+              </label>
               <Input
+                id="gallery-add-url"
                 type="url"
                 placeholder="https://example.com/image.jpg"
                 value={addForm.url}
                 onChange={(e) => setAddForm((s) => ({ ...s, url: e.target.value }))}
               />
-              <div className="text-xs text-muted-foreground">Or upload a file below.</div>
+              <div className="text-muted-foreground text-xs">Or upload a file below.</div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Upload</label>
+              <span className="font-medium text-sm">Upload</span>
               <ImageUpload
                 value={addForm.url}
                 onChange={(url) => setAddForm((s) => ({ ...s, url }))}
@@ -486,10 +493,11 @@ export default function Gallery({ id }: { id: string }) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">
+              <label htmlFor="gallery-add-caption" className="font-medium text-sm">
                 Caption <span className="font-normal text-muted-foreground">(Optional)</span>
               </label>
               <Input
+                id="gallery-add-caption"
                 type="text"
                 placeholder="e.g. VIP seating area"
                 value={addForm.caption}
@@ -498,16 +506,16 @@ export default function Gallery({ id }: { id: string }) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">
+              <label htmlFor="gallery-add-alt" className="font-medium text-sm">
                 Alt Text <span className="font-normal text-muted-foreground">(Optional)</span>
               </label>
               <Textarea
+                id="gallery-add-alt"
                 rows={2}
                 placeholder="Describe what is happening in the image..."
                 value={addForm.alt}
                 onChange={(e) => setAddForm((s) => ({ ...s, alt: e.target.value }))}
               />
-              
             </div>
 
             <DialogFooter>
@@ -543,18 +551,21 @@ export default function Gallery({ id }: { id: string }) {
 
           <form onSubmit={onSubmitEdit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Image URL</label>
+              <label htmlFor="gallery-edit-url" className="font-medium text-sm">
+                Image URL
+              </label>
               <Input
+                id="gallery-edit-url"
                 type="url"
                 placeholder="https://example.com/image.jpg"
                 value={editForm.url}
                 onChange={(e) => setEditForm((s) => ({ ...s, url: e.target.value }))}
               />
-              <div className="text-xs text-muted-foreground">Or upload a file below.</div>
+              <div className="text-muted-foreground text-xs">Or upload a file below.</div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Upload</label>
+              <span className="font-medium text-sm">Upload</span>
               <ImageUpload
                 value={editForm.url}
                 onChange={(url) => setEditForm((s) => ({ ...s, url }))}
@@ -563,10 +574,11 @@ export default function Gallery({ id }: { id: string }) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">
+              <label htmlFor="gallery-edit-caption" className="font-medium text-sm">
                 Caption <span className="font-normal text-muted-foreground">(Optional)</span>
               </label>
               <Input
+                id="gallery-edit-caption"
                 type="text"
                 placeholder="e.g. CEO delivering the opening remarks"
                 value={editForm.caption}
@@ -575,10 +587,11 @@ export default function Gallery({ id }: { id: string }) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">
+              <label htmlFor="gallery-edit-alt" className="font-medium text-sm">
                 Alt Text <span className="font-normal text-muted-foreground">(Optional)</span>
               </label>
               <Textarea
+                id="gallery-edit-alt"
                 rows={2}
                 placeholder="Describe what is happening in the image..."
                 value={editForm.alt}
@@ -587,7 +600,12 @@ export default function Gallery({ id }: { id: string }) {
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)} disabled={updateMutation.isPending}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditOpen(false)}
+                disabled={updateMutation.isPending}
+              >
                 Cancel
               </Button>
               <Button type="submit" variant="default" disabled={updateMutation.isPending || !selected}>
@@ -616,7 +634,12 @@ export default function Gallery({ id }: { id: string }) {
           </DialogHeader>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsDeleteOpen(false)} disabled={deleteMutation.isPending}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsDeleteOpen(false)}
+              disabled={deleteMutation.isPending}
+            >
               Cancel
             </Button>
             <Button

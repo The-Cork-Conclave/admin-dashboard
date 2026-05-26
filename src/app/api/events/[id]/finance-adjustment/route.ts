@@ -2,13 +2,13 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { fetchUpstream } from "@/app/api/_utils/upstream";
 
-export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
 
-  const upstream = await fetchUpstream(`/events/${id}/checkin`, {
-    method: "POST",
-    headers: { "Content-Type": req.headers.get("Content-Type") ?? "application/json" },
+  const upstream = await fetchUpstream(`/events/${id}/finance-adjustment`, {
+    method: "PATCH",
     body: await req.text(),
+    headers: { "Content-Type": req.headers.get("Content-Type") ?? "application/json" },
   });
 
   const body = await upstream.text();

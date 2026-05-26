@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
+
 import { UpdateEventForm } from "./update-event-form";
 
 export default function UpdateEvent({ id }: { id: string }) {

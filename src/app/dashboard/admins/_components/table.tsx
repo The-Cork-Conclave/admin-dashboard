@@ -73,8 +73,10 @@ export function AdminsTable({
           <TableBody>
             {isFetching ? (
               Array.from({ length: skeletonRows }, (_, ri) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: skeleton rows are static and never reordered
                 <TableRow key={`sk-${ri}`}>
                   {Array.from({ length: colCount }, (_, ci) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: skeleton cells are static and never reordered
                     <TableCell key={ci} className="p-3 align-middle">
                       <Skeleton className={ci === 0 ? "h-10 w-full max-w-[220px]" : "h-4 w-28"} />
                     </TableCell>

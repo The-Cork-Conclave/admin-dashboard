@@ -2,6 +2,8 @@
 "use no memo";
 
 import * as React from "react";
+
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -10,7 +12,11 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search } from "lucide-react";
+import type { DateRange } from "react-day-picker";
+
+import { DateRangePicker } from "@/components/date-range-picker";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,16 +28,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type { DateRange } from "react-day-picker";
-import { DateRangePicker } from "@/components/date-range-picker";
-import { fetchUsersList } from "./fetch-members-list";
 import useDebouncedValue from "@/hooks/use-debounced-value";
-import { UsersTableSkeleton } from "./members-skeleton";
+
 import { membersColumn } from "./columns";
+import { fetchUsersList } from "./fetch-members-list";
+import { UsersTableSkeleton } from "./members-skeleton";
 import type { MembersRow } from "./schema";
-import { Download } from "lucide-react";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const sortOptions = [
   { value: "newest", label: "Newest first" },
@@ -224,7 +226,7 @@ export default function Members() {
             </div>
 
             <div className="flex items-center justify-between px-1">
-              <div className="hidden flex-1 text-muted-foreground text-sm lg:flex"></div>
+              <div className="hidden flex-1 text-muted-foreground text-sm lg:flex" />
               <div className="flex w-full items-center gap-8 lg:w-fit">
                 <div className="hidden items-center gap-2 lg:flex">
                   <Label htmlFor="recent-customers-rows-per-page" className="font-medium text-sm">

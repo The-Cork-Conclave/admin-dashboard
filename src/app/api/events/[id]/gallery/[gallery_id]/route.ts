@@ -33,4 +33,3 @@ export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ id: str
     headers: { "Content-Type": upstream.headers.get("Content-Type") ?? "application/json" },
   });
 }
-

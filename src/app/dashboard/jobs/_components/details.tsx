@@ -1,10 +1,11 @@
+import { format, parseISO } from "date-fns";
+import { Copy, TriangleAlert } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { JobStatusBadge, JobName } from "./columns";
-import { Copy, TriangleAlert } from "lucide-react";
 import { copyToClipboard } from "@/lib/copy-to-clipboard";
-import { format, parseISO } from "date-fns";
-import * as React from "react";
+
+import { JobName, JobStatusBadge } from "./columns";
 import type { JobRow } from "./schema";
 
 export type JobDetailsProps = {
@@ -34,11 +35,11 @@ export default function JobDetails({ job, open, onOpenChange, onRetry, retryPend
       <DrawerContent className="w-screen! sm:min-w-150 xl:min-w-125">
         <DrawerHeader className="flex flex-col gap-2">
           <DrawerTitle>{job ? JobName(job.name) : "Job details"}</DrawerTitle>
-          <div className="flex gap-2 justify-between">
-            <span className="font-medium text-xs text-muted-foreground">
+          <div className="flex justify-between gap-2">
+            <span className="font-medium text-muted-foreground text-xs">
               {job?.id ?? "—"}
               <Button
-                className="cursor-pointer h-4"
+                className="h-4 cursor-pointer"
                 variant="ghost"
                 disabled={!job?.id}
                 onClick={() => job?.id && copyToClipboard(job.id)}
@@ -81,9 +82,9 @@ export default function JobDetails({ job, open, onOpenChange, onRetry, retryPend
 
           {job?.last_error && (
             <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-red-600 flex items-center gap-1.5">
-                  <TriangleAlert className="text-sm h-8" />
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="flex items-center gap-1.5 font-medium text-red-600 text-sm">
+                  <TriangleAlert className="h-8 text-sm" />
                   Last Error
                 </h3>
                 <Button
@@ -96,7 +97,7 @@ export default function JobDetails({ job, open, onOpenChange, onRetry, retryPend
               </div>
 
               <div className="rounded-xl border border-red-200/60 bg-red-50/50 p-4 shadow-sm">
-                <p className="text-xs font-mono text-red-700 leading-relaxed whitespace-pre-wrap wrap-break-word">
+                <p className="wrap-break-word whitespace-pre-wrap font-mono text-red-700 text-xs leading-relaxed">
                   {String(job.last_error)}
                 </p>
               </div>
@@ -104,10 +105,10 @@ export default function JobDetails({ job, open, onOpenChange, onRetry, retryPend
           )}
 
           <section>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-zinc-900">Payload</h3>
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="font-medium text-sm text-zinc-900">Payload</h3>
               <Button
-                className="cursor-pointer h-4"
+                className="h-4 cursor-pointer"
                 variant="ghost"
                 disabled={!job}
                 onClick={() => copyToClipboard(prettyPayload)}
@@ -115,8 +116,8 @@ export default function JobDetails({ job, open, onOpenChange, onRetry, retryPend
                 <Copy />
               </Button>
             </div>
-            <div className="rounded-xl border border-zinc-200/80 bg-zinc-100/50 p-4 shadow-sm overflow-x-auto">
-              <pre className="text-xs font-mono text-zinc-700 leading-relaxed whitespace-pre">{prettyPayload}</pre>
+            <div className="overflow-x-auto rounded-xl border border-zinc-200/80 bg-zinc-100/50 p-4 shadow-sm">
+              <pre className="whitespace-pre font-mono text-xs text-zinc-700 leading-relaxed">{prettyPayload}</pre>
             </div>
           </section>
         </div>

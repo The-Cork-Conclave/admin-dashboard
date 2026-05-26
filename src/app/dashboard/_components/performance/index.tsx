@@ -5,7 +5,7 @@ import MembersActivity from "./members-activity";
 
 export function PerformanceOverview() {
   return (
-    <div className="flex flex-col md:flex-row items-stretch gap-6 w-full">
+    <div className="flex w-full flex-col items-stretch gap-6 md:flex-row">
       <div className="flex-1">
         <MembersActivity />
       </div>

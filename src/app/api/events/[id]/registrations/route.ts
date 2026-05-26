@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+
 import { fetchUpstream } from "@/app/api/_utils/upstream";
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {

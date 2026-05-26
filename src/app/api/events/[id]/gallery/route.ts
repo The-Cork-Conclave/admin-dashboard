@@ -30,4 +30,3 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
     headers: { "Content-Type": upstream.headers.get("Content-Type") ?? "application/json" },
   });
 }
-

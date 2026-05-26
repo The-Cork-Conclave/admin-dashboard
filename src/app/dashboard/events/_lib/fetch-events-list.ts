@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { authFetch } from "@/lib/auth/auth-fetch";
+
 const listMetaSchema = z.object({
   total: z.number().int().nonnegative(),
   page: z.number().int().min(1),

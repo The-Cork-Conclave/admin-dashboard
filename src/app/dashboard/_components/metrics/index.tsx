@@ -1,21 +1,27 @@
 "use client";
 
-import { DollarSign, TrendingDown, TrendingUp, UserPlus, Ticket, Waves } from "lucide-react";
+import { useState } from "react";
+
+import { useQuery } from "@tanstack/react-query";
+import { CirclePlus, DollarSign, Ticket, TrendingDown, TrendingUp, UserPlus, Waves } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery } from "@tanstack/react-query";
-import {
-  getRevenueMetrics,
-  RevenueMetricsDTO,
-  getMembersMetrics,
-  MembersMetricsDTO,
-  getTicketsMetrics,
-  TicketsMetricsDTO,
-  getAttendanceMetrics,
-  AttendanceMetricsDTO,
-} from "./api";
 import { formatNairaFromKobo } from "@/lib/utils";
+
+import {
+  type AttendanceMetricsDTO,
+  getAttendanceMetrics,
+  getMembersMetrics,
+  getRevenueMetrics,
+  getTicketsMetrics,
+  type MembersMetricsDTO,
+  type RevenueMetricsDTO,
+  type TicketsMetricsDTO,
+} from "./api";
+import { RevenueOpeningBalanceModal } from "./revenue-opening-balance-modal";
 
 type MetricCardSkeletonProps = {
   description: string;
@@ -52,6 +58,7 @@ function RevenueCard() {
   });
 
   const metric: RevenueMetricsDTO | undefined = query.data;
+  const [open, setOpen] = useState(false);
 
   if (query.isLoading) {
     return <MetricCardSkeleton description="Total Received" />;
@@ -60,10 +67,14 @@ function RevenueCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
+        <CardTitle className="flex items-start justify-between gap-2">
           <div className="flex size-7 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
             <DollarSign className="size-4" />
           </div>
+          <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => setOpen(true)}>
+            <CirclePlus className="size-4" />
+            <span className="sr-only">Set opening revenue</span>
+          </Button>
         </CardTitle>
         <CardDescription>Total Received</CardDescription>
       </CardHeader>
@@ -71,11 +82,20 @@ function RevenueCard() {
       <CardContent className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
           <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">
-            {formatNairaFromKobo(`${metric?.total ?? 0}`).pretty}
+            {formatNairaFromKobo(`${metric?.total_revenue_in_kobo ?? 0}`).pretty}
           </div>
         </div>
         <p className="text-muted-foreground text-sm">Total revenue from event ticket sales</p>
       </CardContent>
+
+      <RevenueOpeningBalanceModal
+        initialPreviousRevenueInKobo={metric?.previous_revenue_in_kobo ?? 0}
+        open={open}
+        onOpenChange={setOpen}
+        onSaved={async () => {
+          await query.refetch();
+        }}
+      />
     </Card>
   );
 }
