@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { authFetch } from "@/lib/auth/auth-fetch";
 
 const listMetaSchema = z.object({

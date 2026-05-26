@@ -7,8 +7,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { DateTimePicker } from "@/components/date-time-picker";
+
 import { AmountInput } from "@/components/amount-input";
+import { DateTimePicker } from "@/components/date-time-picker";
 import { ImageUpload } from "@/components/image-upload";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -210,7 +211,7 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
             />
           </div>
 
-          <div className="md:col-span-2 flex flex-col md:flex-row gap-8">
+          <div className="flex flex-col gap-8 md:col-span-2 md:flex-row">
             <div className="w-full">
               <Controller
                 control={form.control}
@@ -218,7 +219,7 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                 render={({ field, fieldState }) => (
                   <Field className="gap-1.5" data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="event-dress-code">
-                      Dress Code <span className="text-xs text-muted-foreground">(Optional)</span>
+                      Dress Code <span className="text-muted-foreground text-xs">(Optional)</span>
                     </FieldLabel>
                     <Textarea
                       {...field}
@@ -242,7 +243,7 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                 render={({ field, fieldState }) => (
                   <Field className="gap-1.5" data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor="event-entry-fee">
-                      Entry Fee <span className="text-xs text-muted-foreground">(Optional)</span>
+                      Entry Fee <span className="text-muted-foreground text-xs">(Optional)</span>
                     </FieldLabel>
                     <Textarea
                       {...field}
@@ -306,7 +307,7 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor="amount-in-kobo">
                   Amount (₦){" "}
-                  <span className="text-xs text-muted-foreground">(optional; leave empty for a free event)</span>
+                  <span className="text-muted-foreground text-xs">(optional; leave empty for a free event)</span>
                 </FieldLabel>
                 <AmountInput
                   id="amount-in-kobo"
@@ -352,7 +353,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                 <Field className="gap-1.5" data-invalid={fieldState.invalid}>
                   <FieldLabel htmlFor="venue-address">
                     Venue Address{" "}
-                    <span className="text-xs text-muted-foreground">(optional; preferably an address with a map link)</span>
+                    <span className="text-muted-foreground text-xs">
+                      (optional; preferably an address with a map link)
+                    </span>
                   </FieldLabel>
                   <Input
                     {...field}
@@ -373,9 +376,7 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
             name="registration_opens_at"
             render={({ field, fieldState }) => (
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="registration-opens-at">
-                  Registration Opensxw
-                </FieldLabel>
+                <FieldLabel htmlFor="registration-opens-at">Registration Opensxw</FieldLabel>
                 <DateTimePicker
                   id="registration-opens-at"
                   value={field.value}
@@ -394,9 +395,7 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
             name="registration_closes_at"
             render={({ field, fieldState }) => (
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="registration-closes-at">
-                  Registration Closes
-                </FieldLabel>
+                <FieldLabel htmlFor="registration-closes-at">Registration Closes</FieldLabel>
                 <DateTimePicker
                   id="registration-closes-at"
                   value={field.value}

@@ -2,6 +2,8 @@
 "use no memo";
 
 import * as React from "react";
+
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   flexRender,
   getCoreRowModel,
@@ -10,15 +12,21 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
+  Activity,
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Activity,
-  Search,
   Download,
+  Search,
 } from "lucide-react";
+import type { DateRange } from "react-day-picker";
+
+import { fetchEventRegistrationsList } from "@/app/dashboard/events/_lib/fetch-events-registrations-list";
+import { DateRangePicker } from "@/components/date-range-picker";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,16 +38,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { registrationColumns } from "./columns";
-import type { RegistrationRow } from "./schema";
-import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type { DateRange } from "react-day-picker";
-import { DateRangePicker } from "@/components/date-range-picker";
-import { fetchEventRegistrationsList } from "@/app/dashboard/events/_lib/fetch-events-registrations-list";
 import useDebouncedValue from "@/hooks/use-debounced-value";
+
+import { registrationColumns } from "./columns";
 import { EventsRegistrationTableSkeleton } from "./events-registrations-skeleton";
+import type { RegistrationRow } from "./schema";
 
 const statusOptions = [
   { value: "all", label: "All" },
@@ -159,11 +162,11 @@ const Registrations = ({ id }: { id: string }) => {
         </CardAction>
       </CardHeader>
 
-      <CardContent className="pt-2 mt-2">
+      <CardContent className="mt-2 pt-2">
         {query.isLoading ? (
           <EventsRegistrationTableSkeleton rowCount={pagination.pageSize} />
         ) : (
-          <div className="space-y-4 flex flex-col gap-2">
+          <div className="flex flex-col gap-2 space-y-4">
             <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative w-full lg:w-80">
@@ -262,7 +265,7 @@ const Registrations = ({ id }: { id: string }) => {
             </div>
 
             <div className="flex items-center justify-between px-1">
-              <div className="hidden flex-1 text-muted-foreground text-sm lg:flex"></div>
+              <div className="hidden flex-1 text-muted-foreground text-sm lg:flex" />
               <div className="flex w-full items-center gap-8 lg:w-fit">
                 <div className="hidden items-center gap-2 lg:flex">
                   <Label htmlFor="events-rows-per-page" className="font-medium text-sm">

@@ -2,8 +2,9 @@
 "use no memo";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { format, parseISO, isValid } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { CircleAlertIcon, CircleCheckIcon, Clock3Icon, LoaderIcon, UserRound } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 
 import type { RegistrationRow } from "./schema";

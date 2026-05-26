@@ -1,25 +1,28 @@
 "use client";
 
 import { useState } from "react";
+
+import Link from "next/link";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Clock, Keyboard, MapPin, MoveLeft } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import { type EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
+import { QrScanner } from "@/components/qr-scanner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import Registrations from "./registrations";
-import { type EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
-import { formatDateTime, formatTime } from "@/lib/utils";
-import Link from "next/link";
-import { checkinAttendee } from "../api";
-import { formSchema, FormInput, CheckinResponse } from "../schema";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Field, FieldError, FieldGroup } from "@/components/ui/field";
-import { QrScanner } from "@/components/qr-scanner";
 import { decodeQrPayload } from "@/lib/qr-payload";
+import { formatDateTime, formatTime } from "@/lib/utils";
+
+import { checkinAttendee } from "../api";
+import { type CheckinResponse, type FormInput, formSchema } from "../schema";
+import Registrations from "./registrations";
 
 export default function RegistrationPage({ id }: { id: string }) {
   const queryClient = useQueryClient();
@@ -92,9 +95,9 @@ export default function RegistrationPage({ id }: { id: string }) {
       <header className="flex flex-col justify-between gap-4 border-b pb-2 sm:flex-row sm:items-end">
         <div>
           <div className="mb-1.5 flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{event?.name ?? ""}</h1>
+            <h1 className="font-semibold text-2xl tracking-tight">{event?.name ?? ""}</h1>
           </div>
-          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <p className="flex items-center gap-1.5 text-muted-foreground text-sm">
             <MapPin className="size-4" />
             <span className="mr-2">{formatDateTime(event?.event_date)}</span> •
             <span className="ml-2">{event?.venue_name}</span>
@@ -105,8 +108,8 @@ export default function RegistrationPage({ id }: { id: string }) {
           <Card size="sm" className="w-fit gap-2 px-4 py-3">
             <CardContent className="p-0">
               <div className="flex items-center gap-4 text-sm">
-                <div className="flex md:flex-col lg:flex-row text-right items-center gap-4">
-                  <span className="text-xs font-medium text-muted-foreground">Attendees Checked In</span>
+                <div className="flex items-center gap-4 text-right md:flex-col lg:flex-row">
+                  <span className="font-medium text-muted-foreground text-xs">Attendees Checked In</span>
                   <span className="font-semibold tracking-tight">{event?.checked_in_count ?? 0}</span>
                 </div>
               </div>
@@ -123,8 +126,8 @@ export default function RegistrationPage({ id }: { id: string }) {
               onScanText={onScanText}
               helperContent={
                 <div className="space-y-1 text-center">
-                  <p className="text-sm font-medium">Scan attendee QR code to check in</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-medium text-sm">Scan attendee QR code to check in</p>
+                  <p className="text-muted-foreground text-xs">
                     Having trouble scanning? Enter code manually on the right.
                   </p>
                 </div>
@@ -177,19 +180,19 @@ export default function RegistrationPage({ id }: { id: string }) {
 
             {!!details.ticket_id && (
               <Card className="relative overflow-hidden ring-1 ring-green-500/10">
-                <div className="absolute left-0 top-0 h-1 w-full bg-green-500" />
+                <div className="absolute top-0 left-0 h-1 w-full bg-green-500" />
                 <CardContent className="p-6 text-center">
                   <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-green-50 ring-4 ring-green-50/50">
                     <CheckCircle2 className="size-6 text-green-600" />
                   </div>
-                  <h3 className="mb-1 text-lg font-semibold tracking-tight">Check-in Successful</h3>
-                  <p className="mb-5 text-sm text-muted-foreground">Attendee verified and granted access.</p>
+                  <h3 className="mb-1 font-semibold text-lg tracking-tight">Check-in Successful</h3>
+                  <p className="mb-5 text-muted-foreground text-sm">Attendee verified and granted access.</p>
 
                   <div className="w-full rounded-lg border bg-muted/30 p-4 text-left">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="mb-0.5 text-xs text-muted-foreground">Attendee</p>
-                        <p className="text-sm font-medium">{details?.name}</p>
+                        <p className="mb-0.5 text-muted-foreground text-xs">Attendee</p>
+                        <p className="font-medium text-sm">{details?.name}</p>
                       </div>
                     </div>
 
