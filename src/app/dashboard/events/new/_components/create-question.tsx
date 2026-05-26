@@ -5,13 +5,6 @@ import { useState } from "react";
 import { GripVertical, Plus, Trash } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 import {
   type DraftQuestion,
   type DraftQuestionOption,
@@ -23,8 +16,14 @@ import {
   single_choice,
   text,
   yes_no,
-} from "./constants";
-import { SortableVerticalList } from "./sortable-vertical-list";
+} from "@/app/dashboard/events/_components/questions/draft";
+import { SortableVerticalList } from "@/app/dashboard/events/_components/questions/sortable-vertical-list";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Drawer, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 function isChoiceType(type: QuestionType) {
   return type === single_choice || type === multiple_choice;
@@ -132,14 +131,14 @@ function QuestionDrawerForm({
     }
 
     if (isChoiceType(questionType)) {
-      const filled = options.filter((o) => o.label.trim() && o.value.trim());
+      const filled = options.filter((o) => o.value.trim());
       if (filled.length < 2) {
-        toast.error("Choice questions need at least 2 options with label and value.");
+        toast.error("Choice questions need at least 2 options.");
         return;
       }
       for (const opt of options) {
-        if (!opt.label.trim() || !opt.value.trim()) {
-          toast.error("Each option must have a label and value.");
+        if (!opt.value.trim()) {
+          toast.error("Each option must have a value.");
           return;
         }
       }
@@ -154,7 +153,6 @@ function QuestionDrawerForm({
       options: isChoiceType(questionType)
         ? options.map((opt, index) => ({
             ...opt,
-            label: opt.label.trim(),
             value: opt.value.trim(),
             sort_order: index,
           }))
@@ -251,16 +249,10 @@ function QuestionDrawerForm({
 
                       <div className="flex grow flex-col gap-2">
                         <Input
-                          value={option.label}
-                          onChange={(e) => updateOption(option.id, { label: e.target.value })}
-                          className={sharpInputClassName}
-                          placeholder="Label"
-                        />
-                        <Input
                           value={option.value}
                           onChange={(e) => updateOption(option.id, { value: e.target.value })}
                           className={sharpInputClassName}
-                          placeholder="Value"
+                          placeholder="Option"
                         />
                       </div>
 
@@ -315,7 +307,7 @@ function QuestionDrawerForm({
                       className="mt-0.5 h-4 w-4 rounded border-gray-300 text-[#ff545a] focus:ring-[#ff545a]"
                       disabled
                     />
-                    <span className="font-medium text-gray-900 text-sm">{opt.label.trim() || "Option label"}</span>
+                    <span className="font-medium text-gray-900 text-sm">{opt.value.trim() || "Option"}</span>
                   </label>
                 ))}
               </div>

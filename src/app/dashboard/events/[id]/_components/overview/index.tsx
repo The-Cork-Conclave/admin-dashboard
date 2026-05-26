@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, FileText, MapPin, MoveRight, Server, Wallet } from "lucide-react";
+import { Calendar, Clock, FileText, HelpCircle, MapPin, MoveRight, Server, Wallet } from "lucide-react";
 
 import { type EventDTO, getEventClient } from "@/app/dashboard/events/[id]/_lib/get-event.client";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -71,6 +71,13 @@ export function EventDetailsClient({ id }: { id: string }) {
               <Button variant="default" size="sm">
                 <span className="mr-2">Registration</span>
                 <MoveRight />
+              </Button>
+            </Link>
+
+            <Link href={`/dashboard/events/${event?.id ?? ""}/questions`}>
+              <Button variant="outline" size="sm">
+                <HelpCircle className="mr-2 size-4" />
+                Questions
               </Button>
             </Link>
 

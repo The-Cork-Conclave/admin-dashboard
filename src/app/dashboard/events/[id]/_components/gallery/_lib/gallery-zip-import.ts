@@ -5,10 +5,10 @@ import JSZip from "jszip";
 import { postCreateGalleryItem } from "@/app/dashboard/events/[id]/_components/gallery/_lib/gallery-api.client";
 import { uploadImageFileToCloudinaryFolder } from "@/lib/cloudinary-client-upload";
 
-export const GALLERY_ZIP_MAX_BYTES = 100 * 1024 * 1024;
-export const GALLERY_ZIP_MAX_IMAGES = 100;
+export const GALLERY_ZIP_MAX_BYTES = 10000 * 1024 * 1024;
+export const GALLERY_ZIP_MAX_IMAGES = 1000;
 export const GALLERY_ZIP_CONCURRENCY = 4;
-export const GALLERY_ZIP_MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+export const GALLERY_ZIP_MAX_IMAGE_BYTES = 100 * 1024 * 1024;
 
 const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif", "avif", "bmp", "svg"]);
 

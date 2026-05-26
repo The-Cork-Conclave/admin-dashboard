@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Link from "next/link";
 
@@ -31,6 +31,7 @@ export default function RegistrationPage({ id }: { id: string }) {
     name: "",
     ticket_id: "",
   });
+  const checkinSuccessRef = useRef<HTMLDivElement | null>(null);
 
   const query = useQuery({
     queryKey: ["event", id],
@@ -80,6 +81,11 @@ export default function RegistrationPage({ id }: { id: string }) {
       toast.error("Invalid QR code", { description: e instanceof Error ? e.message : "Could not decode QR payload." });
     }
   };
+
+  useEffect(() => {
+    if (!details.ticket_id) return;
+    checkinSuccessRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [details.ticket_id]);
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-4 sm:p-6 lg:p-8">
@@ -179,41 +185,43 @@ export default function RegistrationPage({ id }: { id: string }) {
             </Card>
 
             {!!details.ticket_id && (
-              <Card className="relative overflow-hidden ring-1 ring-green-500/10">
-                <div className="absolute top-0 left-0 h-1 w-full bg-green-500" />
-                <CardContent className="p-6 text-center">
-                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-green-50 ring-4 ring-green-50/50">
-                    <CheckCircle2 className="size-6 text-green-600" />
-                  </div>
-                  <h3 className="mb-1 font-semibold text-lg tracking-tight">Check-in Successful</h3>
-                  <p className="mb-5 text-muted-foreground text-sm">Attendee verified and granted access.</p>
+              <div ref={checkinSuccessRef}>
+                <Card className="relative overflow-hidden ring-1 ring-green-500/10">
+                  <div className="absolute top-0 left-0 h-1 w-full bg-green-500" />
+                  <CardContent className="p-6 text-center">
+                    <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-green-50 ring-4 ring-green-50/50">
+                      <CheckCircle2 className="size-6 text-green-600" />
+                    </div>
+                    <h3 className="mb-1 font-semibold text-lg tracking-tight">Check-in Successful</h3>
+                    <p className="mb-5 text-muted-foreground text-sm">Attendee verified and granted access.</p>
 
-                  <div className="w-full rounded-lg border bg-muted/30 p-4 text-left">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="mb-0.5 text-muted-foreground text-xs">Attendee</p>
-                        <p className="font-medium text-sm">{details?.name}</p>
+                    <div className="w-full rounded-lg border bg-muted/30 p-4 text-left">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="mb-0.5 text-muted-foreground text-xs">Attendee</p>
+                          <p className="font-medium text-sm">{details?.name}</p>
+                        </div>
+                      </div>
+
+                      <Separator className="my-3" />
+
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Ticket ID</span>
+                          <span className="font-mono tracking-tight">{details?.ticket_id}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Time</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="size-3.5 text-muted-foreground" />
+                            {formatTime(details?.checkin_at)}
+                          </span>
+                        </div>
                       </div>
                     </div>
-
-                    <Separator className="my-3" />
-
-                    <div className="space-y-2 text-xs">
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Ticket ID</span>
-                        <span className="font-mono tracking-tight">{details?.ticket_id}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Time</span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="size-3.5 text-muted-foreground" />
-                          {formatTime(details?.checkin_at)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </aside>
         )}
