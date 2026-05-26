@@ -1,137 +1,30 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
 
 import { AmountInput } from "@/components/amount-input";
 import { DateTimePicker } from "@/components/date-time-picker";
 import { ImageUpload } from "@/components/image-upload";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { authFetch } from "@/lib/auth/auth-fetch";
 
-const sharpInputClassName = "rounded-md border-foreground/25";
+import { type FormInput, formSchema, sharpInputClassName } from "./constants";
 
-const formSchema = z.object({
-  name: z.string().min(1, { message: "Please enter an event name." }),
-  image_url: z
-    .string()
-    .min(1, { message: "Please upload an event image." })
-    .url({ message: "Please upload a valid image URL." }),
-  description: z.string().optional(),
-  welcome_text: z.string().optional(),
-  dress_code: z.string().optional(),
-  entry_fee: z.string().optional(),
-  event_date: z.string().min(1, { message: "Please select an event date." }),
-  amount_in_kobo: z.string().refine((v) => v.trim() === "" || /^\d+$/.test(v.trim()), {
-    message: "Amount must be a whole number (naira, stored as kobo on the server).",
-  }),
-  venue_name: z.string().min(1, { message: "Please enter a venue name." }),
-  venue_address: z.string().optional(),
-  registration_opens_at: z.string().optional(),
-  registration_closes_at: z.string().optional(),
-});
-
-type FormInput = z.infer<typeof formSchema>;
-
-type CreateEventResponse = {
-  id: string;
-};
-
-function toRFC3339FromDatetimeLocal(value: string): string {
-  // `datetime-local` returns `YYYY-MM-DDTHH:mm` (no timezone).
-  // We treat it as local time and convert to an RFC3339 string with timezone offset via Date.
-  // If parsing fails, return the raw string and let the backend validate.
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? value : d.toISOString();
-}
-
-function eventInstantFromForm(eventDateLocal: string): Date | null {
-  const d = new Date(eventDateLocal);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function defaultRegistrationOpensIso(eventInstant: Date): string {
-  const d = new Date(eventInstant);
-  d.setDate(d.getDate() - 21);
-  return d.toISOString();
-}
-
-function defaultRegistrationClosesIso(eventInstant: Date): string {
-  const d = new Date(eventInstant);
-  d.setDate(d.getDate() - 1);
-  return d.toISOString();
-}
-
-async function postCreateEvent(input: FormInput): Promise<CreateEventResponse> {
-  const eventInstant = eventInstantFromForm(input.event_date);
-  if (!eventInstant) {
-    throw new Error("Invalid event date.");
-  }
-
-  const registrationOpensAt = input.registration_opens_at?.trim()
-    ? toRFC3339FromDatetimeLocal(input.registration_opens_at)
-    : defaultRegistrationOpensIso(eventInstant);
-
-  const registrationClosesAt = input.registration_closes_at?.trim()
-    ? toRFC3339FromDatetimeLocal(input.registration_closes_at)
-    : defaultRegistrationClosesIso(eventInstant);
-
-  const payload = {
-    name: input.name,
-    image_url: input.image_url.trim(),
-    description: input.description?.trim() ? input.description.trim() : undefined,
-    welcome_text: input.welcome_text?.trim() ? input.welcome_text.trim() : undefined,
-    dress_code: input.dress_code?.trim() ? input.dress_code.trim() : undefined,
-    entry_fee: input.entry_fee?.trim() ? input.entry_fee.trim() : undefined,
-    event_date: toRFC3339FromDatetimeLocal(input.event_date),
-    venue_name: input.venue_name,
-    venue_address: input.venue_address?.trim() ? input.venue_address.trim() : undefined,
-    amount_in_kobo: (input.amount_in_kobo ?? "").trim() || "0",
-    registration_opens_at: registrationOpensAt,
-    registration_closes_at: registrationClosesAt,
-  };
-
-  const res = await authFetch("/api/events", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    let message = "Could not create event. Please try again.";
-    try {
-      const body = (await res.json()) as { message?: string };
-      if (typeof body.message === "string" && body.message.length > 0) {
-        message = body.message;
-      }
-    } catch {
-      /* ignore */
-    }
-    throw new Error(message);
-  }
-
-  const json = (await res.json()) as unknown;
-  const parsed = z.object({ id: z.string().min(1) }).safeParse(json);
-  if (!parsed.success) {
-    throw new Error("Event created, but received an unexpected response.");
-  }
-  return { id: parsed.data.id };
-}
-
-export function CreateEventForm({ footer }: { footer?: (args: { isPending: boolean }) => React.ReactNode }) {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-
+export function CreateEventForm({
+  defaultValues,
+  onNext,
+}: {
+  defaultValues?: FormInput;
+  onNext: (data: FormInput) => void;
+}) {
   const form = useForm<FormInput>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: defaultValues ?? {
       name: "",
       image_url: "",
       description: "",
@@ -147,24 +40,12 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: (input: FormInput) => postCreateEvent(input),
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: ["events"] });
-      toast.success("Event created", { description: "Your event has been saved as a draft." });
-      router.push(`/dashboard/events/${encodeURIComponent(data.id)}`);
-    },
-    onError: (err: Error) => {
-      toast.error("Could not create event", { description: err.message });
-    },
-  });
-
-  const onSubmit = (data: FormInput) => {
-    mutation.mutate(data);
-  };
-
   return (
-    <form noValidate onSubmit={form.handleSubmit(onSubmit)}>
+    <form
+      className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+      noValidate
+      onSubmit={form.handleSubmit(onNext)}
+    >
       <div className="space-y-8 p-6 md:p-8">
         <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
           <div className="md:col-span-2">
@@ -180,10 +61,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                     placeholder="Please enter the event name"
                     autoComplete="off"
                     aria-invalid={fieldState.invalid}
-                    disabled={mutation.isPending}
                     className={sharpInputClassName}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
                 </Field>
               )}
             />
@@ -202,10 +82,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                     rows={6}
                     placeholder="Provide details about the event description..."
                     aria-invalid={fieldState.invalid}
-                    disabled={mutation.isPending}
                     className={`${sharpInputClassName} resize-none`}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
                 </Field>
               )}
             />
@@ -227,10 +106,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                       rows={2}
                       placeholder="e.g. Dress like a Nigerian in 1804."
                       aria-invalid={fieldState.invalid}
-                      disabled={mutation.isPending}
                       className={`${sharpInputClassName} resize-none`}
                     />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
                   </Field>
                 )}
               />
@@ -251,11 +129,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                       placeholder="e.g. A bottle of your favourite wine."
                       rows={2}
                       aria-invalid={fieldState.invalid}
-                      disabled={mutation.isPending}
                       className={`${sharpInputClassName} resize-none`}
                     />
-
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
                   </Field>
                 )}
               />
@@ -273,9 +149,8 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                     value={field.value}
                     onChange={(url) => field.onChange(url)}
                     folder="cork-conclave/events"
-                    disabled={mutation.isPending}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
                 </Field>
               )}
             />
@@ -292,10 +167,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                   value={field.value}
                   onChange={field.onChange}
                   aria-invalid={fieldState.invalid}
-                  disabled={mutation.isPending}
                   className={sharpInputClassName}
                 />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
               </Field>
             )}
           />
@@ -313,13 +187,12 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                   id="amount-in-kobo"
                   placeholder="e.g. 5000"
                   aria-invalid={fieldState.invalid}
-                  disabled={mutation.isPending}
                   className={sharpInputClassName}
                   value={String(field.value ?? "")}
                   onChange={(digitsOnly) => field.onChange(digitsOnly)}
                   ref={field.ref}
                 />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
               </Field>
             )}
           />
@@ -336,10 +209,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                     id="venue-name"
                     placeholder="e.g. Grand Convention Hall"
                     aria-invalid={fieldState.invalid}
-                    disabled={mutation.isPending}
                     className={sharpInputClassName}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
                 </Field>
               )}
             />
@@ -362,10 +234,9 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                     id="venue-address"
                     placeholder="e.g. 123 Convention Way, City District..."
                     aria-invalid={fieldState.invalid}
-                    disabled={mutation.isPending}
                     className={sharpInputClassName}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
                 </Field>
               )}
             />
@@ -376,16 +247,15 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
             name="registration_opens_at"
             render={({ field, fieldState }) => (
               <Field className="gap-1.5" data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="registration-opens-at">Registration Opensxw</FieldLabel>
+                <FieldLabel htmlFor="registration-opens-at">Registration Opens</FieldLabel>
                 <DateTimePicker
                   id="registration-opens-at"
                   value={field.value}
                   onChange={field.onChange}
                   aria-invalid={fieldState.invalid}
-                  disabled={mutation.isPending}
                   className={sharpInputClassName}
                 />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
               </Field>
             )}
           />
@@ -401,25 +271,26 @@ export function CreateEventForm({ footer }: { footer?: (args: { isPending: boole
                   value={field.value}
                   onChange={field.onChange}
                   aria-invalid={fieldState.invalid}
-                  disabled={mutation.isPending}
                   className={sharpInputClassName}
                 />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
               </Field>
             )}
           />
         </div>
       </div>
 
-      {footer?.({ isPending: mutation.isPending }) ?? (
-        <FieldGroup className="px-6 pb-6 md:px-8 md:pb-8">
-          <Input
-            type="submit"
-            value={mutation.isPending ? "Creating…" : "Create Event"}
-            className={sharpInputClassName}
-          />
-        </FieldGroup>
-      )}
+      <div className="flex flex-col-reverse items-center justify-between gap-4 border-border border-t bg-muted/30 px-6 py-5 sm:flex-row md:px-8">
+        <Button asChild variant="destructive" className="w-full sm:w-auto">
+          <Link href="/dashboard/events">Cancel</Link>
+        </Button>
+
+        <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row">
+          <Button type="submit" className="w-full px-4 sm:w-auto">
+            Next
+          </Button>
+        </div>
+      </div>
     </form>
   );
 }
