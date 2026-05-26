@@ -2,8 +2,10 @@
 "use no memo";
 
 import * as React from "react";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   flexRender,
@@ -23,6 +25,7 @@ import {
   Search,
 } from "lucide-react";
 import type { DateRange } from "react-day-picker";
+
 import { DateRangePicker } from "@/components/date-range-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,11 +40,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import useDebouncedValue from "@/hooks/use-debounced-value";
+
 import { fetchEventsList } from "../_lib/fetch-events-list";
 import { eventColumns } from "./columns";
 import { EventsTableSkeleton } from "./events-table-skeleton";
 import type { EventRow } from "./schema";
-import useDebouncedValue from "@/hooks/use-debounced-value";
 
 const statusOptions = [
   { value: "all", label: "All" },
@@ -229,11 +233,11 @@ const Events = () => {
               <div className="overflow-hidden rounded-lg border bg-card">
                 <Table>
                   <TableHeader className="bg-muted/15">
-                    {table.getHeaderGroups().map((headerGroup, index) => (
+                    {table.getHeaderGroups().map((headerGroup) => (
                       <TableRow key={headerGroup.id}>
                         {headerGroup.headers.map((header) => (
                           <TableHead
-                            key={`${index}-${header.id}`}
+                            key={`${headerGroup.id}-${header.id}`}
                             colSpan={header.colSpan}
                             className="h-11 p-3 font-light text-muted-foreground text-sm"
                           >

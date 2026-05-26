@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+
 import { Area, ComposedChart, XAxis, YAxis } from "recharts";
 
-import { type MetricsDTO } from "../../insights/api";
-import { formatMetricChartLabel } from "../../insights/format-metric-chart-label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { formatNairaFromKobo } from "@/lib/utils";
+
+import type { MetricsDTO } from "../../insights/api";
+import { formatMetricChartLabel } from "../../insights/format-metric-chart-label";
 
 type PaymentChartPoint = { label: string; revenue: number };
 
@@ -136,7 +138,7 @@ export function AnalyticsOverview({ metrics }: { metrics: MetricsDTO | undefined
           <CardDescription>Track registrations, ticket sales, attendance, and no-shows</CardDescription>
         </CardHeader>
 
-        <CardContent className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:[&>div:first-child]:pl-0 lg:[&>div:last-child]:pr-0 lg:[&>div]:px-5 mt-2">
+        <CardContent className="mt-2 grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0 lg:divide-x lg:[&>div:first-child]:pl-0 lg:[&>div:last-child]:pr-0 lg:[&>div]:px-5">
           <div className="space-y-1">
             <div className="text-muted-foreground text-sm">Registrations</div>
             <div className="font-semibold text-2xl tabular-nums">{metrics?.total_registrations ?? 0}</div>

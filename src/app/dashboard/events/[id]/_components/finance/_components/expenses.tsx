@@ -2,6 +2,8 @@
 
 import type { PaginationState, Updater } from "@tanstack/react-table";
 
+import { Button } from "@/components/ui/button";
+
 import type { EventFinanceSummaryDTO } from "../api";
 import { BalanceDistributionCard } from "./balance";
 import { ExpensesTableCard, type ExpensesTableCardProps, type ExpensesTableSortValue } from "./expenses-table";
@@ -12,6 +14,7 @@ type ExpensesProps = {
   summaryErrorMessage?: string;
   isSummaryLoading?: boolean;
   onAddExpenseClick?: () => void;
+  onAddOpeningBalanceClick?: () => void;
   onRetrySummary?: () => void;
   expensesTable: {
     data: ExpensesTableCardProps["data"];
@@ -37,6 +40,7 @@ export default function Expenses({
   financeSummary,
   isSummaryLoading,
   onAddExpenseClick,
+  onAddOpeningBalanceClick,
   onRetrySummary,
   summaryErrorMessage,
 }: ExpensesProps) {
@@ -50,6 +54,7 @@ export default function Expenses({
             isLoading={isSummaryLoading}
             netBalanceInKobo={financeSummary?.netBalanceInKobo ?? 0}
             onRetry={onRetrySummary}
+            previousBalanceInKobo={financeSummary?.metrics?.previous_balance_in_kobo}
             revenueInKobo={financeSummary?.revenueInKobo ?? 0}
           />
         </div>
@@ -61,6 +66,14 @@ export default function Expenses({
             onRetry={onRetrySummary}
           />
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {onAddOpeningBalanceClick ? (
+          <Button variant="outline" size="sm" onClick={onAddOpeningBalanceClick}>
+            Opening balance
+          </Button>
+        ) : null}
       </div>
 
       <ExpensesTableCard {...expensesTable} onAddExpenseClick={onAddExpenseClick} />

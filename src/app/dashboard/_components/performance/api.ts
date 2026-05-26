@@ -1,6 +1,7 @@
 "use client";
 
 import { z } from "zod";
+
 import { authFetch } from "@/lib/auth/auth-fetch";
 
 const graphSeriesItemSchema = z.object({

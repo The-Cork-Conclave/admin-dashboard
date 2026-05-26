@@ -1,6 +1,8 @@
-import { FormInput, CheckinResponse } from "./schema";
-import { authFetch } from "@/lib/auth/auth-fetch";
 import { z } from "zod";
+
+import { authFetch } from "@/lib/auth/auth-fetch";
+
+import type { CheckinResponse, FormInput } from "./schema";
 
 export async function checkinAttendee(id: string, input: FormInput): Promise<CheckinResponse> {
   const payload = {

@@ -1,10 +1,11 @@
 "use client";
 
-import { Activities } from "./activities";
-import { EventPerformance } from "./event-performance";
-import { AnalyticsOverview } from "./analytics-overview";
 import { useQuery } from "@tanstack/react-query";
-import { getEventMetrics, MetricsDTO } from "./api";
+
+import { Activities } from "./activities";
+import { AnalyticsOverview } from "./analytics-overview";
+import { getEventMetrics, type MetricsDTO } from "./api";
+import { EventPerformance } from "./event-performance";
 
 export default function Insights({ id }: { id: string }) {
   const query = useQuery({

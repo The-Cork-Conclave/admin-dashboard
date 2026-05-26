@@ -14,6 +14,7 @@ import { ExpenseDetailsDrawer } from "./_components/expense-details-drawer";
 import Expenses from "./_components/expenses";
 import type { ExpensesTableSortValue } from "./_components/expenses-table";
 import type { ExpenseRow } from "./_components/expenses-table-schema";
+import { OpeningBalanceModal } from "./_components/opening-balance-modal";
 import {
   deleteEventExpense,
   type EventExpensesListSortBy,
@@ -52,7 +53,8 @@ export default function Finance({ id }: { id: string }) {
   const [isDeleteExpenseDialogOpen, setIsDeleteExpenseDialogOpen] = React.useState(false);
   const [isEditExpenseOpen, setIsEditExpenseOpen] = React.useState(false);
   const [isExpenseDetailsOpen, setIsExpenseDetailsOpen] = React.useState(false);
-  const [selectedExpense, setSelectedExpense] = React.useState<ExpenseRow | null>(null);
+  const [isOpeningBalanceOpen, setIsOpeningBalanceOpen] = React.useState(false);
+  const [selectedExpenseId, setSelectedExpenseId] = React.useState<string | null>(null);
   const [expenseSearchInput, setExpenseSearchInput] = React.useState("");
   const debouncedExpenseSearch = useDebouncedValue(expenseSearchInput, 350);
   const [expenseSortValue, setExpenseSortValue] = React.useState<ExpensesTableSortValue>("created-desc");
@@ -115,6 +117,23 @@ export default function Finance({ id }: { id: string }) {
         : "Could not load event expenses."
       : undefined;
 
+  const selectedExpense = React.useMemo(() => {
+    if (!selectedExpenseId) return null;
+    return expensesListQuery.data?.data.find((expense) => expense.id === selectedExpenseId) ?? null;
+  }, [expensesListQuery.data?.data, selectedExpenseId]);
+
+  const clearSelectedExpenseIfIdle = React.useCallback(
+    (next: { detailsOpen?: boolean; editOpen?: boolean; deleteOpen?: boolean }) => {
+      const detailsOpen = next.detailsOpen ?? isExpenseDetailsOpen;
+      const editOpen = next.editOpen ?? isEditExpenseOpen;
+      const deleteOpen = next.deleteOpen ?? isDeleteExpenseDialogOpen;
+      if (!detailsOpen && !editOpen && !deleteOpen) {
+        setSelectedExpenseId(null);
+      }
+    },
+    [isDeleteExpenseDialogOpen, isEditExpenseOpen, isExpenseDetailsOpen],
+  );
+
   const refreshExpenseData = React.useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: [`event-${id}-expenses`] }),
@@ -128,7 +147,7 @@ export default function Finance({ id }: { id: string }) {
       await refreshExpenseData();
       setIsDeleteExpenseDialogOpen(false);
       setIsExpenseDetailsOpen(false);
-      setSelectedExpense(null);
+      setSelectedExpenseId(null);
       toast.success("Expense deleted", {
         description: "The expense has been removed successfully.",
       });
@@ -148,28 +167,37 @@ export default function Finance({ id }: { id: string }) {
     await refreshExpenseData();
     setIsEditExpenseOpen(false);
     setIsExpenseDetailsOpen(false);
-    setSelectedExpense(null);
+    setSelectedExpenseId(null);
   }, [refreshExpenseData]);
 
   const handleExpenseRowClick = React.useCallback((expense: ExpenseRow) => {
-    setSelectedExpense(expense);
+    setSelectedExpenseId(expense.id);
     setIsExpenseDetailsOpen(true);
   }, []);
 
-  const handleExpenseDetailsOpenChange = React.useCallback((nextOpen: boolean) => {
-    setIsExpenseDetailsOpen(nextOpen);
-  }, []);
+  const handleExpenseDetailsOpenChange = React.useCallback(
+    (nextOpen: boolean) => {
+      setIsExpenseDetailsOpen(nextOpen);
+      clearSelectedExpenseIfIdle({ detailsOpen: nextOpen });
+    },
+    [clearSelectedExpenseIfIdle],
+  );
 
-  const handleEditExpenseOpenChange = React.useCallback((nextOpen: boolean) => {
-    setIsEditExpenseOpen(nextOpen);
-  }, []);
+  const handleEditExpenseOpenChange = React.useCallback(
+    (nextOpen: boolean) => {
+      setIsEditExpenseOpen(nextOpen);
+      clearSelectedExpenseIfIdle({ editOpen: nextOpen });
+    },
+    [clearSelectedExpenseIfIdle],
+  );
 
   const handleDeleteExpenseDialogOpenChange = React.useCallback(
     (nextOpen: boolean) => {
       if (deleteExpenseMutation.isPending) return;
       setIsDeleteExpenseDialogOpen(nextOpen);
+      clearSelectedExpenseIfIdle({ deleteOpen: nextOpen });
     },
-    [deleteExpenseMutation.isPending],
+    [clearSelectedExpenseIfIdle, deleteExpenseMutation.isPending],
   );
 
   const handleEditExpenseClick = React.useCallback(() => {
@@ -186,21 +214,6 @@ export default function Finance({ id }: { id: string }) {
     if (!selectedExpense?.id) return;
     deleteExpenseMutation.mutate(selectedExpense.id);
   }, [deleteExpenseMutation, selectedExpense]);
-
-  React.useEffect(() => {
-    if (!selectedExpense) return;
-
-    const refreshedExpense = expensesListQuery.data?.data.find((expense) => expense.id === selectedExpense.id);
-    if (refreshedExpense) {
-      setSelectedExpense(refreshedExpense);
-    }
-  }, [expensesListQuery.data?.data, selectedExpense]);
-
-  React.useEffect(() => {
-    if (!isDeleteExpenseDialogOpen && !isEditExpenseOpen && !isExpenseDetailsOpen) {
-      setSelectedExpense(null);
-    }
-  }, [isDeleteExpenseDialogOpen, isEditExpenseOpen, isExpenseDetailsOpen]);
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
@@ -233,6 +246,7 @@ export default function Finance({ id }: { id: string }) {
           financeSummary={financeSummaryQuery.data}
           isSummaryLoading={financeSummaryQuery.isLoading && !financeSummaryQuery.data}
           onAddExpenseClick={() => setIsAddExpenseOpen(true)}
+          onAddOpeningBalanceClick={() => setIsOpeningBalanceOpen(true)}
           onRetrySummary={() => financeSummaryQuery.refetch()}
           summaryErrorMessage={summaryErrorMessage}
         />
@@ -243,6 +257,14 @@ export default function Finance({ id }: { id: string }) {
         open={isAddExpenseOpen}
         onExpenseSaved={handleExpenseCreated}
         onOpenChange={setIsAddExpenseOpen}
+      />
+
+      <OpeningBalanceModal
+        eventId={id}
+        initialPreviousBalanceInKobo={financeSummaryQuery.data?.metrics?.previous_balance_in_kobo ?? 0}
+        open={isOpeningBalanceOpen}
+        onOpenChange={setIsOpeningBalanceOpen}
+        onSaved={refreshExpenseData}
       />
 
       <AddExpenseModal

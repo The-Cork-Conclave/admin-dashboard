@@ -1,5 +1,7 @@
 import { z } from "zod";
+
 import { authFetch } from "@/lib/auth/auth-fetch";
+
 import { activitySchema } from "../_components/insights/schema";
 
 const eventActivitiesCursorSchema = z.object({

@@ -1,10 +1,14 @@
 "use client";
 
 import { z } from "zod";
+
 import { authFetch } from "@/lib/auth/auth-fetch";
 
 export const revenueMetricsDTOSchema = z.object({
   total: z.number(),
+  payments_total: z.number(),
+  previous_revenue_in_kobo: z.number(),
+  total_revenue_in_kobo: z.number(),
 });
 
 export const membersMetricsDTOSchema = z.object({
@@ -41,6 +45,37 @@ export async function getRevenueMetrics(): Promise<GetRevenueMetricsResponse> {
   if (!res.ok) {
     let message = "Could not load metrics. Please try again.";
 
+    try {
+      const body = (await res.json()) as { message?: string };
+      if (typeof body.message === "string" && body.message.length > 0) message = body.message;
+    } catch {
+      /* ignore */
+    }
+    throw new Error(message);
+  }
+
+  const json = (await res.json()) as unknown;
+  return revenueMetricsDTOSchema.parse(json);
+}
+
+const updatePlatformRevenueAdjustmentRequestSchema = z.object({
+  previous_revenue_in_kobo: z.number().int().min(0),
+});
+
+export type UpdatePlatformRevenueAdjustmentInput = z.infer<typeof updatePlatformRevenueAdjustmentRequestSchema>;
+
+export async function updatePlatformRevenueAdjustment(
+  input: UpdatePlatformRevenueAdjustmentInput,
+): Promise<GetRevenueMetricsResponse> {
+  const payload = updatePlatformRevenueAdjustmentRequestSchema.parse(input);
+  const res = await authFetch(`/api/metrics/revenue/adjustment`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    let message = "Could not update opening revenue. Please try again.";
     try {
       const body = (await res.json()) as { message?: string };
       if (typeof body.message === "string" && body.message.length > 0) message = body.message;

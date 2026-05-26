@@ -1,6 +1,6 @@
+import Members from "./_components/members";
 import { MetricCards } from "./_components/metrics";
 import { PerformanceOverview } from "./_components/performance";
-import Members from "./_components/members";
 
 export default function Page() {
   return (

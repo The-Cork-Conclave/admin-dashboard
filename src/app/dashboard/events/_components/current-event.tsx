@@ -4,6 +4,7 @@ import * as React from "react";
 
 import Image from "next/image";
 import Link from "next/link";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CheckCircle, Eye } from "lucide-react";
@@ -165,6 +166,7 @@ export default function CurrentEvent() {
 
             <div className="grid grid-cols-2 gap-4 border-border border-y py-4 lg:grid-cols-4">
               {Array.from({ length: 4 }, (_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: skeleton items are static and never reordered
                 <div key={i} className="space-y-2">
                   <Skeleton className="h-3 w-24" />
                   <Skeleton className="h-4 w-28" />
@@ -283,7 +285,7 @@ export default function CurrentEvent() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 justify-end">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <Link href={`/dashboard/events/${encodeURIComponent(event.id)}`}>
               <Button type="button" className="gap-2">
                 <Eye className="size-4" aria-hidden />
@@ -316,11 +318,7 @@ export default function CurrentEvent() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel disabled={mutation.isPending}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    variant="success"
-                    disabled={mutation.isPending}
-                    onClick={onConfirmComplete}
-                  >
+                  <AlertDialogAction variant="success" disabled={mutation.isPending} onClick={onConfirmComplete}>
                     {mutation.isPending ? "Completing…" : "Yes, complete"}
                   </AlertDialogAction>
                 </AlertDialogFooter>

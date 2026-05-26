@@ -19,6 +19,7 @@ type BalanceDistributionCardProps = {
   isLoading?: boolean;
   netBalanceInKobo: number;
   onRetry?: () => void;
+  previousBalanceInKobo?: number;
   revenueInKobo: number;
 };
 
@@ -52,6 +53,7 @@ export function BalanceDistributionCard({
   isLoading,
   netBalanceInKobo,
   onRetry,
+  previousBalanceInKobo,
   revenueInKobo,
 }: BalanceDistributionCardProps) {
   const chartData = React.useMemo(() => {
@@ -75,6 +77,8 @@ export function BalanceDistributionCard({
     ];
   }, [expensesInKobo, revenueInKobo]);
 
+  const hasOpeningBalance = (previousBalanceInKobo ?? 0) > 0;
+
   if (isLoading) {
     return (
       <Card>
@@ -89,6 +93,7 @@ export function BalanceDistributionCard({
 
           <div className="flex min-w-0 flex-col gap-3">
             {Array.from({ length: 2 }).map((_, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: skeleton rows are static and never reordered
               <div className="grid grid-cols-[1fr_auto] items-end gap-3" key={index}>
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-20" />
@@ -135,6 +140,13 @@ export function BalanceDistributionCard({
       </CardHeader>
 
       <CardContent className="grid items-center gap-4 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)]">
+        {hasOpeningBalance ? (
+          <div className="sm:col-span-2">
+            <div className="text-muted-foreground text-xs">
+              Includes opening balance of {formatNairaFromKobo(String(previousBalanceInKobo ?? 0)).pretty}.
+            </div>
+          </div>
+        ) : null}
         <ChartContainer config={chartConfig} className="mx-auto aspect-square h-50">
           <PieChart>
             <ChartTooltip
@@ -148,8 +160,7 @@ export function BalanceDistributionCard({
                   nameKey="account"
                   payload={payload?.map((item) => ({
                     ...item,
-                    value:
-                      typeof item.value === "number" ? formatNairaFromKobo(String(item.value)).pretty : item.value,
+                    value: typeof item.value === "number" ? formatNairaFromKobo(String(item.value)).pretty : item.value,
                   }))}
                 />
               )}
@@ -198,9 +209,7 @@ export function BalanceDistributionCard({
                   <span aria-hidden="true" className="h-2 w-1 rounded-full" style={{ backgroundColor: item.fill }} />
                   <p className="truncate text-muted-foreground text-xs">{item.account}</p>
                 </div>
-                <p className="font-medium tabular-nums">
-                  {formatNairaFromKobo(String(item.amountInKobo)).pretty}
-                </p>
+                <p className="font-medium tabular-nums">{formatNairaFromKobo(String(item.amountInKobo)).pretty}</p>
               </div>
               <div className="font-medium tabular-nums">{formatPercentage(item.percentage)}%</div>
             </div>

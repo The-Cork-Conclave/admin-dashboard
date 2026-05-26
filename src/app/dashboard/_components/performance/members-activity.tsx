@@ -1,11 +1,13 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery } from "@tanstack/react-query";
-import { getSignupGraph, SignupGraphDTO } from "./api";
+
+import { getSignupGraph, type SignupGraphDTO } from "./api";
 
 const signupChartConfig = {
   signups: {
@@ -25,8 +27,8 @@ export default function MembersActivity() {
   const axisLabelFormatter = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" });
 
   return (
-    <div className="w-full h-full">
-      <Card className="xl:col-span-12 h-full flex flex-col">
+    <div className="h-full w-full">
+      <Card className="flex h-full flex-col xl:col-span-12">
         <CardHeader className="mb-2 pb-2">
           <CardTitle>Members</CardTitle>
           <CardDescription>

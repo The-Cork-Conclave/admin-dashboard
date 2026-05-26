@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+
 import { useRouter } from "next/navigation";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash } from "lucide-react";
 import { toast } from "sonner";
@@ -85,15 +87,14 @@ export function DeleteEventButton({ id, name, status }: DeleteEventButtonProps) 
           <AlertDialogDescription>
             {name ? (
               <>
-                <span className="font-medium text-foreground">{name}</span> will be permanently
-                deleted. Active tickets and registrations will be cancelled, and any pending
-                reminder emails will be cancelled. This action cannot be undone.
+                <span className="font-medium text-foreground">{name}</span> will be permanently deleted. Active tickets
+                and registrations will be cancelled, and any pending reminder emails will be cancelled. This action
+                cannot be undone.
               </>
             ) : (
               <>
-                This event will be permanently deleted. Active tickets and registrations will be
-                cancelled, and any pending reminder emails will be cancelled. This action cannot be
-                undone.
+                This event will be permanently deleted. Active tickets and registrations will be cancelled, and any
+                pending reminder emails will be cancelled. This action cannot be undone.
               </>
             )}
           </AlertDialogDescription>

@@ -176,7 +176,7 @@ export function ImageUpload({
           onChange={onInputChange}
         />
 
-        <div className="flex w-full max-w-full min-w-0 flex-col items-center justify-center px-2 text-center">
+        <div className="flex w-full min-w-0 max-w-full flex-col items-center justify-center px-2 text-center">
           <Button
             type="button"
             variant="outline"

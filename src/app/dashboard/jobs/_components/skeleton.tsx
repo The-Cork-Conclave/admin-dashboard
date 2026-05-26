@@ -15,6 +15,7 @@ export function JobsTableSkeleton({ rowCount = 10 }: EventsTableSkeletonProps) {
           <TableHeader className="bg-muted/15">
             <TableRow>
               {Array.from({ length: COLS }, (_, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: skeleton columns are static and never reordered
                 <TableHead key={i} className="h-11 p-3">
                   <Skeleton className="h-4 w-24" />
                 </TableHead>
@@ -23,8 +24,10 @@ export function JobsTableSkeleton({ rowCount = 10 }: EventsTableSkeletonProps) {
           </TableHeader>
           <TableBody>
             {Array.from({ length: rowCount }, (_, ri) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: skeleton rows are static and never reordered
               <TableRow key={ri}>
                 {Array.from({ length: COLS }, (_, ci) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: skeleton cells are static and never reordered
                   <TableCell key={ci} className="p-3 align-middle">
                     <Skeleton className={ci === 0 ? "h-10 w-full max-w-65" : "h-4 w-28"} />
                   </TableCell>
@@ -45,6 +48,7 @@ export function JobsTableSkeleton({ rowCount = 10 }: EventsTableSkeletonProps) {
           <Skeleton className="h-4 w-28" />
           <div className="ml-auto flex gap-2 lg:ml-0">
             {Array.from({ length: 4 }, (_, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: skeleton actions are static and never reordered
               <Skeleton key={i} className="size-8 rounded-md" />
             ))}
           </div>

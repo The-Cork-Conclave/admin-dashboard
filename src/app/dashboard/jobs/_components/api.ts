@@ -1,5 +1,7 @@
 import { z } from "zod";
+
 import { authFetch } from "@/lib/auth/auth-fetch";
+
 import { jobSchema, listMetaSchema } from "./schema";
 
 export const JobsListResponseSchema = z.object({

@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+
 import { Camera, Scan } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -115,10 +117,10 @@ export function QrScanner({
 
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-neutral-950/40 px-6">
               <div className="relative mb-6 size-56">
-                <div className="absolute left-0 top-0 h-8 w-8 rounded-tl-xl border-l-2 border-t-2 border-white/80" />
-                <div className="absolute right-0 top-0 h-8 w-8 rounded-tr-xl border-r-2 border-t-2 border-white/80" />
-                <div className="absolute bottom-0 left-0 h-8 w-8 rounded-bl-xl border-b-2 border-l-2 border-white/80" />
-                <div className="absolute bottom-0 right-0 h-8 w-8 rounded-br-xl border-b-2 border-r-2 border-white/80" />
+                <div className="absolute top-0 left-0 h-8 w-8 rounded-tl-xl border-white/80 border-t-2 border-l-2" />
+                <div className="absolute top-0 right-0 h-8 w-8 rounded-tr-xl border-white/80 border-t-2 border-r-2" />
+                <div className="absolute bottom-0 left-0 h-8 w-8 rounded-bl-xl border-white/80 border-b-2 border-l-2" />
+                <div className="absolute right-0 bottom-0 h-8 w-8 rounded-br-xl border-white/80 border-r-2 border-b-2" />
 
                 <div className="absolute inset-0 overflow-hidden rounded-xl">
                   <div id={regionId} className="h-full w-full" />
@@ -151,7 +153,7 @@ export function QrScanner({
               )}
 
               {status === "error" && error.length > 0 && (
-                <p className="mt-4 text-center text-xs text-white/80">{error}</p>
+                <p className="mt-4 text-center text-white/80 text-xs">{error}</p>
               )}
             </div>
           </div>
