@@ -39,7 +39,6 @@ export type FormInput = z.infer<typeof formSchema>;
 
 export type DraftQuestionOption = {
   id: string;
-  label: string;
   value: string;
   sort_order: number;
 };
@@ -68,7 +67,6 @@ export function reindexQuestions(questions: DraftQuestion[]): DraftQuestion[] {
 export function newDraftQuestionOption(): DraftQuestionOption {
   return {
     id: crypto.randomUUID(),
-    label: "",
     value: "",
     sort_order: 0,
   };
@@ -142,7 +140,6 @@ export async function postCreateEvent({
             return {
               ...base,
               options: (q.options ?? []).map((opt, optIndex) => ({
-                label: opt.label.trim(),
                 value: opt.value.trim(),
                 sort_order: opt.sort_order ?? optIndex,
               })),

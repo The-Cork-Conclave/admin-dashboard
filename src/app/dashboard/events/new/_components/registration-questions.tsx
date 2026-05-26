@@ -4,12 +4,11 @@ import { useMemo, useState } from "react";
 
 import { GripVertical, Pencil, Plus, Trash, Type } from "lucide-react";
 
+import { CreateQuestionDrawer } from "@/app/dashboard/events/_components/questions/create-question-drawer";
+import type { DraftQuestion } from "@/app/dashboard/events/_components/questions/draft";
+import { questionTypeLabel, reindexQuestions } from "@/app/dashboard/events/_components/questions/draft";
+import { SortableVerticalList } from "@/app/dashboard/events/_components/questions/sortable-vertical-list";
 import { Button } from "@/components/ui/button";
-
-import type { DraftQuestion } from "./constants";
-import { questionTypeLabel, reindexQuestions } from "./constants";
-import { CreateQuestionDrawer } from "./create-question";
-import { SortableVerticalList } from "./sortable-vertical-list";
 
 export function RegistrationQuestions({
   previous,
