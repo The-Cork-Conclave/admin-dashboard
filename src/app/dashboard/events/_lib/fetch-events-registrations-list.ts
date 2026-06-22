@@ -9,6 +9,15 @@ const listMetaSchema = z.object({
   total_pages: z.number().int().nonnegative(),
 });
 
+const registrationQuestionResponseSchema = z.object({
+  question_id: z.string(),
+  question: z.string(),
+  type: z.enum(["yes_no", "text", "single_choice", "multiple_choice"]),
+  sort_order: z.number(),
+  answer_text: z.string().optional(),
+  answer_options: z.array(z.string()).optional(),
+});
+
 const eventRegistrationListItemSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -18,6 +27,7 @@ const eventRegistrationListItemSchema = z.object({
   confirmed_at: z.string().optional(),
   checked_in_at: z.string().nullable().optional(),
   created_at: z.string(),
+  responses: z.array(registrationQuestionResponseSchema).optional(),
 });
 
 export const eventRegistrationListResponseSchema = z.object({
@@ -27,6 +37,7 @@ export const eventRegistrationListResponseSchema = z.object({
 
 export type EventRegistrationListResponse = z.infer<typeof eventRegistrationListResponseSchema>;
 export type EventRegistrationListItem = z.infer<typeof eventRegistrationListItemSchema>;
+export type RegistrationQuestionResponse = z.infer<typeof registrationQuestionResponseSchema>;
 
 export async function fetchEventRegistrationsList(
   id: string,

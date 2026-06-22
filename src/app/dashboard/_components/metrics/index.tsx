@@ -3,9 +3,8 @@
 import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
-import { CirclePlus, DollarSign, Ticket, TrendingDown, TrendingUp, UserPlus, Waves } from "lucide-react";
+import { CirclePlus, DollarSign, Ticket, UserPlus, Waves } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,7 +20,10 @@ import {
   type RevenueMetricsDTO,
   type TicketsMetricsDTO,
 } from "./api";
+import { MetricDeltaBadge } from "./metric-delta-badge";
 import { RevenueOpeningBalanceModal } from "./revenue-opening-balance-modal";
+
+const METRIC_CHANGE_FOOTER = "Change vs previous calendar month";
 
 type MetricCardSkeletonProps = {
   description: string;
@@ -46,6 +48,7 @@ function MetricCardSkeleton({ description, showBadge = false }: MetricCardSkelet
           {showBadge ? <Skeleton className="h-6 w-14 rounded-full" /> : null}
         </div>
         <Skeleton className="h-4 w-64" />
+        {showBadge ? <Skeleton className="h-4 w-48" /> : null}
       </CardContent>
     </Card>
   );
@@ -61,7 +64,7 @@ function RevenueCard() {
   const [open, setOpen] = useState(false);
 
   if (query.isLoading) {
-    return <MetricCardSkeleton description="Total Received" />;
+    return <MetricCardSkeleton description="Total Received" showBadge />;
   }
 
   return (
@@ -84,8 +87,9 @@ function RevenueCard() {
           <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">
             {formatNairaFromKobo(`${metric?.total_revenue_in_kobo ?? 0}`).pretty}
           </div>
+          <MetricDeltaBadge delta={metric?.delta ?? 0} />
         </div>
-        <p className="text-muted-foreground text-sm">Total revenue from event ticket sales</p>
+        <p className="text-muted-foreground text-xs">{METRIC_CHANGE_FOOTER}</p>
       </CardContent>
 
       <RevenueOpeningBalanceModal
@@ -109,7 +113,7 @@ function MembersCard() {
   const metric: MembersMetricsDTO | undefined = query.data;
 
   if (query.isLoading) {
-    return <MetricCardSkeleton description="New Members" showBadge />;
+    return <MetricCardSkeleton description="Members" showBadge />;
   }
 
   return (
@@ -120,17 +124,14 @@ function MembersCard() {
             <UserPlus className="size-4" />
           </div>
         </CardTitle>
-        <CardDescription>New Members</CardDescription>
+        <CardDescription>Members</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
           <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">{metric?.total ?? 0}</div>
-          <Badge variant={`${(metric?.delta ?? 0) >= 0 ? "success" : "destructive"}`}>
-            {(metric?.delta ?? 0) >= 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-            {metric?.delta?.toFixed(2) ?? 0}%
-          </Badge>
+          <MetricDeltaBadge delta={metric?.delta ?? 0} />
         </div>
-        <p className="text-muted-foreground text-sm">New members registered this month</p>
+        <p className="text-muted-foreground text-xs">{METRIC_CHANGE_FOOTER}</p>
       </CardContent>
     </Card>
   );
@@ -161,12 +162,9 @@ function TicketsCard() {
       <CardContent className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
           <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">{metric?.total ?? 0}</div>
-          <Badge variant={`${(metric?.delta ?? 0) >= 0 ? "success" : "destructive"}`}>
-            {(metric?.delta ?? 0) >= 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
-            {metric?.delta?.toFixed(2) ?? "0.00"}%
-          </Badge>
+          <MetricDeltaBadge delta={metric?.delta ?? 0} />
         </div>
-        <p className="text-muted-foreground text-sm">Number of paid tickets for events this month</p>
+        <p className="text-muted-foreground text-xs">{METRIC_CHANGE_FOOTER}</p>
       </CardContent>
     </Card>
   );
@@ -181,7 +179,7 @@ function AttendanceCard() {
   const metric: AttendanceMetricsDTO | undefined = query.data;
 
   if (query.isLoading) {
-    return <MetricCardSkeleton description="Attendance Rate" />;
+    return <MetricCardSkeleton description="Attendance Rate" showBadge />;
   }
 
   const fmtPercent = (n: number | undefined) => `${Math.round(n ?? 0)}%`;
@@ -199,12 +197,11 @@ function AttendanceCard() {
       <CardContent className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
           <div className="font-medium text-3xl tabular-nums leading-none tracking-tight">
-            {fmtPercent(metric?.attendance_vs_all_registrations)}
+            {fmtPercent(metric?.total)}
           </div>
+          <MetricDeltaBadge delta={metric?.delta ?? 0} />
         </div>
-        <p className="text-muted-foreground text-sm">
-          {fmtPercent(metric?.attendance_vs_confirmed_registrations)} of confirmed registrations checked in this month
-        </p>
+        <p className="text-muted-foreground text-xs">{METRIC_CHANGE_FOOTER}</p>
       </CardContent>
     </Card>
   );

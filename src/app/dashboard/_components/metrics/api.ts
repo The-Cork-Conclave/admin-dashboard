@@ -9,6 +9,7 @@ export const revenueMetricsDTOSchema = z.object({
   payments_total: z.number(),
   previous_revenue_in_kobo: z.number(),
   total_revenue_in_kobo: z.number(),
+  delta: z.number(),
 });
 
 export const membersMetricsDTOSchema = z.object({
@@ -22,8 +23,8 @@ export const ticketsMetricsDTOSchema = z.object({
 });
 
 export const attendanceMetricsDTOSchema = z.object({
-  attendance_vs_all_registrations: z.number(),
-  attendance_vs_confirmed_registrations: z.number(),
+  total: z.number(),
+  delta: z.number(),
 });
 
 export type RevenueMetricsDTO = z.infer<typeof revenueMetricsDTOSchema>;

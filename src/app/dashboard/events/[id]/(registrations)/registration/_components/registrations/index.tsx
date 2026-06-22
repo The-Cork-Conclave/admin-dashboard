@@ -40,8 +40,9 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import useDebouncedValue from "@/hooks/use-debounced-value";
 
-import { registrationColumns } from "./columns";
+import { getRegistrationColumns } from "./columns";
 import { EventsRegistrationTableSkeleton } from "./events-registrations-skeleton";
+import { RegistrationDetailsDrawer } from "./registration-details-drawer";
 import type { RegistrationRow } from "./schema";
 
 const statusOptions = [
@@ -72,6 +73,20 @@ const Registrations = ({ id }: { id: string }) => {
   const [status, setStatus] = React.useState<(typeof statusOptions)[number]["value"]>("all");
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>(undefined);
   const [sortValue, setSortValue] = React.useState<(typeof sortOptions)[number]["value"]>("newest");
+  const [selectedRegistration, setSelectedRegistration] = React.useState<RegistrationRow | null>(null);
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+
+  const openRegistrationDetails = React.useCallback((row: RegistrationRow) => {
+    setSelectedRegistration(row);
+    setDrawerOpen(true);
+  }, []);
+
+  const handleDrawerOpenChange = React.useCallback((open: boolean) => {
+    setDrawerOpen(open);
+    if (!open) {
+      setSelectedRegistration(null);
+    }
+  }, []);
 
   const handleDateRangeChange = (value: DateRange | undefined) => {
     setDateRange(value?.from && value?.to ? value : undefined);
@@ -122,9 +137,14 @@ const Registrations = ({ id }: { id: string }) => {
   const total = query.data?.meta.total ?? 0;
   const pageCount = Math.max(1, query.data?.meta.total_pages ?? 1);
 
+  const columns = React.useMemo(
+    () => getRegistrationColumns({ onView: openRegistrationDetails }),
+    [openRegistrationDetails],
+  );
+
   const table = useReactTable({
     data,
-    columns: registrationColumns,
+    columns,
     state: {
       rowSelection,
       pagination,
@@ -245,7 +265,20 @@ const Registrations = ({ id }: { id: string }) => {
                 <TableBody>
                   {table.getRowModel().rows.length ? (
                     table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                        role="button"
+                        tabIndex={0}
+                        className="cursor-pointer hover:bg-muted/25 focus-visible:outline-none"
+                        onClick={() => openRegistrationDetails(row.original)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            openRegistrationDetails(row.original);
+                          }
+                        }}
+                      >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id} className="p-3 align-middle">
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -341,6 +374,12 @@ const Registrations = ({ id }: { id: string }) => {
           </div>
         )}
       </CardContent>
+
+      <RegistrationDetailsDrawer
+        registration={selectedRegistration}
+        open={drawerOpen}
+        onOpenChange={handleDrawerOpenChange}
+      />
     </Card>
   );
 };
