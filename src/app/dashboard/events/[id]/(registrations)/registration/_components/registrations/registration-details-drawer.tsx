@@ -48,9 +48,9 @@ function statusIcon(status: string) {
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-1 gap-2 p-3 text-sm sm:grid-cols-3">
-      <div className="text-muted-foreground sm:col-span-1">{label}</div>
-      <div className="font-medium text-foreground sm:col-span-2">{value}</div>
+    <div className="w-full flex flex-col gap-4 p-3 text-sm">
+      <div className="text-muted-foreground">{label}</div>
+      <div className="font-medium text-foreground">{value}</div>
     </div>
   );
 }
@@ -109,9 +109,10 @@ export function RegistrationDetailsDrawer({ registration, open, onOpenChange }: 
             </div>
           </section>
 
-          <section className="space-y-3">
-            <h3 className="font-semibold text-foreground text-sm">Registration questions</h3>
-            {responses.length > 0 ? (
+          {responses.length > 0 && (
+            <section className="space-y-3">
+              <h3 className="font-semibold text-foreground text-sm">Registration questions</h3>
+
               <div className="overflow-hidden rounded-xl border bg-background">
                 {responses.map((response, index) => (
                   <div key={response.question_id}>
@@ -120,12 +121,8 @@ export function RegistrationDetailsDrawer({ registration, open, onOpenChange }: 
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="rounded-xl border border-dashed bg-muted/20 p-4 text-muted-foreground text-sm">
-                No registration questions were answered.
-              </div>
-            )}
-          </section>
+            </section>
+          )}
         </div>
       </DrawerContent>
     </Drawer>
