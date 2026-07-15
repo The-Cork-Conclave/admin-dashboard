@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
@@ -13,55 +15,80 @@ import { bffRoutes } from "@/lib/bff-routes";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
+  password: z.string().optional(),
 });
+
+type SigninResult = { authenticated: true } | { magicLinkSent: true };
 
 const sharpInputClassName = "rounded-md border-foreground/25";
 
-async function postSigninRequestLink(email: string): Promise<void> {
+async function postSigninRequestLink(input: { email: string; password?: string }): Promise<SigninResult> {
+  const body: { email: string; password?: string } = { email: input.email };
+  const password = input.password?.trim();
+  if (password) body.password = password;
+
   const res = await fetch(bffRoutes.adminAuth.requestLink(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
-    let message = "Could not send sign-in link. Please try again.";
-    try {
-      const body = (await res.json()) as { message?: string };
-      if (typeof body.message === "string" && body.message.length > 0) {
-        message = body.message;
-      }
-    } catch {
-      /* ignore */
-    }
-    throw new Error(message);
+    throw new Error("Invalid Credentials");
   }
+
+  const data = (await res.json()) as {
+    authenticated?: boolean;
+    magic_link_sent?: boolean;
+    ok?: boolean;
+  };
+
+  if (data.authenticated === true) {
+    return { authenticated: true };
+  }
+
+  if (data.magic_link_sent === true || data.ok === true) {
+    return { magicLinkSent: true };
+  }
+
+  throw new Error("Invalid Credentials");
 }
 
 export function LoginForm() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
+      password: "",
     },
   });
 
   const mutation = useMutation({
-    mutationFn: (email: string) => postSigninRequestLink(email),
-    onSuccess: () => {
+    mutationFn: (input: z.infer<typeof formSchema>) =>
+      postSigninRequestLink({
+        email: input.email,
+        password: input.password,
+      }),
+    onSuccess: (result) => {
+      if ("authenticated" in result) {
+        router.replace("/dashboard");
+        router.refresh();
+        return;
+      }
       toast.success("Check your email", {
-        description: "If an account exists for that address, we sent a sign-in link.",
+        description: "You will receive the sign-in link at the provided email address if it exists.",
       });
     },
     onError: (err: Error) => {
-      toast.error("Could not send sign-in link", {
-        description: err.message,
+      toast.error("Invalid Credentials", {
+        description: err.message === "Invalid Credentials" ? undefined : err.message,
       });
     },
   });
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    mutation.mutate(data.email);
+    mutation.mutate(data);
   };
 
   return (
@@ -87,10 +114,30 @@ export function LoginForm() {
             </Field>
           )}
         />
+        <Controller
+          control={form.control}
+          name="password"
+          render={({ field, fieldState }) => (
+            <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="login-password">Password (optional)</FieldLabel>
+              <Input
+                {...field}
+                className={sharpInputClassName}
+                id="login-password"
+                type="password"
+                placeholder="••••••••"
+                autoComplete="current-password"
+                aria-invalid={fieldState.invalid}
+                disabled={mutation.isPending}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
       </FieldGroup>
 
       <Button className="w-full" type="submit" disabled={mutation.isPending}>
-        {mutation.isPending ? "Sending…" : "Send sign-in link"}
+        {mutation.isPending ? "Signing in…" : "Sign in"}
       </Button>
     </form>
   );

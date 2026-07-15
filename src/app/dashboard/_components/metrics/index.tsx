@@ -3,7 +3,13 @@
 import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
-import { CirclePlus, DollarSign, Ticket, UserPlus, Waves } from "lucide-react";
+import {
+  //  CirclePlus,
+  DollarSign,
+  Ticket,
+  UserPlus,
+  Waves,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,7 +81,7 @@ function RevenueCard() {
             <DollarSign className="size-4" />
           </div>
           <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => setOpen(true)}>
-            <CirclePlus className="size-4" />
+            {/* <CirclePlus className="size-4" /> */}
             <span className="sr-only">Set opening revenue</span>
           </Button>
         </CardTitle>

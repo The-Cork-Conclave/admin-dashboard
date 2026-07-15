@@ -2,6 +2,7 @@ export const bffPaths = {
   adminAuthRequestLink: "/api/auth/request-link",
   adminAuthExchange: "/api/auth/exchange",
   adminAuthLogout: "/api/auth/logout",
+  adminAuthPassword: "/api/auth/password",
 } as const;
 
 export const bffRoutes = {
@@ -13,5 +14,6 @@ export const bffRoutes = {
       return `${bffPaths.adminAuthExchange}?${sp.toString()}`;
     },
     logout: () => bffPaths.adminAuthLogout,
+    password: () => bffPaths.adminAuthPassword,
   },
 } as const;

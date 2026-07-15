@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   type LucideIcon,
   Users2Icon,
+  Wallet,
   // , Logs,
 } from "lucide-react";
 
@@ -44,6 +45,11 @@ export const sidebarItems: NavGroup[] = [
         title: "Events",
         url: "/dashboard/events",
         icon: CalendarIcon,
+      },
+      {
+        title: "Finance",
+        url: "/dashboard/finance",
+        icon: Wallet,
       },
       {
         title: "Admins",

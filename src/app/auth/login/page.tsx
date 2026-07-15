@@ -27,7 +27,9 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-10 py-24 lg:py-32">
           <div className="space-y-4 text-center">
             <div className="font-medium tracking-tight">Login</div>
-            <div className="mx-auto max-w-xl text-muted-foreground">Welcome back. Enter your email address.</div>
+            <div className="mx-auto max-w-xl text-muted-foreground">
+              Welcome back. Enter your email, and optionally your password.
+            </div>
           </div>
           <div className="space-y-4">
             <Suspense fallback={null}>
