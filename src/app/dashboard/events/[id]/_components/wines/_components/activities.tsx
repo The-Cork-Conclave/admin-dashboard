@@ -4,13 +4,16 @@ import * as React from "react";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { CircleX, DollarSign, Ticket, User, UserCheck, Wine } from "lucide-react";
+import { CircleX, DollarSign, Star, Ticket, User, UserCheck, Wine } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { type EventActivitiesCursor, fetchEventActivitiesPage } from "../../_lib/fetch-event-activities";
+import { type EventActivitiesCursor, fetchEventActivitiesPage } from "../../../_lib/fetch-event-activities";
 import type { Activity, ActivityType } from "./schema";
+
+const WINE_ACTIVITY_TYPES = new Set<ActivityType>(["wine_added", "wine_reviewed"]);
 
 function ActivityIcon({ type }: { type: ActivityType }) {
   switch (type) {
@@ -48,6 +51,12 @@ function ActivityIcon({ type }: { type: ActivityType }) {
       return (
         <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-amber-100 bg-amber-50 text-amber-700 shadow-sm">
           <Wine className="h-4 w-4" />
+        </div>
+      );
+    case "wine_reviewed":
+      return (
+        <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-violet-100 bg-violet-50 text-violet-700 shadow-sm">
+          <Star className="h-4 w-4" />
         </div>
       );
     default:
@@ -108,7 +117,8 @@ function ActivitiesSkeleton({ rows = 6 }: { rows?: number }) {
   );
 }
 
-export function ActivitiesListClient({ id, limit = 20 }: { id: string; limit?: number }) {
+export function Activities({ id }: { id: string }) {
+  const limit = 20;
   const scrollRootRef = React.useRef<HTMLDivElement | null>(null);
   const sentinelRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -126,8 +136,19 @@ export function ActivitiesListClient({ id, limit = 20 }: { id: string; limit?: n
     },
   });
 
-  const activities = React.useMemo(() => query.data?.pages.flatMap((p) => p.data) ?? [], [query.data]);
+  const activities = React.useMemo(
+    () => (query.data?.pages.flatMap((p) => p.data) ?? []).filter((activity) => WINE_ACTIVITY_TYPES.has(activity.type)),
+    [query.data],
+  );
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = query;
+
+  // Keep paging until wine-related rows appear or the feed is exhausted.
+  React.useEffect(() => {
+    if (query.isLoading || query.isError) return;
+    if (activities.length > 0) return;
+    if (!hasNextPage || isFetchingNextPage) return;
+    void fetchNextPage();
+  }, [activities.length, fetchNextPage, hasNextPage, isFetchingNextPage, query.isError, query.isLoading]);
 
   React.useEffect(() => {
     const root = scrollRootRef.current;
@@ -150,7 +171,7 @@ export function ActivitiesListClient({ id, limit = 20 }: { id: string; limit?: n
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  if (query.isLoading) {
+  if (query.isLoading || (activities.length === 0 && hasNextPage)) {
     return <ActivitiesSkeleton />;
   }
 
@@ -169,23 +190,27 @@ export function ActivitiesListClient({ id, limit = 20 }: { id: string; limit?: n
   }
 
   if (activities.length === 0) {
-    return <div className="text-slate-500 text-sm">No activities yet.</div>;
+    return <div className="text-slate-500 text-sm">No wine activities yet.</div>;
   }
 
   return (
-    <div ref={scrollRootRef} className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
-      <div className="flex-1 space-y-2">
-        {activities.map((activity) => (
-          <ActivityItem key={activity.id} activity={activity} />
-        ))}
+    <Card className="h-full max-h-125 min-h-0 shadow-xs">
+      <CardContent className="flex min-h-0 flex-1 flex-col">
+        <div ref={scrollRootRef} className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+          <div className="flex-1 space-y-2">
+            {activities.map((activity) => (
+              <ActivityItem key={activity.id} activity={activity} />
+            ))}
 
-        <div ref={sentinelRef} className="h-8" />
+            <div ref={sentinelRef} className="h-8" />
 
-        {query.isFetchingNextPage && <div className="text-slate-500 text-xs">Loading more…</div>}
-        {!query.hasNextPage && (
-          <div className="mb-4 pb-4 text-center text-slate-400 text-xs">You’re all caught up.</div>
-        )}
-      </div>
-    </div>
+            {query.isFetchingNextPage && <div className="text-slate-500 text-xs">Loading more…</div>}
+            {!query.hasNextPage && (
+              <div className="mb-4 pb-4 text-center text-slate-400 text-xs">You’re all caught up.</div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

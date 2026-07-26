@@ -231,12 +231,3 @@ export default function RegistrationPage({ id }: { id: string }) {
     </main>
   );
 }
-
-{
-  /* <div className="mt-6 space-y-1 text-center">
-<p className="text-sm font-medium">Scan attendee QR code to check in</p>
-<p className="text-xs text-muted-foreground">
-  Having trouble scanning? Enter code manually on the right.
-</p>
-</div> */
-}

@@ -20,6 +20,7 @@ import {
   ChevronsRight,
   Download,
   Search,
+  UserPlus,
 } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
@@ -42,12 +43,14 @@ import useDebouncedValue from "@/hooks/use-debounced-value";
 
 import { getRegistrationColumns } from "./columns";
 import { EventsRegistrationTableSkeleton } from "./events-registrations-skeleton";
+import { InviteMemberModal } from "./invite-member-modal";
 import { RegistrationDetailsDrawer } from "./registration-details-drawer";
 import type { RegistrationRow } from "./schema";
 
 const statusOptions = [
   { value: "all", label: "All" },
   { value: "confirmed", label: "Paid" },
+  { value: "invited", label: "Invited" },
   { value: "checked_in", label: "Checked in" },
   { value: "pending_payment", label: "Pending" },
   { value: "cancelled", label: "Cancelled" },
@@ -75,6 +78,7 @@ const Registrations = ({ id }: { id: string }) => {
   const [sortValue, setSortValue] = React.useState<(typeof sortOptions)[number]["value"]>("newest");
   const [selectedRegistration, setSelectedRegistration] = React.useState<RegistrationRow | null>(null);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [inviteOpen, setInviteOpen] = React.useState(false);
 
   const openRegistrationDetails = React.useCallback((row: RegistrationRow) => {
     setSelectedRegistration(row);
@@ -174,7 +178,11 @@ const Registrations = ({ id }: { id: string }) => {
           {total} Registered Member{total !== 1 ? "s" : ""}
         </CardTitle>
 
-        <CardAction>
+        <CardAction className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
+            <UserPlus />
+            Invite member
+          </Button>
           <Button variant="outline" size="sm">
             <Download />
             Export
@@ -380,6 +388,8 @@ const Registrations = ({ id }: { id: string }) => {
         open={drawerOpen}
         onOpenChange={handleDrawerOpenChange}
       />
+
+      <InviteMemberModal eventId={id} open={inviteOpen} onOpenChange={setInviteOpen} />
     </Card>
   );
 };

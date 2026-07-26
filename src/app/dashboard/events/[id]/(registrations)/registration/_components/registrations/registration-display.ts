@@ -2,13 +2,21 @@ import { format, isValid, parseISO } from "date-fns";
 
 import type { RegistrationQuestionResponse, RegistrationRow } from "./schema";
 
-export function getEffectiveRegistrationStatus(registration: Pick<RegistrationRow, "status" | "checked_in_at">) {
-  return registration.checked_in_at ? "checked_in" : registration.status;
+export function getEffectiveRegistrationStatus(
+  registration: Pick<RegistrationRow, "status" | "checked_in_at" | "is_complimentary">,
+) {
+  if (registration.checked_in_at) return "checked_in";
+  if (registration.is_complimentary && (registration.status === "confirmed" || registration.status === "invited")) {
+    return "invited";
+  }
+  return registration.status;
 }
 
 export function formatRegistrationStatusLabel(status: string) {
   if (status === "pending_payment") return "Pending";
   if (status === "checked_in") return "Checked in";
+  if (status === "confirmed") return "Paid";
+  if (status === "invited") return "Invited";
   return status;
 }
 

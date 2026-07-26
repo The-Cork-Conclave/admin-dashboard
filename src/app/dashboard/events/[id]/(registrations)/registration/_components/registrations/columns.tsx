@@ -19,6 +19,8 @@ function statusIcon(status: string) {
   switch (status.toLowerCase()) {
     case "confirmed":
       return <CircleCheckIcon className="fill-green-500 stroke-primary-foreground dark:fill-green-600" />;
+    case "invited":
+      return <CircleCheckIcon className="fill-violet-500 stroke-primary-foreground dark:fill-violet-600" />;
     case "checked_in":
       return <CircleCheckIcon className="fill-primary stroke-primary-foreground" />;
     case "pending_payment":
@@ -71,7 +73,7 @@ export function getRegistrationColumns(opts: { onView: (row: RegistrationRow) =>
     },
     {
       accessorKey: "confirmed_at",
-      header: "Paid On",
+      header: "Confirmed On",
       cell: ({ row }) => {
         const formatted = formatRegistrationDate(row.original.confirmed_at);
         if (formatted === "—") {

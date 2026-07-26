@@ -29,14 +29,31 @@ export async function GET(req: NextRequest) {
     const { cloudName, apiKey, apiSecret } = parseCloudinaryUrl(cloudinaryUrl);
 
     const folder = req.nextUrl.searchParams.get("folder")?.trim() || "cork-conclave";
+    // Optional delivery format for image uploads (e.g. jpg) so HEIC/etc. become browser-displayable.
+    // Must not be set for raw/auto uploads (receipts, PDFs) or the signature will not match.
+    const format = req.nextUrl.searchParams.get("format")?.trim().toLowerCase() || "";
     const timestamp = Math.floor(Date.now() / 1000);
 
     // Cloudinary signature is SHA1 of the sorted params string + apiSecret.
-    // Here we sign only what we send alongside the upload request.
-    const signatureBase = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
+    // Params must match exactly what the client sends on the upload request.
+    const signedParams: Record<string, string> = { folder, timestamp: String(timestamp) };
+    if (format) signedParams.format = format;
+
+    const signatureBase =
+      Object.keys(signedParams)
+        .sort()
+        .map((key) => `${key}=${signedParams[key]}`)
+        .join("&") + apiSecret;
     const signature = signSha1(signatureBase);
 
-    return NextResponse.json({ cloudName, apiKey, timestamp, signature, folder });
+    return NextResponse.json({
+      cloudName,
+      apiKey,
+      timestamp,
+      signature,
+      folder,
+      ...(format ? { format } : {}),
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to sign upload";
     return NextResponse.json({ message }, { status: 500 });

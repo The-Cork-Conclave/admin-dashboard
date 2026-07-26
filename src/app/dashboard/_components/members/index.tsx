@@ -3,6 +3,8 @@
 
 import * as React from "react";
 
+import { useRouter } from "next/navigation";
+
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   flexRender,
@@ -11,12 +13,13 @@ import {
   type PaginationState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search } from "lucide-react";
+import { ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, PlusIcon, Search } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
 import { DateRangePicker } from "@/components/date-range-picker";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +33,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import useDebouncedValue from "@/hooks/use-debounced-value";
 
+import { AddMemberForm } from "./add-member-form";
 import { membersColumn } from "./columns";
 import { fetchUsersList } from "./fetch-members-list";
 import { UsersTableSkeleton } from "./members-skeleton";
@@ -43,6 +47,8 @@ const sortOptions = [
 ] as const;
 
 export default function Members() {
+  const router = useRouter();
+  const [addOpen, setAddOpen] = React.useState(false);
   const [rowSelection, setRowSelection] = React.useState({});
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
@@ -127,181 +133,213 @@ export default function Members() {
   });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="leading-none">
-          {total} Member{total > 1 ? "s" : ""}
-        </CardTitle>
-        <CardDescription>Recent member records.</CardDescription>
-      </CardHeader>
+    <>
+      <Card>
+        <CardHeader className="w-full justify-between align-middle">
+          <div>
+            <CardTitle className="leading-none">
+              {total} Member{total > 1 ? "s" : ""}
+            </CardTitle>
+            <CardDescription>Recent member records.</CardDescription>
+          </div>
+          <CardAction>
+            <Button variant="outline" size="sm" onClick={() => setAddOpen(true)}>
+              <PlusIcon />
+              Add Member
+            </Button>
+          </CardAction>
+        </CardHeader>
 
-      <CardContent className="pt-0">
-        {query.isLoading ? (
-          <UsersTableSkeleton rowCount={pagination.pageSize} />
-        ) : (
-          <div className="space-y-4">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="relative w-full lg:w-80">
-                  <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    className="h-7 rounded-[min(var(--radius-md),12px)] pl-8"
-                    placeholder="Search members..."
-                    value={searchInput}
-                    onChange={(event) => setSearchInput(event.target.value)}
-                  />
+        <CardContent className="pt-0">
+          {query.isLoading ? (
+            <UsersTableSkeleton rowCount={pagination.pageSize} />
+          ) : (
+            <div className="space-y-4">
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="relative w-full lg:w-80">
+                    <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      className="h-7 rounded-[min(var(--radius-md),12px)] pl-8"
+                      placeholder="Search members..."
+                      value={searchInput}
+                      onChange={(event) => setSearchInput(event.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center xl:w-auto">
-                <div className="flex flex-col gap-1">
-                  <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
-                </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center xl:w-auto">
+                  <div className="flex flex-col gap-1">
+                    <DateRangePicker value={dateRange} onChange={handleDateRangeChange} />
+                  </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <ArrowUpDown />
-                      Sort
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuRadioGroup
-                      value={sortValue}
-                      onValueChange={(v) => setSortValue(v as typeof sortValue)}
-                    >
-                      {sortOptions.map((option) => (
-                        <DropdownMenuRadioItem key={option.value} value={option.value}>
-                          {option.label}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-
-            <div className="overflow-hidden rounded-lg border bg-card">
-              <Table>
-                <TableHeader className="bg-muted/15">
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => (
-                        <TableHead key={header.id} colSpan={header.colSpan} className="h-11 p-3 font-medium">
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(header.column.columnDef.header, header.getContext())}
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableHeader>
-
-                <TableBody>
-                  {table.getRowModel().rows.length ? (
-                    table.getRowModel().rows.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        role="link"
-                        tabIndex={0}
-                        className="cursor-pointer hover:bg-muted-foreground/25"
-                        data-state={row.getIsSelected() && "selected"}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <ArrowUpDown />
+                        Sort
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuRadioGroup
+                        value={sortValue}
+                        onValueChange={(v) => setSortValue(v as typeof sortValue)}
                       >
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id} className="p-3 align-middle">
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
+                        {sortOptions.map((option) => (
+                          <DropdownMenuRadioItem key={option.value} value={option.value}>
+                            {option.label}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+
+              <div className="overflow-hidden rounded-lg border bg-card">
+                <Table>
+                  <TableHeader className="bg-muted/15">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <TableRow key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                          <TableHead key={header.id} colSpan={header.colSpan} className="h-11 p-3 font-medium">
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(header.column.columnDef.header, header.getContext())}
+                          </TableHead>
                         ))}
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
-                        No results.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    ))}
+                  </TableHeader>
 
-            <div className="flex items-center justify-between px-1">
-              <div className="hidden flex-1 text-muted-foreground text-sm lg:flex" />
-              <div className="flex w-full items-center gap-8 lg:w-fit">
-                <div className="hidden items-center gap-2 lg:flex">
-                  <Label htmlFor="recent-customers-rows-per-page" className="font-medium text-sm">
-                    Rows per page
-                  </Label>
-                  <Select
-                    value={`${table.getState().pagination.pageSize}`}
-                    onValueChange={(value) => {
-                      table.setPageSize(Number(value));
-                    }}
-                  >
-                    <SelectTrigger size="sm" className="w-20" id="recent-customers-rows-per-page">
-                      <SelectValue placeholder={table.getState().pagination.pageSize} />
-                    </SelectTrigger>
-                    <SelectContent side="top">
-                      <SelectGroup>
-                        {[10, 20, 30, 40, 50].map((pageSize) => (
-                          <SelectItem key={pageSize} value={`${pageSize}`}>
-                            {pageSize}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex w-fit items-center justify-center font-medium text-sm">
-                  Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-                </div>
-                <div className="ml-auto flex items-center gap-2 lg:ml-0">
-                  <Button
-                    variant="outline"
-                    className="hidden size-8 lg:flex"
-                    size="icon"
-                    onClick={() => table.setPageIndex(0)}
-                    disabled={!table.getCanPreviousPage()}
-                  >
-                    <span className="sr-only">Go to first page</span>
-                    <ChevronsLeft className="size-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="size-8"
-                    size="icon"
-                    onClick={() => table.previousPage()}
-                    disabled={!table.getCanPreviousPage()}
-                  >
-                    <span className="sr-only">Go to previous page</span>
-                    <ChevronLeft className="size-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="size-8"
-                    size="icon"
-                    onClick={() => table.nextPage()}
-                    disabled={!table.getCanNextPage()}
-                  >
-                    <span className="sr-only">Go to next page</span>
-                    <ChevronRight className="size-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="hidden size-8 lg:flex"
-                    size="icon"
-                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                    disabled={!table.getCanNextPage()}
-                  >
-                    <span className="sr-only">Go to last page</span>
-                    <ChevronsRight className="size-4" />
-                  </Button>
+                  <TableBody>
+                    {table.getRowModel().rows.length ? (
+                      table.getRowModel().rows.map((row) => (
+                        <TableRow
+                          key={row.id}
+                          role="link"
+                          tabIndex={0}
+                          className="cursor-pointer hover:bg-muted-foreground/25"
+                          data-state={row.getIsSelected() && "selected"}
+                          onClick={() => router.push(`/dashboard/members/${encodeURIComponent(row.id)}`)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              router.push(`/dashboard/members/${encodeURIComponent(row.id)}`);
+                            }
+                          }}
+                        >
+                          {row.getVisibleCells().map((cell) => (
+                            <TableCell key={cell.id} className="p-3 align-middle">
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
+                          No results.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              <div className="flex items-center justify-between px-1">
+                <div className="hidden flex-1 text-muted-foreground text-sm lg:flex" />
+                <div className="flex w-full items-center gap-8 lg:w-fit">
+                  <div className="hidden items-center gap-2 lg:flex">
+                    <Label htmlFor="recent-customers-rows-per-page" className="font-medium text-sm">
+                      Rows per page
+                    </Label>
+                    <Select
+                      value={`${table.getState().pagination.pageSize}`}
+                      onValueChange={(value) => {
+                        table.setPageSize(Number(value));
+                      }}
+                    >
+                      <SelectTrigger size="sm" className="w-20" id="recent-customers-rows-per-page">
+                        <SelectValue placeholder={table.getState().pagination.pageSize} />
+                      </SelectTrigger>
+                      <SelectContent side="top">
+                        <SelectGroup>
+                          {[10, 20, 30, 40, 50].map((pageSize) => (
+                            <SelectItem key={pageSize} value={`${pageSize}`}>
+                              {pageSize}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex w-fit items-center justify-center font-medium text-sm">
+                    Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                  </div>
+                  <div className="ml-auto flex items-center gap-2 lg:ml-0">
+                    <Button
+                      variant="outline"
+                      className="hidden size-8 lg:flex"
+                      size="icon"
+                      onClick={() => table.setPageIndex(0)}
+                      disabled={!table.getCanPreviousPage()}
+                    >
+                      <span className="sr-only">Go to first page</span>
+                      <ChevronsLeft className="size-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="size-8"
+                      size="icon"
+                      onClick={() => table.previousPage()}
+                      disabled={!table.getCanPreviousPage()}
+                    >
+                      <span className="sr-only">Go to previous page</span>
+                      <ChevronLeft className="size-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="size-8"
+                      size="icon"
+                      onClick={() => table.nextPage()}
+                      disabled={!table.getCanNextPage()}
+                    >
+                      <span className="sr-only">Go to next page</span>
+                      <ChevronRight className="size-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="hidden size-8 lg:flex"
+                      size="icon"
+                      onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                      disabled={!table.getCanNextPage()}
+                    >
+                      <span className="sr-only">Go to last page</span>
+                      <ChevronsRight className="size-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="p-0 sm:max-w-md">
+          <Card className="py-4 ring-0">
+            <CardHeader className="border-b">
+              <DialogHeader>
+                <DialogTitle>Add member</DialogTitle>
+              </DialogHeader>
+            </CardHeader>
+            <CardContent className="py-4">
+              <AddMemberForm onSuccess={() => setAddOpen(false)} />
+            </CardContent>
+          </Card>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

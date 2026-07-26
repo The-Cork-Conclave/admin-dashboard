@@ -2,8 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { fetchUpstream } from "@/app/api/_utils/upstream";
 
-export async function GET(req: NextRequest) {
-  const upstream = await fetchUpstream("users", {
+export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  const upstream = await fetchUpstream(`/events/${encodeURIComponent(id)}/wines`, {
     method: "GET",
     searchParams: req.nextUrl.searchParams,
   });
@@ -15,8 +16,9 @@ export async function GET(req: NextRequest) {
   });
 }
 
-export async function POST(req: NextRequest) {
-  const upstream = await fetchUpstream("/users", {
+export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  const upstream = await fetchUpstream(`/events/${encodeURIComponent(id)}/wines`, {
     method: "POST",
     headers: { "Content-Type": req.headers.get("Content-Type") ?? "application/json" },
     body: await req.text(),

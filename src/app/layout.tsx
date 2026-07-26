@@ -12,6 +12,8 @@ import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
 import { ThemeBootScript } from "@/scripts/theme-boot";
 import { PreferencesStoreProvider } from "@/stores/preferences/preferences-provider";
 
+import "react-phone-number-input/style.css";
+
 import "./globals.css";
 
 export const metadata: Metadata = {

@@ -15,6 +15,7 @@ export const registrationSchema = z.object({
   email: z.string(),
   user_id: z.string(),
   status: z.string(),
+  is_complimentary: z.boolean().optional().default(false),
   confirmed_at: z.string().optional(),
   checked_in_at: z.string().nullable().optional(),
   created_at: z.string(),

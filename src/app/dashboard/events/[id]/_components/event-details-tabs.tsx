@@ -7,9 +7,10 @@ import Gallery from "@/app/dashboard/events/[id]/_components/gallery";
 import Insights from "@/app/dashboard/events/[id]/_components/insights";
 import { EventDetailsClient } from "@/app/dashboard/events/[id]/_components/overview";
 import UpdateEvent from "@/app/dashboard/events/[id]/_components/update";
+import Wines from "@/app/dashboard/events/[id]/_components/wines";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const TAB_VALUES = ["overview", "update", "insights", "gallery", "finance"] as const;
+const TAB_VALUES = ["overview", "update", "insights", "gallery", "finance", "wines"] as const;
 type TabValue = (typeof TAB_VALUES)[number];
 
 function isTabValue(value: string | null | undefined): value is TabValue {
@@ -57,6 +58,10 @@ export function EventDetailsTabs({ id }: { id: string }) {
         <TabsTrigger value="finance" className="md:px-3 md:py-1 lg:text-base">
           Finance
         </TabsTrigger>
+
+        <TabsTrigger value="wines" className="md:px-3 md:py-1 lg:text-base">
+          Wines
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="overview">
@@ -73,6 +78,10 @@ export function EventDetailsTabs({ id }: { id: string }) {
 
       <TabsContent value="gallery">
         <Gallery id={id} />
+      </TabsContent>
+
+      <TabsContent value="wines">
+        <Wines id={id} />
       </TabsContent>
 
       <TabsContent value="finance">

@@ -2,21 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { fetchUpstream } from "@/app/api/_utils/upstream";
 
-export async function GET(req: NextRequest) {
-  const upstream = await fetchUpstream("users", {
-    method: "GET",
-    searchParams: req.nextUrl.searchParams,
-  });
+export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
 
-  const body = await upstream.text();
-  return new NextResponse(body, {
-    status: upstream.status,
-    headers: { "Content-Type": upstream.headers.get("Content-Type") ?? "application/json" },
-  });
-}
-
-export async function POST(req: NextRequest) {
-  const upstream = await fetchUpstream("/users", {
+  const upstream = await fetchUpstream(`/events/${encodeURIComponent(id)}/registrations/invite`, {
     method: "POST",
     headers: { "Content-Type": req.headers.get("Content-Type") ?? "application/json" },
     body: await req.text(),

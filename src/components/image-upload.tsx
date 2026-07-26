@@ -7,7 +7,12 @@ import Image from "next/image";
 import { Trash2, UploadCloud } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { getCloudinarySignature, uploadFileToCloudinary } from "@/lib/cloudinary-client-upload";
+import {
+  cloudinaryDisplayUrl,
+  getCloudinarySignature,
+  IMAGE_UPLOAD_FORMAT,
+  uploadFileToCloudinary,
+} from "@/lib/cloudinary-client-upload";
 import { cn } from "@/lib/utils";
 
 export type ImageUploadProps = {
@@ -69,7 +74,7 @@ export function ImageUpload({
 
       setIsUploading(true);
       try {
-        const sig = await getCloudinarySignature(folder);
+        const sig = await getCloudinarySignature(folder, { format: IMAGE_UPLOAD_FORMAT });
         const url = await uploadFileToCloudinary(file, sig);
         onChange(url);
       } catch (e) {
@@ -123,7 +128,13 @@ export function ImageUpload({
           )}
         >
           <div className="relative h-56 w-full min-w-0">
-            <Image src={value as string} alt="Uploaded" fill unoptimized className="object-cover brightness-75" />
+            <Image
+              src={cloudinaryDisplayUrl(value as string)}
+              alt="Uploaded"
+              fill
+              unoptimized
+              className="object-cover brightness-75"
+            />
             <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
           </div>
           <div className="pointer-events-none absolute inset-0 grid place-items-center">
