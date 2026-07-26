@@ -33,6 +33,7 @@ export const formSchema = z.object({
   venue_address: z.string().optional(),
   registration_opens_at: z.string().optional(),
   registration_closes_at: z.string().optional(),
+  to_notify: z.enum(["true", "false"]),
 });
 
 export type FormInput = z.infer<typeof formSchema>;
@@ -163,6 +164,7 @@ export async function postCreateEvent({
     amount_in_kobo: (input.amount_in_kobo ?? "").trim() || "0",
     registration_opens_at: registrationOpensAt,
     registration_closes_at: registrationClosesAt,
+    to_notify: input.to_notify === "true",
     questions: apiQuestions,
   };
 

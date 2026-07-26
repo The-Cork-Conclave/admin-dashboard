@@ -11,6 +11,7 @@ import { ImageUpload } from "@/components/image-upload";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 import { type FormInput, formSchema, sharpInputClassName } from "./constants";
@@ -24,7 +25,7 @@ export function CreateEventForm({
 }) {
   const form = useForm<FormInput>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues ?? {
+    defaultValues: {
       name: "",
       image_url: "",
       description: "",
@@ -37,6 +38,8 @@ export function CreateEventForm({
       venue_address: "",
       registration_opens_at: "",
       registration_closes_at: "",
+      to_notify: "true",
+      ...defaultValues,
     },
   });
 
@@ -192,6 +195,26 @@ export function CreateEventForm({
                   onChange={(digitsOnly) => field.onChange(digitsOnly)}
                   ref={field.ref}
                 />
+                {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
+              </Field>
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="to_notify"
+            render={({ field, fieldState }) => (
+              <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+                <FieldLabel htmlFor="to-notify">Notify members</FieldLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="to-notify" aria-invalid={fieldState.invalid} className={sharpInputClassName}>
+                    <SelectValue placeholder="Notify members?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
                 {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
               </Field>
             )}
