@@ -74,6 +74,10 @@ export function JobName(name: JobType) {
       return "Send Event Reminder (day of)";
     case "send_new_event_announcement_email":
       return "Send New Event Announcement Email";
+    case "send_event_day_after_thank_you":
+      return "Send Day-After Thank You Email";
+    case "send_event_day_after_missed_you":
+      return "Send Day-After Missed You Email";
     case "verify_ercas_payment":
       return "Verify Ercas Payment";
     default:
