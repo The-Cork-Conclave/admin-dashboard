@@ -16,6 +16,7 @@ import {
   CirclePlus,
   Pencil,
   PlusIcon,
+  RefreshCw,
   Search,
   Trash2,
   Wallet,
@@ -62,6 +63,7 @@ import {
   type PlatformFinanceItemDTO,
 } from "../_lib/api";
 import { ItemFormModal } from "./item-form-modal";
+import { RequeryPaymentModal } from "./requery-payment-modal";
 
 const typeFilterOptions = [
   { value: "all", label: "All types" },
@@ -87,6 +89,7 @@ const eventSortOptions = [
 function SummaryCards() {
   const queryClient = useQueryClient();
   const [openingOpen, setOpeningOpen] = React.useState(false);
+  const [requeryOpen, setRequeryOpen] = React.useState(false);
   const query = useQuery({
     queryKey: ["finance-summary"],
     queryFn: getFinanceSummary,
@@ -111,8 +114,18 @@ function SummaryCards() {
     <>
       <Card className="py-4 shadow-xs">
         <CardHeader className="px-4">
-          <CardTitle>Overview</CardTitle>
-          <CardDescription>Payments, expenses, and platform adjustments across the app</CardDescription>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle>Overview</CardTitle>
+              <CardDescription>Payments, expenses, and platform adjustments across the app</CardDescription>
+            </div>
+            <CardAction>
+              <Button size="sm" variant="outline" onClick={() => setRequeryOpen(true)}>
+                <RefreshCw />
+                Requery payment
+              </Button>
+            </CardAction>
+          </div>
         </CardHeader>
 
         <CardContent className="mt-2 space-y-4 px-4 lg:space-y-0 lg:divide-y">
@@ -159,6 +172,7 @@ function SummaryCards() {
           await queryClient.invalidateQueries({ queryKey: ["finance-summary"] });
         }}
       />
+      <RequeryPaymentModal open={requeryOpen} onOpenChange={setRequeryOpen} />
     </>
   );
 }

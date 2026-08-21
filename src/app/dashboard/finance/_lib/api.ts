@@ -225,3 +225,33 @@ export async function deleteFinanceItem(id: string): Promise<void> {
     throw new Error(message);
   }
 }
+
+const requeryPaymentResponseSchema = z.object({
+  message: z.string(),
+  status: z.string(),
+  transaction_reference: z.string(),
+  payment_reference: z.string().optional().nullable(),
+});
+
+export type RequeryPaymentResponseDTO = z.infer<typeof requeryPaymentResponseSchema>;
+
+export async function requeryPayment(input: {
+  transaction_reference?: string;
+  payment_reference?: string;
+}): Promise<RequeryPaymentResponseDTO> {
+  const res = await authFetch("/api/payments/requery", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    let message = "Could not requery payment.";
+    try {
+      message = errorMessage(message, await res.json());
+    } catch {
+      /* ignore */
+    }
+    throw new Error(message);
+  }
+  return requeryPaymentResponseSchema.parse(await res.json());
+}
