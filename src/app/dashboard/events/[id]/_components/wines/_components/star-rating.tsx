@@ -9,19 +9,34 @@ type StarRatingProps = {
   className?: string;
 };
 
+function fillFor(rating: number, index: number): "full" | "half" | "empty" {
+  const threshold = index + 1;
+  if (rating >= threshold) return "full";
+  if (rating >= threshold - 0.5) return "half";
+  return "empty";
+}
+
 export function StarRating({ rating, max = 5, size = "sm", className }: StarRatingProps) {
   const iconClass = size === "sm" ? "size-2.5" : "size-3.5";
 
   return (
     <div className={cn("flex items-center gap-0.5 text-amber-500", className)}>
       {Array.from({ length: max }, (_, i) => {
-        const filled = i < Math.round(rating);
-        return (
-          <Star
-            key={i}
-            className={cn(iconClass, filled ? "fill-amber-500 text-amber-500" : "fill-none text-muted-foreground/40")}
-          />
-        );
+        const fill = fillFor(rating, i);
+        if (fill === "full") {
+          return <Star key={i} className={cn(iconClass, "fill-amber-500 text-amber-500")} />;
+        }
+        if (fill === "half") {
+          return (
+            <span key={i} className={cn("relative inline-flex", iconClass)}>
+              <Star className={cn(iconClass, "fill-none text-muted-foreground/40")} />
+              <span className="absolute inset-0 overflow-hidden" style={{ width: "50%" }}>
+                <Star className={cn(iconClass, "fill-amber-500 text-amber-500")} />
+              </span>
+            </span>
+          );
+        }
+        return <Star key={i} className={cn(iconClass, "fill-none text-muted-foreground/40")} />;
       })}
     </div>
   );
