@@ -23,6 +23,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { lagosDatetimeLocalToRfc3339, rfc3339ToLagosDatetimeLocal } from "@/lib/lagos-time";
 
 import { createFinanceItem, type PlatformFinanceItemDTO, updateFinanceItem } from "../_lib/api";
 
@@ -70,21 +71,15 @@ function toOptional(value: string) {
   return t.length > 0 ? t : undefined;
 }
 
-function toDatetimeLocalString(date: Date): string {
-  const pad2 = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}T${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
-}
-
 function buildValues(item?: PlatformFinanceItemDTO | null): FormInput {
   if (!item) return INITIAL;
-  const parsed = item.item_date ? new Date(item.item_date) : undefined;
   return {
     title: item.title,
     type: item.type,
     amountNaira: String(Math.trunc(item.amount_in_kobo / 100)),
     category: item.category ?? "",
     description: item.description ?? "",
-    itemDate: parsed && !Number.isNaN(parsed.getTime()) ? toDatetimeLocalString(parsed) : "",
+    itemDate: rfc3339ToLagosDatetimeLocal(item.item_date),
     vendorName: item.vendor_name ?? "",
     paidBy: item.paid_by ?? "",
     paymentMethod: item.payment_method ?? "",
@@ -113,7 +108,7 @@ export function ItemFormModal({ item, onSaved, onOpenChange, open }: ItemFormMod
         amount_in_kobo: Number(values.amountNaira.trim()) * 100,
         description: toOptional(values.description),
         category: toOptional(values.category),
-        item_date: values.itemDate ? new Date(values.itemDate).toISOString() : undefined,
+        item_date: values.itemDate ? lagosDatetimeLocalToRfc3339(values.itemDate) : undefined,
         vendor_name: toOptional(values.vendorName),
         paid_by: toOptional(values.paidBy),
         payment_method: toOptional(values.paymentMethod),

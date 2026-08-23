@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { CheckCircle, Eye } from "lucide-react";
 import { toast } from "sonner";
 
@@ -25,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authFetch } from "@/lib/auth/auth-fetch";
-import { formatNairaFromKobo } from "@/lib/utils";
+import { formatDate, formatNairaFromKobo, formatTime } from "@/lib/utils";
 
 import { fetchEventsList } from "../_lib/fetch-events-list";
 
@@ -39,18 +38,6 @@ function toExternalUrl(maybeUrl?: string): string | null {
   } catch {
     return null;
   }
-}
-
-function formatDate(raw: string): string {
-  const d = new Date(raw);
-  if (Number.isNaN(d.getTime())) return "—";
-  return format(d, "MMM d, yyyy");
-}
-
-function formatTime(raw: string): string {
-  const d = new Date(raw);
-  if (Number.isNaN(d.getTime())) return "—";
-  return format(d, "h:mm a");
 }
 
 export default function CurrentEvent() {

@@ -1,5 +1,4 @@
 import { type ClassValue, clsx } from "clsx";
-import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -46,7 +45,11 @@ export function formatDateTime(value?: string): string {
   if (!value) return "—";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(d);
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Africa/Lagos",
+  }).format(d);
 }
 
 export function formatNairaFromKobo(koboString?: string): { pretty: string; raw: string } {
@@ -62,5 +65,18 @@ export function formatNairaFromKobo(koboString?: string): { pretty: string; raw:
 export function formatTime(raw: string): string {
   const d = new Date(raw);
   if (Number.isNaN(d.getTime())) return "—";
-  return format(d, "h:mm a");
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "Africa/Lagos",
+  }).format(d);
+}
+
+export function formatDate(raw: string): string {
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return "—";
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeZone: "Africa/Lagos",
+  }).format(d);
 }

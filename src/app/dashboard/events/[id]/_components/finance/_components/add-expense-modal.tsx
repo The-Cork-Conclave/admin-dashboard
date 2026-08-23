@@ -24,6 +24,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { lagosDatetimeLocalToRfc3339, rfc3339ToLagosDatetimeLocal } from "@/lib/lagos-time";
 
 import { createEventExpense, type EventExpenseDTO, updateEventExpense } from "../api";
 import type { ExpenseRow } from "./expenses-table-schema";
@@ -88,31 +89,19 @@ function toOptionalTrimmedString(value: string) {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-function toDatetimeLocalString(date: Date): string {
-  const pad2 = (n: number) => String(n).padStart(2, "0");
-  return [
-    `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`,
-    `${pad2(date.getHours())}:${pad2(date.getMinutes())}`,
-  ].join("T");
-}
-
 function toRFC3339FromDatetimeLocal(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toISOString();
+  return lagosDatetimeLocalToRfc3339(value);
 }
 
 function buildFormValues(expense?: ExpenseRow | null): FormInput {
   if (!expense) return INITIAL_FORM_VALUES;
-
-  const parsedExpenseDate = expense.expense_date ? new Date(expense.expense_date) : undefined;
 
   return {
     title: expense.title ?? "",
     amountNaira: typeof expense.amount_in_kobo === "number" ? String(Math.trunc(expense.amount_in_kobo / 100)) : "",
     category: expense.category ?? "",
     description: expense.description ?? "",
-    expenseDate:
-      parsedExpenseDate && !Number.isNaN(parsedExpenseDate.getTime()) ? toDatetimeLocalString(parsedExpenseDate) : "",
+    expenseDate: rfc3339ToLagosDatetimeLocal(expense.expense_date),
     vendorName: expense.vendor_name ?? "",
     paidBy: expense.paid_by ?? "",
     paymentMethod: expense.payment_method ?? "",

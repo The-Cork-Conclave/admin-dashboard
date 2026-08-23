@@ -10,6 +10,7 @@ import {
   text,
   yes_no,
 } from "@/lib/event-questions";
+import { addLagosCalendarDaysRfc3339, lagosDatetimeLocalToRfc3339 } from "@/lib/lagos-time";
 
 export { multiple_choice, type QuestionType, question_types, questionTypeLabel, single_choice, text, yes_no };
 
@@ -84,26 +85,22 @@ export function newDraftQuestion(): DraftQuestion {
   };
 }
 
-function toRFC3339FromDatetimeLocal(value: string): string {
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? value : d.toISOString();
+function toRfc3339FromDatetimeLocal(value: string): string {
+  return lagosDatetimeLocalToRfc3339(value);
 }
 
-function eventInstantFromForm(eventDateLocal: string): Date | null {
-  const d = new Date(eventDateLocal);
-  return Number.isNaN(d.getTime()) ? null : d;
+function eventInstantFromForm(eventDateLocal: string): string | null {
+  const rfc = lagosDatetimeLocalToRfc3339(eventDateLocal);
+  const d = new Date(rfc);
+  return Number.isNaN(d.getTime()) ? null : rfc;
 }
 
-function defaultRegistrationOpensIso(eventInstant: Date): string {
-  const d = new Date(eventInstant);
-  d.setDate(d.getDate() - 21);
-  return d.toISOString();
+function defaultRegistrationOpensIso(eventRfc3339: string): string {
+  return addLagosCalendarDaysRfc3339(eventRfc3339, -21);
 }
 
-function defaultRegistrationClosesIso(eventInstant: Date): string {
-  const d = new Date(eventInstant);
-  d.setDate(d.getDate() - 1);
-  return d.toISOString();
+function defaultRegistrationClosesIso(eventRfc3339: string): string {
+  return addLagosCalendarDaysRfc3339(eventRfc3339, -1);
 }
 
 export async function postCreateEvent({
@@ -120,11 +117,11 @@ export async function postCreateEvent({
   }
 
   const registrationOpensAt = input.registration_opens_at?.trim()
-    ? toRFC3339FromDatetimeLocal(input.registration_opens_at)
+    ? toRfc3339FromDatetimeLocal(input.registration_opens_at)
     : defaultRegistrationOpensIso(eventInstant);
 
   const registrationClosesAt = input.registration_closes_at?.trim()
-    ? toRFC3339FromDatetimeLocal(input.registration_closes_at)
+    ? toRfc3339FromDatetimeLocal(input.registration_closes_at)
     : defaultRegistrationClosesIso(eventInstant);
 
   const apiQuestions =
@@ -158,7 +155,7 @@ export async function postCreateEvent({
     welcome_text: input.welcome_text?.trim() ? input.welcome_text.trim() : undefined,
     dress_code: input.dress_code?.trim() ? input.dress_code.trim() : undefined,
     entry_fee: input.entry_fee?.trim() ? input.entry_fee.trim() : undefined,
-    event_date: toRFC3339FromDatetimeLocal(input.event_date),
+    event_date: toRfc3339FromDatetimeLocal(input.event_date),
     venue_name: input.venue_name,
     venue_address: input.venue_address?.trim() ? input.venue_address.trim() : undefined,
     amount_in_kobo: (input.amount_in_kobo ?? "").trim() || "0",

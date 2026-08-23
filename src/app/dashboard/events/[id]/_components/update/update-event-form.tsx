@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { authFetch } from "@/lib/auth/auth-fetch";
+import { lagosDatetimeLocalToRfc3339, rfc3339ToLagosDatetimeLocal } from "@/lib/lagos-time";
 
 const sharpInputClassName = "rounded-md border-foreground/25";
 
@@ -59,23 +60,11 @@ const formSchema = z.object({
 type FormInput = z.infer<typeof formSchema>;
 
 function toRFC3339FromDatetimeLocal(value: string): string {
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? value : d.toISOString();
+  return lagosDatetimeLocalToRfc3339(value);
 }
 
 function toDatetimeLocalFromRFC3339(value: string | undefined): string {
-  const v = (value ?? "").trim();
-  if (!v) return "";
-  const d = new Date(v);
-  if (Number.isNaN(d.getTime())) return "";
-
-  const pad2 = (n: number) => String(n).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  const mm = pad2(d.getMonth() + 1);
-  const dd = pad2(d.getDate());
-  const hh = pad2(d.getHours());
-  const min = pad2(d.getMinutes());
-  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+  return rfc3339ToLagosDatetimeLocal(value);
 }
 
 function nairaStringFromKoboString(kobo: string | undefined): string {
