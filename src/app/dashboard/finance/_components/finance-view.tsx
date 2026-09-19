@@ -50,6 +50,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import useDebouncedValue from "@/hooks/use-debounced-value";
+import { TABLE_PAGE_SIZE } from "@/lib/table-pagination";
 import { formatCurrency, formatDateTime, formatNairaFromKobo } from "@/lib/utils";
 
 import { RevenueOpeningBalanceModal } from "../../_components/metrics/revenue-opening-balance-modal";
@@ -178,7 +179,7 @@ function SummaryCards() {
 }
 
 function EventsBreakdown() {
-  const [pagination, setPagination] = React.useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = React.useState<PaginationState>({ pageIndex: 0, pageSize: TABLE_PAGE_SIZE });
   const [searchInput, setSearchInput] = React.useState("");
   const debouncedSearch = useDebouncedValue(searchInput, 350);
   const [sortValue, setSortValue] = React.useState<(typeof eventSortOptions)[number]["value"]>("name-asc");
@@ -331,7 +332,6 @@ function EventsBreakdown() {
         </div>
         <PaginationBar
           pageIndex={pagination.pageIndex}
-          pageSize={pagination.pageSize}
           pageCount={table.getPageCount()}
           total={query.data?.meta.total ?? 0}
           canPrevious={table.getCanPreviousPage()}
@@ -340,7 +340,6 @@ function EventsBreakdown() {
           onPrev={() => table.previousPage()}
           onNext={() => table.nextPage()}
           onLast={() => table.setPageIndex(table.getPageCount() - 1)}
-          onPageSize={(size) => setPagination({ pageIndex: 0, pageSize: size })}
         />
       </CardContent>
     </Card>
@@ -349,7 +348,7 @@ function EventsBreakdown() {
 
 function NonEventItems() {
   const queryClient = useQueryClient();
-  const [pagination, setPagination] = React.useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = React.useState<PaginationState>({ pageIndex: 0, pageSize: TABLE_PAGE_SIZE });
   const [searchInput, setSearchInput] = React.useState("");
   const debouncedSearch = useDebouncedValue(searchInput, 350);
   const [typeFilter, setTypeFilter] = React.useState<(typeof typeFilterOptions)[number]["value"]>("all");
@@ -615,7 +614,6 @@ function NonEventItems() {
           </div>
           <PaginationBar
             pageIndex={pagination.pageIndex}
-            pageSize={pagination.pageSize}
             pageCount={table.getPageCount()}
             total={query.data?.meta.total ?? 0}
             canPrevious={table.getCanPreviousPage()}
@@ -624,7 +622,6 @@ function NonEventItems() {
             onPrev={() => table.previousPage()}
             onNext={() => table.nextPage()}
             onLast={() => table.setPageIndex(table.getPageCount() - 1)}
-            onPageSize={(size) => setPagination({ pageIndex: 0, pageSize: size })}
           />
         </CardContent>
       </Card>
@@ -682,7 +679,6 @@ function NonEventItems() {
 
 function PaginationBar(props: {
   pageIndex: number;
-  pageSize: number;
   pageCount: number;
   total: number;
   canPrevious: boolean;
@@ -691,7 +687,6 @@ function PaginationBar(props: {
   onPrev: () => void;
   onNext: () => void;
   onLast: () => void;
-  onPageSize: (size: number) => void;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -699,18 +694,6 @@ function PaginationBar(props: {
         {props.total} total · Page {props.pageIndex + 1} of {props.pageCount}
       </p>
       <div className="flex items-center gap-2">
-        <Select value={String(props.pageSize)} onValueChange={(v) => props.onPageSize(Number(v))}>
-          <SelectTrigger className="w-[100px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {[10, 20, 50].map((n) => (
-              <SelectItem key={n} value={String(n)}>
-                {n} / page
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
         <Button variant="outline" size="icon" className="size-8" disabled={!props.canPrevious} onClick={props.onFirst}>
           <ChevronsLeft className="size-4" />
         </Button>

@@ -9,6 +9,7 @@ import { PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { TABLE_PAGE_SIZE } from "@/lib/table-pagination";
 
 import { fetchAdminsList } from "../_lib/fetch-admins-list";
 import { AdminsTableSkeleton } from "./admins-table-skeleton";
@@ -19,7 +20,7 @@ export function AdminsView() {
   const [inviteOpen, setInviteOpen] = React.useState(false);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: TABLE_PAGE_SIZE,
   });
 
   const page = pagination.pageIndex + 1;

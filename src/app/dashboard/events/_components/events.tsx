@@ -37,10 +37,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import useDebouncedValue from "@/hooks/use-debounced-value";
+import { TABLE_PAGE_SIZE } from "@/lib/table-pagination";
 
 import { fetchEventsList } from "../_lib/fetch-events-list";
 import { eventColumns } from "./columns";
@@ -68,7 +67,7 @@ const Events = () => {
   const [rowSelection, setRowSelection] = React.useState({});
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: TABLE_PAGE_SIZE,
   });
 
   const [searchInput, setSearchInput] = React.useState("");
@@ -290,30 +289,6 @@ const Events = () => {
                 </div>
 
                 <div className="flex w-full items-center gap-8 lg:w-fit">
-                  <div className="hidden items-center gap-2 lg:flex">
-                    <Label htmlFor="events-rows-per-page" className="font-medium text-sm">
-                      Rows per page
-                    </Label>
-                    <Select
-                      value={`${table.getState().pagination.pageSize}`}
-                      onValueChange={(value) => {
-                        table.setPageSize(Number(value));
-                      }}
-                    >
-                      <SelectTrigger size="sm" className="w-20" id="events-rows-per-page">
-                        <SelectValue placeholder={table.getState().pagination.pageSize} />
-                      </SelectTrigger>
-                      <SelectContent side="top">
-                        <SelectGroup>
-                          {[10, 20, 30, 40, 50].map((pageSize) => (
-                            <SelectItem key={pageSize} value={`${pageSize}`}>
-                              {pageSize}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
                   <div className="flex w-fit items-center justify-center font-medium text-sm">
                     Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
                   </div>

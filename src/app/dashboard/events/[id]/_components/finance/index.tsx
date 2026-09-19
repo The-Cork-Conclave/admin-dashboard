@@ -7,6 +7,7 @@ import type { PaginationState } from "@tanstack/react-table";
 import { toast } from "sonner";
 
 import useDebouncedValue from "@/hooks/use-debounced-value";
+import { TABLE_PAGE_SIZE } from "@/lib/table-pagination";
 
 import { AddExpenseModal } from "./_components/add-expense-modal";
 import { DeleteExpenseDialog } from "./_components/delete-expense-dialog";
@@ -60,7 +61,7 @@ export default function Finance({ id }: { id: string }) {
   const [expenseSortValue, setExpenseSortValue] = React.useState<ExpensesTableSortValue>("created-desc");
   const [expensePagination, setExpensePagination] = React.useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: TABLE_PAGE_SIZE,
   });
 
   const expenseSort = React.useMemo(() => getExpenseSort(expenseSortValue), [expenseSortValue]);
