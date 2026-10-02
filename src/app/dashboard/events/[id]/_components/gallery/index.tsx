@@ -392,7 +392,7 @@ export default function Gallery({ id }: { id: string }) {
             <DialogDescription>
               Images are uploaded to storage and added to this gallery. Max{" "}
               {Math.round(GALLERY_ZIP_MAX_BYTES / (1024 * 1024))} MB per ZIP, up to {GALLERY_ZIP_MAX_IMAGES} images
-              (jpg, png, webp, gif, avif, bmp, svg).
+              (jpg, png, webp, gif, avif, bmp, svg, heic).
             </DialogDescription>
           </DialogHeader>
 

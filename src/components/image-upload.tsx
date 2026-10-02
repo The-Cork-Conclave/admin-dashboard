@@ -24,6 +24,14 @@ export type ImageUploadProps = {
   maxSizeBytes?: number;
 };
 
+const HEIC_EXTENSIONS = [".heic", ".heif"];
+
+function isSupportedImageFile(file: File): boolean {
+  if (file.type.startsWith("image/")) return true;
+  const name = file.name.toLowerCase();
+  return HEIC_EXTENSIONS.some((ext) => name.endsWith(ext));
+}
+
 function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
   const units = ["B", "KB", "MB", "GB"];
@@ -54,7 +62,8 @@ export function ImageUpload({
 
   const validateFile = React.useCallback(
     (file: File) => {
-      if (!file.type.startsWith("image/")) return `Only image files are supported. Got: ${file.type || "unknown"}`;
+      if (!isSupportedImageFile(file))
+        return `Only image files are supported. Got: ${file.type || file.name || "unknown"}`;
       if (Number.isFinite(maxSizeBytes) && maxSizeBytes > 0 && file.size > maxSizeBytes) {
         return `File is too large (${formatBytes(file.size)}). Max is ${formatBytes(maxSizeBytes)}.`;
       }
@@ -181,7 +190,7 @@ export function ImageUpload({
           ref={inputRef}
           id={inputId}
           type="file"
-          accept="image/*"
+          accept="image/*,.heic,.heif,image/heic,image/heif"
           className="sr-only"
           disabled={disabled || isUploading}
           onChange={onInputChange}
@@ -210,7 +219,7 @@ export function ImageUpload({
           <div className="mt-2 max-w-md text-balance text-muted-foreground text-xs leading-relaxed">
             {isUploading
               ? "Please wait while your image uploads."
-              : `Drag an image here, or click the icon to browse (max ${formatBytes(maxSizeBytes)}).`}
+              : `Drag an image here, or click the icon to browse. JPG, PNG, HEIC, and other images up to ${formatBytes(maxSizeBytes)}.`}
           </div>
         </div>
       </label>

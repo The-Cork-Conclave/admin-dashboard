@@ -10,7 +10,7 @@ export const GALLERY_ZIP_MAX_IMAGES = 1000;
 export const GALLERY_ZIP_CONCURRENCY = 4;
 export const GALLERY_ZIP_MAX_IMAGE_BYTES = 100 * 1024 * 1024;
 
-const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif", "avif", "bmp", "svg"]);
+const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif", "avif", "bmp", "svg", "heic", "heif"]);
 
 export type ZipImportProgress = {
   completed: number;
@@ -29,6 +29,14 @@ export type ZipImportResult = {
 function isSkippableZipPath(path: string): boolean {
   const lower = path.toLowerCase();
   return lower.includes("__macosx/") || lower.endsWith(".ds_store");
+}
+
+function imageMimeForExt(ext: string): string {
+  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+  if (ext === "heic") return "image/heic";
+  if (ext === "heif") return "image/heif";
+  if (ext === "svg") return "image/svg+xml";
+  return `image/${ext}`;
 }
 
 function imageExtFromPath(path: string): string | null {
@@ -72,14 +80,14 @@ export async function collectZipImageFiles(
     }
 
     const base = path.split("/").pop() ?? "image";
-    const mime = blob.type || `image/${ext === "jpg" ? "jpeg" : ext}`;
+    const mime = blob.type || imageMimeForExt(ext);
     const file = new File([blob], base, { type: mime });
     files.push({ path, file });
   }
 
   if (files.length === 0) {
     return {
-      error: "No supported images found in the ZIP (jpg, png, webp, gif, avif, bmp, svg).",
+      error: "No supported images found in the ZIP (jpg, png, webp, gif, avif, bmp, svg, heic).",
     };
   }
 

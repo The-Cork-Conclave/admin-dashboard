@@ -13,11 +13,12 @@ import { Activities } from "./_components/activities";
 import { AddWineModal } from "./_components/add-wine-modal";
 import WineCard from "./_components/wine-card";
 import { WineDetailsDrawer } from "./_components/wine-details-drawer";
-import { fetchEventWines } from "./_lib/wines-api.client";
+import { type EventWineListItem, fetchEventWines } from "./_lib/wines-api.client";
 
 export default function Wines({ id }: { id: string }) {
   const queryClient = useQueryClient();
   const [addOpen, setAddOpen] = React.useState(false);
+  const [editingWine, setEditingWine] = React.useState<EventWineListItem | null>(null);
   const [detailsWineId, setDetailsWineId] = React.useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = React.useState(false);
 
@@ -60,10 +61,12 @@ export default function Wines({ id }: { id: string }) {
     };
 
     es.addEventListener("wine_added", invalidateLive);
+    es.addEventListener("wine_updated", invalidateLive);
     es.addEventListener("wine_reviewed", invalidateLive);
 
     return () => {
       es.removeEventListener("wine_added", invalidateLive);
+      es.removeEventListener("wine_updated", invalidateLive);
       es.removeEventListener("wine_reviewed", invalidateLive);
       es.close();
     };
@@ -72,7 +75,14 @@ export default function Wines({ id }: { id: string }) {
   return (
     <main className="mx-auto w-full px-6 py-4 md:px-10">
       <header className="mb-10 flex flex-col justify-end gap-6 md:flex-row md:items-end">
-        <Button size="lg" className="gap-2 self-start md:self-auto" onClick={() => setAddOpen(true)}>
+        <Button
+          size="lg"
+          className="gap-2 self-start md:self-auto"
+          onClick={() => {
+            setEditingWine(null);
+            setAddOpen(true);
+          }}
+        >
           <CirclePlus className="size-4" />
           Add Wine
         </Button>
@@ -161,9 +171,29 @@ export default function Wines({ id }: { id: string }) {
         </div>
       </div>
 
-      <AddWineModal open={addOpen} onOpenChange={setAddOpen} eventId={id} onSuccess={refreshAfterAnnounce} />
+      <AddWineModal
+        open={addOpen || editingWine != null}
+        onOpenChange={(open) => {
+          if (open) return;
+          setAddOpen(false);
+          setEditingWine(null);
+        }}
+        eventId={id}
+        wine={editingWine}
+        onSuccess={refreshAfterAnnounce}
+      />
 
-      <WineDetailsDrawer eventId={id} eventWineId={detailsWineId} open={detailsOpen} onOpenChange={setDetailsOpen} />
+      <WineDetailsDrawer
+        eventId={id}
+        eventWineId={detailsWineId}
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        onEdit={(wine) => {
+          setDetailsOpen(false);
+          setAddOpen(false);
+          setEditingWine(wine);
+        }}
+      />
     </main>
   );
 }

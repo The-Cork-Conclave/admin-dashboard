@@ -124,6 +124,24 @@ export async function announceEventWine(
   return (await res.json()) as AnnounceEventWineResponse;
 }
 
+export async function updateEventWine(
+  eventId: string,
+  eventWineId: string,
+  payload: AnnounceEventWinePayload,
+): Promise<AnnounceEventWineResponse> {
+  const res = await authFetch(`/api/events/${encodeURIComponent(eventId)}/wines/${encodeURIComponent(eventWineId)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw new WinesApiError(await parseErrorMessage(res, "Could not update wine. Please try again."), res.status);
+  }
+
+  return (await res.json()) as AnnounceEventWineResponse;
+}
+
 export async function fetchEventWineDetail(eventId: string, eventWineId: string): Promise<EventWineDetailResponse> {
   const res = await authFetch(`/api/events/${encodeURIComponent(eventId)}/wines/${encodeURIComponent(eventWineId)}`, {
     method: "GET",

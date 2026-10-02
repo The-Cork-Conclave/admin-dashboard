@@ -87,7 +87,7 @@ export function FileUpload({
   disabled = false,
   className,
   maxSizeBytes = 10 * 1024 * 1024,
-  accept = "image/*,.pdf,.doc,.docx",
+  accept = "image/*,.heic,.heif,image/heic,image/heif,.pdf,.doc,.docx",
   allowedMimeTypes = [
     "application/msword",
     "application/pdf",
@@ -114,7 +114,8 @@ export function FileUpload({
   const validateFile = React.useCallback(
     (file: File) => {
       const lowerName = file.name.toLowerCase();
-      const isAllowedByType = file.type.startsWith("image/") || allowedMimeTypes.includes(file.type);
+      const isHeic = lowerName.endsWith(".heic") || lowerName.endsWith(".heif");
+      const isAllowedByType = file.type.startsWith("image/") || isHeic || allowedMimeTypes.includes(file.type);
       const isAllowedByExtension = allowedExtensions.some((ext) => lowerName.endsWith(ext));
 
       if (!(isAllowedByType || isAllowedByExtension)) {

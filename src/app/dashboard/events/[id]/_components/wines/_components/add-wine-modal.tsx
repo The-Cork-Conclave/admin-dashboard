@@ -31,7 +31,14 @@ import { cloudinaryDisplayUrl } from "@/lib/cloudinary-client-upload";
 import { cn } from "@/lib/utils";
 
 import { WINE_COLORS } from "../_lib/types";
-import { announceEventWine, searchWinesCatalog, type WineCatalogItem, WinesApiError } from "../_lib/wines-api.client";
+import {
+  announceEventWine,
+  type EventWineListItem,
+  searchWinesCatalog,
+  updateEventWine,
+  type WineCatalogItem,
+  WinesApiError,
+} from "../_lib/wines-api.client";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Wine name is required." }),
@@ -65,6 +72,7 @@ type AddWineModalProps = {
   onOpenChange: (open: boolean) => void;
   eventId: string;
   onSuccess: () => void | Promise<void>;
+  wine?: EventWineListItem | null;
 };
 
 function optionalTrim(value: string): string | null {
@@ -296,7 +304,19 @@ function WineNameField({
   );
 }
 
-export function AddWineModal({ open, onOpenChange, eventId, onSuccess }: AddWineModalProps) {
+function formValuesFromWine(wine: EventWineListItem): FormInput {
+  return {
+    name: wine.name,
+    producer: wine.producer,
+    year: wine.year != null ? String(wine.year) : "",
+    grapeVariety: wine.grape_variety?.trim() ?? "",
+    wineType: wine.wine_type,
+    alcoholLevel: wine.alcohol_level != null ? String(wine.alcohol_level) : "",
+    imageUrl: wine.image_url?.trim() ?? "",
+  };
+}
+
+export function AddWineModal({ open, onOpenChange, eventId, onSuccess, wine = null }: AddWineModalProps) {
   const [pending, setPending] = React.useState(false);
 
   const form = useForm<FormInput>({
@@ -306,9 +326,9 @@ export function AddWineModal({ open, onOpenChange, eventId, onSuccess }: AddWine
 
   React.useEffect(() => {
     if (!open) return;
-    form.reset(INITIAL);
+    form.reset(wine ? formValuesFromWine(wine) : INITIAL);
     setPending(false);
-  }, [form, open]);
+  }, [form, open, wine]);
 
   const applyCatalogWine = (wine: WineCatalogItem) => {
     form.setValue("name", wine.name, { shouldDirty: true, shouldValidate: true });
@@ -334,27 +354,38 @@ export function AddWineModal({ open, onOpenChange, eventId, onSuccess }: AddWine
       const yearTrimmed = values.year.trim();
       const alcoholTrimmed = values.alcoholLevel.trim();
       const wineType = values.wineType.trim();
-      await announceEventWine(eventId, {
+      const payload = {
         name: values.name.trim(),
         producer: values.producer.trim(),
         wine_type: wineType,
         year: yearTrimmed ? Number(yearTrimmed) : null,
+        country: wine?.country ?? null,
+        region: wine?.region ?? null,
         grape_variety: optionalTrim(values.grapeVariety),
         alcohol_level: alcoholTrimmed ? Number(alcoholTrimmed) : null,
         image_url: optionalTrim(values.imageUrl),
-      });
-      toast.success("Wine announced", { description: values.name.trim() });
+      };
+      if (wine) {
+        await updateEventWine(eventId, wine.event_wine_id, payload);
+        toast.success("Wine updated", { description: payload.name });
+      } else {
+        await announceEventWine(eventId, payload);
+        toast.success("Wine announced", { description: payload.name });
+      }
       await onSuccess();
       onOpenChange(false);
     } catch (err) {
       const message =
-        err instanceof WinesApiError ? err.message : err instanceof Error ? err.message : "Could not announce wine.";
-      toast.error(
-        err instanceof WinesApiError && err.status === 409 ? "Wine already on this event" : "Announce failed",
-        {
-          description: message,
-        },
-      );
+        err instanceof WinesApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : wine
+              ? "Could not update wine."
+              : "Could not announce wine.";
+      const conflict = err instanceof WinesApiError && err.status === 409;
+      const title = conflict ? "Could not save wine" : wine ? "Update failed" : "Announce failed";
+      toast.error(title, { description: message });
     } finally {
       setPending(false);
     }
@@ -364,8 +395,12 @@ export function AddWineModal({ open, onOpenChange, eventId, onSuccess }: AddWine
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
         <DialogHeader className="border-b bg-muted/20 px-6 py-5">
-          <DialogTitle>Add &amp; Announce Wine</DialogTitle>
-          <DialogDescription>Add the next wine being sampled. Attendees can review it in realtime.</DialogDescription>
+          <DialogTitle>{wine ? "Edit Wine" : "Add & Announce Wine"}</DialogTitle>
+          <DialogDescription>
+            {wine
+              ? "Update this wine's details. Changes show up for attendees."
+              : "Add the next wine being sampled. Attendees can review it in realtime."}
+          </DialogDescription>
         </DialogHeader>
 
         <form className="flex min-h-0 flex-1 flex-col" onSubmit={(e) => e.preventDefault()}>
@@ -476,7 +511,7 @@ export function AddWineModal({ open, onOpenChange, eventId, onSuccess }: AddWine
                 Cancel
               </Button>
               <Button type="button" disabled={pending} onClick={() => void submit()} size="lg">
-                {pending ? "Submitting..." : "Submit"}
+                {pending ? "Submitting..." : wine ? "Save" : "Submit"}
               </Button>
             </div>
           </DialogFooter>

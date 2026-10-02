@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { Star, Wine, X } from "lucide-react";
+import { Pencil, Star, Wine, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cloudinaryDisplayUrl } from "@/lib/cloudinary-client-upload";
 
-import { fetchEventWineDetail } from "../_lib/wines-api.client";
+import { type EventWineListItem, fetchEventWineDetail } from "../_lib/wines-api.client";
 import { StarRating } from "./star-rating";
 
 type WineDetailsDrawerProps = {
@@ -27,9 +27,10 @@ type WineDetailsDrawerProps = {
   eventWineId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEdit?: (wine: EventWineListItem) => void;
 };
 
-export function WineDetailsDrawer({ eventId, eventWineId, open, onOpenChange }: WineDetailsDrawerProps) {
+export function WineDetailsDrawer({ eventId, eventWineId, open, onOpenChange, onEdit }: WineDetailsDrawerProps) {
   const detailQuery = useQuery({
     queryKey: ["events", eventId, "wines", eventWineId],
     queryFn: () => {
@@ -51,12 +52,20 @@ export function WineDetailsDrawer({ eventId, eventWineId, open, onOpenChange }: 
               <DrawerTitle className="text-lg">Wine Details &amp; Reviews</DrawerTitle>
               <DrawerDescription className="sr-only">Reviews for this event wine</DrawerDescription>
             </div>
-            <DrawerClose asChild>
-              <Button type="button" variant="ghost" size="icon" className="size-8 shrink-0">
-                <X className="size-4" />
-                <span className="sr-only">Close drawer</span>
-              </Button>
-            </DrawerClose>
+            <div className="flex shrink-0 items-center gap-1">
+              {wine && onEdit ? (
+                <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => onEdit(wine)}>
+                  <Pencil className="size-3.5" />
+                  Edit
+                </Button>
+              ) : null}
+              <DrawerClose asChild>
+                <Button type="button" variant="ghost" size="icon" className="size-8 shrink-0">
+                  <X className="size-4" />
+                  <span className="sr-only">Close drawer</span>
+                </Button>
+              </DrawerClose>
+            </div>
           </div>
         </DrawerHeader>
 
