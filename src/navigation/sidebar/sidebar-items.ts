@@ -3,6 +3,7 @@ import {
   CirclePile,
   LayoutDashboard,
   type LucideIcon,
+  Shirt,
   Users2Icon,
   Wallet,
   // , Logs,
@@ -50,6 +51,12 @@ export const sidebarItems: NavGroup[] = [
         title: "Finance",
         url: "/dashboard/finance",
         icon: Wallet,
+      },
+      {
+        title: "Merch",
+        url: "/dashboard/merch",
+        icon: Shirt,
+        isNew: true,
       },
       {
         title: "Admins",

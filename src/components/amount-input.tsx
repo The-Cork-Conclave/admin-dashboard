@@ -76,7 +76,6 @@ export const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
       {...props}
       ref={composedRef}
       inputMode={props.inputMode ?? "numeric"}
-      pattern={props.pattern ?? "\\d*"}
       value={formatAmountDigits(String(value ?? ""))}
       onChange={(e) => {
         const raw = e.target.value ?? "";
