@@ -4,10 +4,21 @@ import * as React from "react";
 
 import Image from "next/image";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,6 +35,7 @@ export function MerchView() {
   const [tab, setTab] = React.useState("products");
   const [formOpen, setFormOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<MerchProduct | null>(null);
+  const [deleting, setDeleting] = React.useState<MerchProduct | null>(null);
 
   const productsQuery = useQuery({
     queryKey: ["merch-products"],
@@ -40,16 +52,17 @@ export function MerchView() {
     await productsQuery.refetch();
   }
 
-  async function onDelete(product: MerchProduct) {
-    if (!window.confirm(`Delete “${product.name}”?`)) return;
-    try {
-      await deleteMerchProduct(product.id);
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteMerchProduct(id),
+    onSuccess: async () => {
       toast.success("Product deleted");
+      setDeleting(null);
       await refreshProducts();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete");
-    }
-  }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to delete");
+    },
+  });
 
   return (
     <div className="space-y-6 p-6">
@@ -137,7 +150,7 @@ export function MerchView() {
                         <Pencil className="size-3.5" />
                         Edit
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => onDelete(product)}>
+                      <Button variant="destructive" size="sm" onClick={() => setDeleting(product)}>
                         <Trash2 className="size-3.5" />
                         Delete
                       </Button>
@@ -202,6 +215,44 @@ export function MerchView() {
       </Tabs>
 
       <ProductFormModal open={formOpen} product={editing} onOpenChange={setFormOpen} onSaved={refreshProducts} />
+
+      <AlertDialog
+        open={Boolean(deleting)}
+        onOpenChange={(open) => {
+          if (deleteMutation.isPending) return;
+          if (!open) setDeleting(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2 />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Delete this product?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleting ? (
+                <>
+                  <span className="text-foreground font-medium">{deleting.name}</span> will be deleted. This cannot be
+                  undone.
+                </>
+              ) : null}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteMutation.isPending || !deleting}
+              onClick={(e) => {
+                e.preventDefault();
+                if (deleting) deleteMutation.mutate(deleting.id);
+              }}
+            >
+              {deleteMutation.isPending ? "Deleting…" : "Yes, delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
