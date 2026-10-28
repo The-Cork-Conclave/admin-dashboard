@@ -126,17 +126,7 @@ export function MerchView() {
                         {product.is_active ? "Active" : "Paused"}
                       </Badge>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {product.colors.map((c) => (
-                        <span
-                          key={`${c.label}-${c.value}`}
-                          className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs"
-                        >
-                          <span className="size-2.5 rounded-full border" style={{ backgroundColor: c.value }} />
-                          {c.label}
-                        </span>
-                      ))}
-                    </div>
+                    <p className="text-muted-foreground text-xs">Colors: {product.colors.join(", ")}</p>
                     <p className="text-muted-foreground text-xs">Sizes: {product.sizes.join(", ")}</p>
                     <div className="flex gap-2">
                       <Button

@@ -4,8 +4,7 @@ import * as React from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -35,14 +34,6 @@ type ProductFormModalProps = {
   open: boolean;
 };
 
-const colorSchema = z.object({
-  label: z.string().trim().min(1, { message: "Color label is required." }),
-  value: z
-    .string()
-    .trim()
-    .regex(/^#[0-9A-Fa-f]{6}$/, { message: "Pick a hex color." }),
-});
-
 const formSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required." }),
   description: z.string(),
@@ -56,7 +47,7 @@ const formSchema = z.object({
     .min(1, { message: "Delivery fee is required." })
     .refine((v) => /^\d+$/.test(v.trim()), { message: "Delivery fee must be a whole number." }),
   pickup_location: z.string(),
-  colors: z.array(colorSchema).min(1, { message: "Add at least one color." }),
+  colorsText: z.string().trim().min(1, { message: "Add at least one color (comma-separated)." }),
   sizesText: z.string().trim().min(1, { message: "Add at least one size (comma-separated)." }),
   is_active: z.boolean(),
 });
@@ -70,10 +61,17 @@ const INITIAL: FormInput = {
   priceNaira: "",
   deliveryFeeNaira: "4000",
   pickup_location: "",
-  colors: [{ label: "", value: "#000000" }],
+  colorsText: "Black, White",
   sizesText: "S, M, L, XL",
   is_active: true,
 };
+
+function splitList(value: string): string[] {
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
 
 function buildValues(product?: MerchProduct | null): FormInput {
   if (!product) return INITIAL;
@@ -84,9 +82,7 @@ function buildValues(product?: MerchProduct | null): FormInput {
     priceNaira: String(Math.trunc(product.price_in_kobo / 100)),
     deliveryFeeNaira: String(Math.trunc(product.delivery_fee_in_kobo / 100)),
     pickup_location: product.pickup_location,
-    colors: product.colors.length
-      ? product.colors.map((c) => ({ label: c.label, value: c.value }))
-      : [{ label: "", value: "#000000" }],
+    colorsText: product.colors.join(", "),
     sizesText: product.sizes.join(", "),
     is_active: product.is_active,
   };
@@ -98,7 +94,6 @@ export function ProductFormModal({ product, onSaved, onOpenChange, open }: Produ
     resolver: zodResolver(formSchema),
     defaultValues: INITIAL,
   });
-  const { fields, append, remove } = useFieldArray({ control: form.control, name: "colors" });
 
   const initialValues = React.useMemo(() => buildValues(product), [product]);
 
@@ -109,10 +104,6 @@ export function ProductFormModal({ product, onSaved, onOpenChange, open }: Produ
 
   const mutation = useMutation({
     mutationFn: async (values: FormInput) => {
-      const sizes = values.sizesText
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
       const body = {
         name: values.name.trim(),
         description: values.description.trim(),
@@ -120,11 +111,8 @@ export function ProductFormModal({ product, onSaved, onOpenChange, open }: Produ
         price_in_kobo: Number(values.priceNaira.trim()) * 100,
         delivery_fee_in_kobo: Number(values.deliveryFeeNaira.trim()) * 100,
         pickup_location: values.pickup_location.trim(),
-        colors: values.colors.map((c) => ({
-          label: c.label.trim(),
-          value: c.value.trim().toUpperCase(),
-        })),
-        sizes,
+        colors: splitList(values.colorsText),
+        sizes: splitList(values.sizesText),
         is_active: values.is_active,
       };
       if (isEdit && product) {
@@ -148,7 +136,7 @@ export function ProductFormModal({ product, onSaved, onOpenChange, open }: Produ
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit product" : "New product"}</DialogTitle>
           <DialogDescription>
-            Configure shirt price, colors (label + hex), sizes, delivery fee, and pickup location.
+            Configure shirt price, color names, sizes, delivery fee, and pickup location.
           </DialogDescription>
         </DialogHeader>
 
@@ -204,46 +192,15 @@ export function ProductFormModal({ product, onSaved, onOpenChange, open }: Produ
             </Field>
 
             <Field>
-              <FieldLabel>Sizes (comma-separated)</FieldLabel>
-              <Input {...form.register("sizesText")} placeholder="S, M, L, XL" />
-              <FieldError errors={[form.formState.errors.sizesText]} />
+              <FieldLabel>Colors (comma-separated)</FieldLabel>
+              <Input {...form.register("colorsText")} placeholder="Black, Purple, Red" />
+              <FieldError errors={[form.formState.errors.colorsText]} />
             </Field>
 
             <Field>
-              <div className="mb-2 flex items-center justify-between">
-                <FieldLabel>Colors</FieldLabel>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => append({ label: "", value: "#000000" })}
-                >
-                  <Plus className="size-4" />
-                  Add color
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {fields.map((field, index) => (
-                  <div key={field.id} className="flex items-start gap-2">
-                    <Input {...form.register(`colors.${index}.label`)} placeholder="Purple" className="flex-1" />
-                    <Input
-                      type="color"
-                      {...form.register(`colors.${index}.value`)}
-                      className="h-9 w-14 cursor-pointer p-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      disabled={fields.length < 2}
-                      onClick={() => remove(index)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <FieldError errors={[form.formState.errors.colors]} />
+              <FieldLabel>Sizes (comma-separated)</FieldLabel>
+              <Input {...form.register("sizesText")} placeholder="S, M, L, XL" />
+              <FieldError errors={[form.formState.errors.sizesText]} />
             </Field>
 
             <Field>
